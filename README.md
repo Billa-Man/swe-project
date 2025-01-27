@@ -45,7 +45,7 @@ Given the existence of a tough, competitive computer science job market, ResAI a
   
 #### Nice-to-Haves
 - Scrapping jobs online based on resume location, qualifications, keywords, etc.
-- 
+- Skill Gap Analysis with Personalized Learning Recommendations
 
 #### CRUD (Create, Read, Update, Delete) Operations
 ##### Persona 1: Admin
@@ -76,6 +76,11 @@ Job seekers can upload their resumes, and get relevant job postings fetched from
 **2. Simplify Jobs** [Link](https://simplify.jobs/)
 
 Users can use this platform to autofill job applications based on their profile and resume. Candidates can optimize their resume and track their applications, Bookmark jobs from multiple portals.
+
+
+**3. Huntr** [Link](https://huntr.co/)
+
+Organizes Job applications, users can manually track their applications and integrate with email for tracking too, providing a centralized platform for job seekers.
 
 
 ### 2. ResAI

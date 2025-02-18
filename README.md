@@ -8,216 +8,94 @@ Software Engineering Project of Group 1 - Spring 2025
 - Sundhan, Vishnu
 - Zhang, Leile
 
-# Project Ideas
-## 1. ResAI
-### Description
-ResAI is a web application designed to assist job seekers by providing tools for resume building, tailoring, and job matching.
+#PhishLearn
 
-### Problem
+Description
+PhishLearn is a cybersecurity awareness platform designed to help companies enhance their employees’ ability to recognize and respond to phishing and smishing attacks. The platform provides company’s IT administrators with a dashboard that enables them to monitor user awareness levels by simulating real-world scenarios. Through this dashboard, administrators can craft and send phishing emails that spoof legitimate addresses, targeting specific user groups within the organization. By analyzing user responses to these phishing emails, organizations can identify vulnerabilities and assess their cybersecurity posture. If a user falls victim to a phishing attempt, PhishLearn offers a dedicated training dashboard designed to educate and strengthen their awareness. This includes interactive learning modules, informative readings, and quizzes to reinforce best practices for identifying and avoiding phishing threats. By integrating real-world attack simulations with targeted educational interventions, PhishLearn aims to improve end-user awareness and significantly reduce the risk of security breaches caused by social engineering attacks.	
 
-The competitive computer science job market presents challenges for job seekers in standing out and securing roles. ResAI addresses these issues by offering advanced resume optimization, tailored job suggestions, and enhanced job-matching capabilities, improving users’ chances of landing interviews and making meaningful connections.
+What is the problem you are trying to solve?
 
-### Targeted Users
+Improve end-user phishing awareness
+Reduce the risk of breaches
+Ensure user is qualified to work 
 
-- Job seekers
-  - Individuals actively looking for jobs in various industries.
-  - Use the platform to build resumes, tailor applications, and find relevant job opportunities.
+Tech Stack:
+PhishLearn will utilize React JS for its frontend to provide a seamless and responsive user experience across web and mobile platforms, ensuring accessibility and engagement for both IT administrators and employees. 
+The backend will be built with Django, chosen for its robust security features, scalability, and built-in support for API development through Django Rest Framework (DRF), making it well-suited for handling user authentication, phishing simulations, and training data.
+Firebase will serve as the database, offering real-time data synchronization, cloud scalability, and seamless authentication integration, allowing the platform to efficiently track user interactions and update awareness scores dynamically. 
+This tech stack will ensure that PhishLearn remains secure, scalable, and efficient in delivering cybersecurity training and phishing simulations.
+PhishLearn: Cybersecurity Awareness Platform Proposal
+1. Introduction
+Overview of the Problem
+In today’s digital world, cybersecurity threats, specifically phishing and smishing attacks, pose a significant risk to businesses and individuals alike. These social engineering tactics are increasingly sophisticated, making it harder for employees to recognize and effectively respond to such threats. Despite technological advances, human error remains the most vulnerable point in security defenses, as employees are often the primary targets of these attacks.
+Importance of Cybersecurity Awareness
+Organizations need to prioritize cybersecurity awareness to prevent breaches and safeguard sensitive data. Employees must be equipped with the knowledge to identify, respond to, and avoid phishing attacks, reducing the risk of successful attacks that could compromise company resources.
+2. Objectives
+Goals
+Improve End-User Phishing Awareness: Equip employees with the tools and knowledge to identify phishing and smishing attempts.
+Reduce the Risk of Breaches: Lower the chances of a security breach by minimizing the effectiveness of social engineering tactics.
+Ensure Employees Are Qualified to Work Securely: Create a workforce that is educated on best security practices and compliant with industry cybersecurity standards.
+Key Deliverables
+A user-friendly dashboard for IT administrators to monitor phishing awareness.
+A real-time phishing simulation system to create and send targeted phishing emails.
+An interactive training dashboard with educational modules, quizzes, and analytics.
+Progress tracking for employees to evaluate their performance and improvements in awareness. (Nice-to-have!)
+3. Problem Statement
+Phishing Threat Landscape
+Phishing and smishing attacks have evolved in complexity, with attackers using personalized messages, fake websites, and spoofed email addresses to deceive victims. These attacks can lead to significant data breaches, financial loss, and damage to an organization’s reputation.
+Challenges Faced by Organizations
+Organizations struggle with ensuring that their employees are adequately prepared to spot and report phishing attacks. Training often lacks real-world context and fails to engage employees in a way that reinforces their learning. Additionally, traditional methods like workshops or static materials fail to measure employee comprehension and readiness.
+4. Proposed Solution (PhishLearn)
+How PhishLearn Addresses the Problem
+PhishLearn will combine real-world phishing attack simulations with interactive training modules to create a continuous feedback loop. By allowing IT administrators to craft and send targeted phishing emails, PhishLearn will simulate realistic threats to assess employee vulnerabilities. Employees who fall victim to phishing attacks will then receive tailored training to improve their awareness.
+5. Features & Functionality
+Phishing Simulation
+Email Spoofing: IT administrators will be able to create phishing emails that impersonate legitimate sources.
+Targeted User Groups: Administrators can send phishing emails to specific teams or departments within an organization.
+Real-Time Tracking: Track user responses to phishing attempts, including clicks, reportings, and the completion of follow-up actions.
+Awareness Monitoring
+User Dashboard: Employees will have access to a personal dashboard showing their progress in phishing awareness.
+Reports & Analytics: IT administrators will have detailed reports on user performance, trends in phishing awareness, and vulnerabilities within the organization.
+Training System
+Interactive Modules: After falling victim to a phishing attempt, users will be prompted to complete training on identifying phishing attempts and best practices.
+Quizzes & Assessments: Users will be tested through quizzes to reinforce knowledge.
+Progress Tracking: A comprehensive tracking system will show employee progress over time.
+Security Measures
+User Authentication: Robust authentication methods (e.g., JWT/OAuth) will be used to ensure secure access.
+Email Spoofing Prevention: PhishLearn will include built-in anti-spoofing features to ensure simulations are ethical and safe.
+6. Target Audience
+Primary Users
+IT Administrators: They will manage phishing simulations, track user awareness, and ensure the platform is effective in training employees.
+Employees: They will engage with phishing simulations and training modules to improve their understanding of security best practices.
+Organizations of All Sizes
+PhishLearn will cater to small, medium, and large organizations, enabling them to tailor simulations to their specific needs and monitor user performance at scale.
+7. Technology Stack
+Frontend: React JS (for web) and React Native (for mobile) to provide a responsive and seamless user experience across platforms.
+Backend: Django with Django Rest Framework (DRF) to provide secure and scalable APIs, handle user authentication, and power the platform’s simulation logic.
+Database: Firebase will be used for its real-time database capabilities, user authentication, and seamless integration across devices.
+This stack ensures scalability, security, and efficiency, while also offering flexibility for future enhancements.
+8. Implementation Plan
+Phase 1: Research & Design (1 months)
+Define detailed system requirements.
+Conduct user research to understand needs.
+Design the platform’s UI/UX.
+Phase 2: MVP Development (2 months)
+Build the core features (phishing simulations, user dashboard, admin interface).
+Set up database integration with Firebase.
+Implement basic email spoofing functionality and real-time tracking.
+Phase 3: Testing & Feedback (3 weeks)
+Conduct internal testing and gather user feedback.
+Refine the system based on real-world usage and feedback.
+Phase 4: Launch & Deployment (1 week)
+Deploy the platform for initial clients.
+Provide ongoing support and optimization.
+9. Security Considerations
+Data Encryption: All user data and interactions will be encrypted in transit and at rest.
+Authentication & Authorization: JWT/OAuth2 will be used for secure authentication, and role-based access will ensure only authorized users can access certain features.
+Anti-Spoofing Measures: Phishing simulations will be designed to ensure they mimic real-world threats without putting user data at risk.
+10. Conclusion
+PhishLearn will provide companies with a powerful tool to proactively combat phishing and smishing threats. Through simulated attacks and real-time educational feedback, organizations will improve their employees' awareness and reduce the risk of breaches. This platform’s scalability and security features, powered by a modern tech stack, will enable PhishLearn to effectively meet the growing cybersecurity needs of businesses.
 
-- Recruiters
-  - Professionals or companies seeking qualified candidates.
-  - Use the platform to search for resumes, post job openings, and identify top matches.
-
-### Major Features
-- **Resume Rating:** Evaluate resumes against job descriptions to provide a score and feedback on alignment.
-- **Resume Matching:** Match job seekers' resumes with job postings based on qualifications, experience, and skills.
-- **Resume Tailoring:** Suggest optimizations to resumes to better fit specific roles and job requirements.
-- **Job Suggestions:** Provide personalized job recommendations based on the user’s qualifications, preferences, and experience.
-
-### Minimum Viable Product
-
-- **Dashboard:** Central hub to manage resumes, applications, and recommendations.
-- **Resume Rating Based on Job Descriptions:** Provide a rating system and feedback for resumes tailored to specific jobs.
-- **Cover Letter Generation:** Automatically create personalized cover letters for job applications.
-
-### Minimum Lovable Product
-- **Automatic Job Application Tracking:** Track applied jobs, statuses, and deadlines.
-- **AI-Powered Resume Tailoring:** Allow users to upload job descriptions to get resume suggestions for optimized keyword alignment.
-- **Custom Job Alerts:** Notify users of new job postings tailored to their profile.
-- **Job Scraping:** Automatically pull job postings from multiple platforms based on location, qualifications, and keywords.
-  
-### Nice-to-Haves
-- **Connection Suggestions Based on Resume Qualifications:** Recommend relevant professionals, mentors, or recruiters to network with.
-- **Skill Gap Analysis:** Identify missing skills for target roles and provide Personalized Learning Recommendations (e.g., courses or certifications).
-- **Application Templates:** Provide customizable application templates for different industries.
-- **Job Interview Preparation:** Offer AI-powered mock interviews and suggested responses based on common questions for the role.
-- **Salary Insights:** Display salary ranges for target roles based on location and qualifications.
-- **Social Media Profile Enhancement:** Suggest updates to LinkedIn or other professional profiles based on the user’s resume.
-- **Language Optimization:** Offer grammar, tone, and language improvements for resumes and cover letters.
-- **Global Job Opportunities:** Include a feature to search for international job postings with visa and relocation details.
-
-### CRUD (Create, Read, Update, Delete) Operations
-#### Admin
-- **Create:** Automated Workflow (Email Notification from platform)
-- **Read:** Take a look at all accounts and application statistics
-- **Update:** Manage User roles / Permissions
-- **Delete:** Remove job postings or inappropriate users
-
-#### Persona 1: Job Seekers
-
-- **Create:** Create a new profile, add education and experiences
-- **Read:** Explore job descriptions, application statuses, job dashboard
-- **Update:** Edit resumes, Job Preferences, enhance profile details with new skills or qualifications.
-- **Delete:** Deactivate Account, Remove outdated resumes, cover letters, or account data.
-
-#### Persona 2: Recruiters
-
-- **Create:** Post job openings, add keywords for optimized candidate matching
-- **Read:** Review applicant resumes, view matched candidates, and access analytics on posting performance.
-- **Update:** Modify job descriptions, adjust candidate requirements
-- **Delete:** Remove job postings, archive old Job Postings or delete outdated postings and profiles.
-
-### Existing Applications
-**1. Job Right AI** [Link](https://jobright.ai/): Helps job seekers upload resumes and fetch relevant job postings. Also features AI-powered resume optimization.
-
-**2. Simplify Jobs** [Link](https://simplify.jobs/): Autofills job applications using user profiles and resumes, optimizing resumes and allowing candidates to track applications and bookmark jobs.
-
-
-**3. Huntr** [Link](https://huntr.co/): Organizes Job applications, users can manually track their applications and integrate with email for tracking too, providing a centralized platform for job seekers.
-
-
-## 2. RapidRead
-### Description
-A news application designed to deliver concise summaries of news articles tailored to users’ interests. The app incorporates an intuitive “swipe-to-like” mechanism, allowing users to swipe right if they like an article or left if they do not. Over time, the app personalizes the news feed based on the user’s swiping behavior, ensuring a tailored and relevant experience. By focusing on delivering shortened content, the application caters to the needs of modern users with limited attention spans.
-
-### Problem
-- Difficulty in consuming long-form content during busy schedules and short attention span.
-- Information overload from traditional news platforms.
-- Lack of customization and personalization in most news apps.
-
-### Targeted Users
-
-- Professionals who need quick, relevant updates on industry news, allowing them to stay informed.
-- Casual readers who want a broad awareness.
-- Students who need simplified, educational content
-
-### Major Features
-- **News Summarization:** Extract and summarize articles using AI models for quick reading.
-- **Personalized News Feed:** Adaptive feed tailored to user interactions and preferences.
-- **Swipe-to-Like:** Intuitive swiping to like or dislike articles, refining recommendations.
-- **Community Features:** Engage with comments, likes, sharing, and bookmarking articles.
-
-### Minimum Viable Product
-
-- Personalized news feed based on categories/topics chosen by users.
-- Summaries of articles.
-- User profile creation 
-- Interactive swipe functionality for liking or disliking articles, refining recommendations over time.
-
-### Minimum Lovable Product
-- Insights into users’ preferences based on their interactions.
-- Community Features such as comments, likes, and sharing options for articles.	
-  
-### Nice-to-Haves
-- Offline reading capabilities.
-- Content filters for specific news type 
-
-### CRUD (Create, Read, Update, Delete) Operations
-#### Admin
-- **Create:** Add new news sources or integrate with APIs, create content categories.
-- **Read:** Analyze user interaction reports (e.g., swipe behavior)
-- **Update:** Modifies and updates existing articles, notification settings, or saved items.
-- **Delete:** Remove outdated or irrelevant new articles
-
-#### Persona 1: Professionals, casual reader, students
-
-- **Create:** Create a user profile with preferences based on their choices
-- **Read:** Read concise summaries of articles
-- **Update:** Update preferences, notification settings, or saved items.
-- **Delete:** Delete saved bookmarks, deactivate accounts.
-
-#### Persona 2: Journalist
-
-- **Create:** Write and publish original articles, investigative reports, and feature stories.
-- **Read:** Access and analyze articles, reports, or publications from other journalists and media outlets for research and inspiration.
-- **Update:** Edit and refine AI-generated summaries or drafts to ensure factual accuracy, clarity, and alignment with journalistic standards.
-- **Delete:** Remove outdated, irrelevant, or incorrect articles from their portfolio or publication database.
-
-### Existing Applications
-**1. Inshorts** [Link](https://inshorts.com/en/read): Gives users concise news summaries but does not emphasize personalized feeds.
-
-**2. Google News** [Link](https://news.google.com/home?hl=en-US&gl=US&ceid=US:en): Autofills job applications using user profiles and resumes, optimizing resumes and allowing candidates to track applications and bookmark jobs.
-
-**3. Pocket** [Link](https://getpocket.com/home): Unlike RapidRead, it does not summarize content but emphasizes saving and consuming it late.
-
-## 3. PhishLearn
-### Description
-- We are developing a dashboard that enables a company’s IT administrators to monitor the cybersecurity awareness of their users by sending them different sorts of Phishing/Smishing emails that simulate an attack. The application provides functionality to spoof any email address the email is coming from, send it to a list of email addresses and generate a template for the phishing email. 
-- If the user falls victim to the email, we have another user fronting dashboard that consists of training the user. Training consists of some reading and interactive quizzes.
-
-### Problem
-
-- Improve end-user awareness
-- Reduce the risk of breaches
-
-### Targeted Users
-
-- **IT administrators:** the IT department of the organization
-- **End user:** someone who would interact with this website to complete the lessons
-
-### Major Features
-- **IT Administrator Dashboard:**
-  - Create, customize and send phishing emails to different users from different email addresses
-  - Monitor and track phishing “victims”
-  - Record user actions (e.g., clicked on the link, entered credentials)
-- **User-Facing Dashboard:**
-  - Interactive training modules for users
-  - Learning material covering phishing and smishing awareness and answering questions in the form of quizzes
-- **Analytics & Reporting:**
-  - Real-time monitoring of simulation campaigns
-  - Aggregated statistics like the percentage of users falling for phishing attempts
-  - Comparative analysis of awareness improvements over time
-
-### Minimum Viable Product
-- Admin dashboard with the ability to send phishing emails from any email address and to a list of email addresses
-- Ability to track whether a user interacts with the phishing email and displaying statistics for the admin
-- User facing dashboard where the user reads articles and answers questions as part of a quiz
-
-### Minimum Lovable Product
-- Interactive graphs and detailed analytics regarding user click through rate and security trends
-- More engaging user dashboard including videos/games
-- Create new email templates to stay updated with newer scams
-
-### Nice-to-Haves
-- Some form of social media phishing
-- Additional modules for simulating other cyber attacks
-
-### CRUD (Create, Read, Update, Delete) Operations
-#### Admin
-- **Create:** New admin accounts, new email templates, new simulated threats
-- **Read:** View all accounts, access system logs
-- **Update:** Edit admin permissions or roles, update email templates
-- **Delete:** Remove admin accounts, delete outdated email templates
-
-#### Persona 1: IT administrators
-
-- **Create:** New user accounts, new training modules
-- **Read:** Analysis reports, logs of user training progress
-- **Update:** Assign users to training, update user roles
-- **Delete:** Delete inactive users, delete outdated training modules
-
-#### Persona 2: Users
-
-- **Create:** New user profile.
-- **Read:** Review assigned training, access test scores.
-- **Update:** Update profile information eg. password, email etc.
-- **Delete:** Delete own account.
-
-### Existing Applications
-**1. KnowBe4** [Link](https://www.knowbe4.com): Offers phishing security tests and training.
-
-**2. PhishMe(Cofense)** [Link](https://cofense.com): Focuses on phishing simulations and threat reporting.
-
-**3. Terranova Security** [Link](https://www.terranovasecurity.com): Provides phishing simulations and interactive eLearning.
 
 # Environment Setup
 First, clone the repository

@@ -150,3 +150,6 @@ python manage.py runserver
 
 ### 5. Visit the link to view project 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+### (Optional) Check Connection
+[http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)

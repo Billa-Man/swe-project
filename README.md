@@ -112,27 +112,41 @@ This stack ensures scalability, security, and efficiency, while also offering fl
 
 PhishLearn will provide companies with a powerful tool to proactively combat phishing and smishing threats. Through simulated attacks and real-time educational feedback, organizations will improve their employees' awareness and reduce the risk of breaches. This platform’s scalability and security features, powered by a modern tech stack, will enable PhishLearn to effectively meet the growing cybersecurity needs of businesses.
 
+## Installation Steps
 
-### 1. Clone the repository on your terminal
-git clone git clone https://github.com/Billa-Man/swe-project.git
-
-### 2. Move into the directory
+First, clone the repository
+```
+git clone https://github.com/Billa-Man/swe-project.git
 cd swe-project/
+```
 
-### 3. Open your terminal/VSCode and create the virtual environment
-python3 -m venv venv
+### 1. Virtual Environment Setup
+```
+# Create virtual environment
+python3 -m venv swe_project
 
-### 4. Activate the virtual environment
-source venv/bin/activate
+# Activate virtual environment
+# For Unix/macOS
+source swe_project/bin/activate
 
-### 5. Go into the directory
-cd 
+# For Windows
+# swe_project\Scripts\activate
+```
 
-### 6. Install Django
+### 2. Go into the directory
+```
+cd phishlearn
+```
+
+### 3. Install Django
+```
 python -m pip install django
+```
 
-### 7. Run the Django application
+### 4. Run the Django application
+```
 python manage.py runserver
+```
 
-### 8. Visit the link to view project 
-http://127.0.0.1:8000/
+### 5. Visit the link to view project 
+[http://127.0.0.1:8000/](http://127.0.0.1:8000/)

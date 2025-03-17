@@ -15,12 +15,12 @@ In short:
 - Ensure user is qualified to work 
 
 ## Technology Stack
-- **Frontend:** React JS (for web) and React Native (for mobile) to provide a responsive and seamless user experience across platforms.
+- **Frontend:** Django
 - **Backend:** Django with Django Rest Framework (DRF) to provide secure and scalable APIs, handle user authentication, and power the platform’s simulation logic.
 - **Database:** Firebase will be used for its real-time database capabilities, user authentication, and seamless integration across devices.
 
 
-# Collaborators
+## Collaborators
 - Alasmari, Abdulelah
 - Bandari, Sohith
 - Ganesh Babu, Swetha

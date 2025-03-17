@@ -1,1 +1,3 @@
 /swe_project
+__pycache__/
+*.py[cod]

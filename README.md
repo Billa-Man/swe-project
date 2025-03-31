@@ -57,8 +57,6 @@ First, clone the repository
 ```
 git clone https://github.com/Billa-Man/swe-project.git
 cd swe-project/
-cd phishlear/
-pip install -r requirements.txt
 ```
 
 ### 1. Virtual Environment Setup
@@ -74,9 +72,10 @@ source swe_project/bin/activate
 # swe_project\Scripts\activate
 ```
 
-### 2. Go into the directory
+### 2. Go into the directory and install requirements
 ```
 cd phishlearn
+pip install -r requirements.txt
 ```
 
 ### 3. Install Django

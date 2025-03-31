@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">{{ course.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h1 class="card-title h2">{{ course.title }}</h1>
+            <p class="text-muted">Created by {{ course.created_by.email }} on {{ course.created_at|date:"M d, Y" }}</p>
+            <p class="card-text">{{ course.description }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Course Content</h2>
+        </div>
+        <div class="card-body">
+            {{ course.content|linebreaks }}
+        </div>
+    </div>
+
+    {% if quizzes %}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Quizzes</h2>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for quiz in quizzes %}
+                        <a href="{% url 'take_quiz' quiz.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ quiz.title }}</h5>
+                                <small class="text-muted">
+                                    {% with attempt=quiz.quizattempt_set.filter.first %}
+                                        {% if attempt %}
+                                            Score: {{ attempt.score }}%
+                                        {% else %}
+                                            Not attempted
+                                        {% endif %}
+                                    {% endwith %}
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ quiz.description }}</p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

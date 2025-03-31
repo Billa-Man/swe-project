@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .navbar {
+        background-color: #1e293b !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .navbar-brand i {
+        font-size: 1.25rem;
+        color: white;
+    }
+
+    .navbar-nav .nav-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar-nav .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.25rem;
+        padding: 0.5rem;
+        margin: 0 0.25rem;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .navbar-nav .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .dashboard {
+        background-color: #f8fafc;
+        min-height: calc(100vh - 56px);
+        padding: 2rem 0;
+    }
+    
+    .welcome-section {
+        margin-bottom: 2rem;
+    }
+    
+    .welcome-section h1 {
+        font-size: 1.875rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .welcome-section p {
+        color: #64748b;
+        font-size: 1rem;
+    }
+    
+    .progress-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .progress-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress-circle {
+        width: 200px;
+        height: 200px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .progress-circle svg {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        transform: rotate(-90deg);
+    }
+
+    .progress-circle circle {
+        fill: none;
+        stroke-width: 8;
+    }
+
+    .progress-circle .bg {
+        stroke: #e2e8f0;
+    }
+
+    .progress-circle .progress {
+        stroke: #5047e5;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.5s;
+    }
+    
+    .progress-circle .percentage {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #5047e5;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .progress-circle .label {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+    
+    .progress-legend {
+        margin-top: 1.5rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        color: #64748b;
+    }
+    
+    .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 0.75rem;
+    }
+    
+    .dot-completed { background-color: #5047e5; }
+    .dot-progress { background-color: #fbbf24; }
+    .dot-not-started { background-color: #e2e8f0; }
+    
+    .upcoming-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .test-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .test-item:last-child {
+        border-bottom: none;
+    }
+    
+    .test-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+    
+    .test-due {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        background-color: #fff3cd;
+        color: #856404;
+        display: inline-block;
+    }
+    
+    .recent-activity {
+        margin-top: 2rem;
+    }
+    
+    .activity-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .activity-table th {
+        text-align: left;
+        padding: 1rem;
+        color: #64748b;
+        font-weight: 500;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .activity-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .status-completed {
+        color: #047857;
+        background-color: #ecfdf5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+    }
+
+    .profile-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background-color: #5047e5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        min-width: 200px;
+        display: none;
+        z-index: 1000;
+    }
+
+    .profile-circle:hover .profile-dropdown {
+        display: block;
+    }
+
+    .profile-dropdown a {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #1e293b;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .profile-dropdown a:hover {
+        background-color: #f8fafc;
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-shield-alt"></i>
+            PhishLearn
+        </a>
+        <div class="nav-icons">
+            <div class="nav-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="profile-circle">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper|default:user.email|first|upper }}
+                <div class="profile-dropdown">
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-user-circle me-2"></i>
+                        Edit Profile
+                    </a>
+                    <a href="{% url 'account_change_password' %}">
+                        <i class="fas fa-key me-2"></i>
+                        Change Password
+                    </a>
+                    <a href="{% url 'account_logout' %}">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome back, {{ user.first_name|default:user.email }}!</h1>
+            <p>Track your progress and complete your training modules</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="progress-card">
+                    <h2 class="progress-title">Your Progress</h2>
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="progress-circle">
+                                <svg>
+                                    <circle class="bg" cx="100" cy="100" r="90"/>
+                                    <circle class="progress" cx="100" cy="100" r="90"
+                                            stroke-dasharray="565.48"
+                                            stroke-dashoffset="141.37"/>
+                                </svg>
+                                <div class="text-center">
+                                    <div class="percentage">75%</div>
+                                    <div class="label">Completed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="progress-legend">
+                                <div class="legend-item">
+                                    <div class="legend-dot dot-completed"></div>
+                                    Completed: 6 modules
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot dot-progress"></div>
+                                    In Progress: 2 modules
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot dot-not-started"></div>
+                                    Not Started: 2 modules
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h2 class="progress-title">Recent Activity</h2>
+                    <div class="progress-card">
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Phishing Awareness</td>
+                                    <td><span class="status-completed">Completed</span></td>
+                                    <td>Mar 10, 2025</td>
+                                    <td>95%</td>
+                                </tr>
+                                <tr>
+                                    <td>Social Engineering</td>
+                                    <td><span class="status-completed">Completed</span></td>
+                                    <td>Mar 8, 2025</td>
+                                    <td>88%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="upcoming-card">
+                    <h2 class="progress-title">Upcoming Tests</h2>
+                    <div class="test-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="test-title">Email Security Basics</div>
+                                <div class="test-due">Due: Mar 15, 2025</div>
+                            </div>
+                            <span class="status-badge">Pending</span>
+                        </div>
+                    </div>
+                    <div class="test-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="test-title">Password Management</div>
+                                <div class="test-due">Due: Mar 20, 2025</div>
+                            </div>
+                            <span class="status-badge">Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Calculate progress circle
+    const circle = document.querySelector('.progress-circle .progress');
+    const radius = circle.getAttribute('r');
+    const circumference = 2 * Math.PI * radius;
+    const progress = 75;
+    
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
+</script>
+{% endblock %} 

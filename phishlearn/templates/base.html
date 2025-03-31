@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishLearn - {% block title %}{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Custom CSS for login/signup pages -->
+    <style>
+        :root {
+            --primary-color: #5047e5;
+            --primary-hover: #4338ca;
+            --bg-color: #edf2fe;
+        }
+        
+        .auth-page {
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .auth-page .navbar {
+            background-color: var(--bg-color) !important;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-page .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .auth-page .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .auth-page .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        .auth-page .text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .auth-page a {
+            color: var(--primary-color);
+        }
+        
+        .auth-page a:hover {
+            color: var(--primary-hover);
+        }
+        
+        .auth-page .card {
+            border-radius: 1rem;
+            border: none;
+            margin-top: 1rem;
+        }
+        
+        .auth-page .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(80, 71, 229, 0.25);
+        }
+
+        .auth-page .container {
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .auth-page .card-body {
+            padding: 2rem;
+        }
+
+        /* Override Bootstrap's default primary color */
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        .navbar-dark.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+    </style>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% if request.path == '/accounts/login/' or request.path == '/accounts/signup/' %}
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i>
+                PhishLearn
+            </a>
+        </div>
+    </nav>
+    {% else %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">PhishLearn</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                        </li>
+                        {% if user.userprofile.user_type == 'it_owner' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'manage_employees' %}">Manage Employees</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'send_phishing_test' %}">Send Phishing Test</a>
+                            </li>
+                        {% elif user.userprofile.user_type == 'site_admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'manage_courses' %}">Manage Courses</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'manage_templates' %}">Manage Templates</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if request.path != '/accounts/login/' and request.path != '/accounts/signup/' %}
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2024 PhishLearn. All rights reserved.</span>
+        </div>
+    </footer>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

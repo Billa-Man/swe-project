@@ -57,6 +57,8 @@ First, clone the repository
 ```
 git clone https://github.com/Billa-Man/swe-project.git
 cd swe-project/
+cd phishlear/
+pip install -r requirements.txt
 ```
 
 ### 1. Virtual Environment Setup

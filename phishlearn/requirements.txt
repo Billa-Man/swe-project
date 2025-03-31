@@ -1,0 +1,6 @@
+Django==4.2.11
+supabase==2.3.4
+python-dotenv==1.0.1
+django-crispy-forms==2.1
+crispy-bootstrap5==2024.2
+django-allauth==0.61.1 

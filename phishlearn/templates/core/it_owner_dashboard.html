@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}IT Owner Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .navbar {
+        background-color: #1e293b !important;
+        padding: 1rem 2rem;
+    }
+
+    .navbar-brand {
+        color: white !important;
+        font-size: 1.25rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .navbar-brand i {
+        font-size: 1.25rem;
+        color: white !important;
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .profile-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dashboard {
+        padding: 2rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 64px);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .department-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .department-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        background-color: #e0e7ff;
+        color: #4338ca;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .add-more {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        color: #4338ca;
+        background-color: #f5f3ff;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        text-decoration: none;
+        gap: 0.25rem;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.875rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .open-rate { color: #3b82f6; }
+    .click-rate { color: #10b981; }
+    .bounce-rate { color: #ef4444; }
+
+    .campaign-date {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-top: 1rem;
+    }
+
+    .analytics-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .analytics-table th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.875rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .analytics-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-details {
+        font-size: 0.875rem;
+    }
+
+    .user-email {
+        color: #64748b;
+        font-size: 0.75rem;
+    }
+
+    .progress-bar {
+        width: 100px;
+        height: 0.5rem;
+        background-color: #e2e8f0;
+        border-radius: 0.25rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background-color: #10b981;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-shield-alt me-2" style="color: white !important;"></i>
+            PhishLearn IT Owner
+        </a>
+        <div class="nav-right">
+            <i class="fas fa-bell text-white"></i>
+            <div class="profile-circle">
+                <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}" alt="Profile" class="w-100 h-100 rounded-circle">
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="section-title">Email Campaigns</div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Campaign Name</label>
+                    <input type="text" class="form-control" placeholder="Q1 Awareness Campaign" value="Q1 Awareness Campaign">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Template</label>
+                    <select class="form-control">
+                        <option>Password Reset</option>
+                        <option>Package Delivery</option>
+                        <option>IT Support</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Target Departments</label>
+            <div class="department-tags">
+                <span class="department-tag">Marketing</span>
+                <span class="department-tag">Sales</span>
+                <a href="#" class="add-more">
+                    <i class="fas fa-plus"></i>
+                    Add More
+                </a>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mb-4">
+            <button class="btn btn-primary">Schedule Campaign</button>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="section-title">User Analytics</div>
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Department</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">SW</div>
+                                    <div class="user-details">
+                                        <div>Sarah Wilson</div>
+                                        <div class="user-email">sarah@company.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Marketing</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span>85%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <div class="section-title">Email Statistics</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value open-rate">24%</div>
+                        <div class="stat-label">Open Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value click-rate">12%</div>
+                        <div class="stat-label">Click Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value bounce-rate">2%</div>
+                        <div class="stat-label">Bounce Rate</div>
+                    </div>
+                </div>
+                <div class="campaign-date">
+                    Last Campaign Performance • March 1-7, 2025
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Phishing Templates{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Manage Phishing Templates</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Create Template</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Template Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Email Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Email Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+                            <div class="form-text">You can use HTML formatting for the content.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Template</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Existing Templates</h2>
+                </div>
+                <div class="card-body">
+                    {% if templates %}
+                        <div class="accordion" id="templatesAccordion">
+                            {% for template in templates %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ template.id }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ template.id }}">
+                                            {{ template.title }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ template.id }}" class="accordion-collapse collapse" data-bs-parent="#templatesAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Subject:</strong></p>
+                                            <p>{{ template.subject }}</p>
+                                            
+                                            <p><strong>Content Preview:</strong></p>
+                                            <div class="border rounded p-3 bg-light">
+                                                {{ template.content|truncatewords:50 }}
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <p class="text-muted">
+                                                    Created by {{ template.created_by.email }} on {{ template.created_at|date:"M d, Y" }}
+                                                </p>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#previewModal{{ template.id }}">
+                                                    Preview
+                                                </button>
+                                                <!-- Add edit and delete buttons if needed -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Preview Modal -->
+                                <div class="modal fade" id="previewModal{{ template.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">{{ template.title }} - Preview</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <strong>Subject:</strong> {{ template.subject }}
+                                                </div>
+                                                <div class="border rounded p-3">
+                                                    {{ template.content|safe }}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="mb-0">No templates available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

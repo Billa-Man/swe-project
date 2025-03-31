@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Courses{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Manage Courses</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Create Course</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Course Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Course Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+                            <div class="form-text">You can use Markdown formatting for the content.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Course</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Existing Courses</h2>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        <div class="accordion" id="coursesAccordion">
+                            {% for course in courses %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ course.id }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ course.id }}">
+                                            {{ course.title }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ course.id }}" class="accordion-collapse collapse" data-bs-parent="#coursesAccordion">
+                                        <div class="accordion-body">
+                                            <p><strong>Description:</strong></p>
+                                            <p>{{ course.description }}</p>
+                                            
+                                            <p><strong>Content Preview:</strong></p>
+                                            <div class="border rounded p-3 bg-light">
+                                                {{ course.content|truncatewords:50 }}
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <p class="text-muted">
+                                                    Created by {{ course.created_by.email }} on {{ course.created_at|date:"M d, Y" }}
+                                                    <br>
+                                                    Last updated: {{ course.updated_at|date:"M d, Y" }}
+                                                </p>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <a href="{% url 'course_detail' course.id %}" class="btn btn-primary btn-sm">View Course</a>
+                                                <!-- Add edit and delete buttons if needed -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="mb-0">No courses available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

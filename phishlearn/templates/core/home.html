@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block extra_css %}
+<style>
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.2s ease;
+        box-shadow: 0 4px 6px rgba(80, 71, 229, 0.1);
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">Welcome to PhishLearn</h1>
+            <p class="lead mb-4">
+                A comprehensive platform for phishing awareness training and simulation.
+                Protect your organization by educating employees about phishing threats.
+            </p>
+            
+            {% if not user.is_authenticated %}
+                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                    <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg px-4 gap-3">Login</a>
+                    <a href="{% url 'account_signup' %}" class="btn btn-outline-primary btn-lg px-4">Register</a>
+                </div>
+            {% else %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">Go to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-graduation-cap fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Learn</h3>
+                    <p class="card-text">Access comprehensive courses on phishing awareness and best practices.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Practice</h3>
+                    <p class="card-text">Test your knowledge with interactive quizzes and simulations.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Track</h3>
+                    <p class="card-text">Monitor progress and performance through detailed analytics.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

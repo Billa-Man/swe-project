@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'course_detail' quiz.course.id %}">{{ quiz.course.title }}</a></li>
+            <li class="breadcrumb-item active">{{ quiz.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h1 class="card-title h2">{{ quiz.title }}</h1>
+            <p class="card-text">{{ quiz.description }}</p>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Question {{ forloop.counter }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ question.question_text }}</p>
+                    <div class="list-group">
+                        {% for choice in question.choice_set.all %}
+                            <label class="list-group-item">
+                                <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" class="me-2" required>
+                                {{ choice.choice_text }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
+            <a href="{% url 'course_detail' quiz.course.id %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

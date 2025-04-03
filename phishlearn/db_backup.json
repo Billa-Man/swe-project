@@ -1,0 +1,180 @@
+{
+  "users": [
+    {
+      "model": "auth.user",
+      "pk": 1,
+      "fields": {
+        "password": "pbkdf2_sha256$600000$U81q7SpRldmx47662sZ1XC$kL2EFs9fvQjHY1h8UPZkBAJRtZdWMlOgJmOtVOfAXoA=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "user",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-03-31T14:52:43.014Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    },
+    {
+      "model": "auth.user",
+      "pk": 2,
+      "fields": {
+        "password": "pbkdf2_sha256$600000$qWGLWFLWO2yMVXCrL5i6sT$tI8l4el/1yAJcba7AQ1tGetzX3tkUEQzoXV14lA1qas=",
+        "last_login": "2025-03-31T18:12:26.659Z",
+        "is_superuser": false,
+        "username": "aaa",
+        "first_name": "",
+        "last_name": "",
+        "email": "aaa@gmail.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-03-31T14:53:55.858Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    },
+    {
+      "model": "auth.user",
+      "pk": 3,
+      "fields": {
+        "password": "pbkdf2_sha256$600000$vhxTKI9TBQ0KZLn8dQbZmA$F79hgnDOfMVfvY1cKXVCsOWKATYMdgpmv4Vp4Z/2xc8=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "vs3164",
+        "first_name": "",
+        "last_name": "",
+        "email": "vs3164@nyu.edu",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-03-31T14:54:30.973Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    },
+    {
+      "model": "auth.user",
+      "pk": 4,
+      "fields": {
+        "password": "pbkdf2_sha256$600000$7TXRTmz0MdOWHCeNAEeXS9$MXPVClu59FABCtFDV7zeWDPrreeUJ/YRjiCJ9JGKVDM=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "bbb",
+        "first_name": "",
+        "last_name": "",
+        "email": "bbb@gmail.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-03-31T15:00:52.559Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    },
+    {
+      "model": "auth.user",
+      "pk": 5,
+      "fields": {
+        "password": "pbkdf2_sha256$600000$aLM0G7cu7DFJ0cnCuAQwPi$Vt/sL+6z0laNAEwNTcCb0ioOnSP/4weGv6xbvKX1SuU=",
+        "last_login": "2025-03-31T15:06:04.633Z",
+        "is_superuser": false,
+        "username": "qqq",
+        "first_name": "",
+        "last_name": "",
+        "email": "qqq@gmail.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-03-31T15:06:03.712Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    },
+    {
+      "model": "auth.user",
+      "pk": 6,
+      "fields": {
+        "password": "pbkdf2_sha256$600000$aw40AJTP1wxh3JBIHjE2FE$VSUq2Qtu8I4NgEls2qwsCv+n+xLWABY7gcQxMhjVshc=",
+        "last_login": "2025-03-31T15:47:12.461Z",
+        "is_superuser": true,
+        "username": "phishlearnadmin",
+        "first_name": "",
+        "last_name": "",
+        "email": "vs3164@nyu.edu",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-03-31T15:11:13.314Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    },
+    {
+      "model": "auth.user",
+      "pk": 7,
+      "fields": {
+        "password": "pbkdf2_sha256$1000000$Ocy2ex0k2uouAmfVqHVeSd$XpgagA8O0Orm7wdLnewNStUZUlC0W3XgxO3DvIeGt2Y=",
+        "last_login": "2025-04-03T15:02:42.582Z",
+        "is_superuser": false,
+        "username": "it_admin_1",
+        "first_name": "",
+        "last_name": "",
+        "email": "itadmin1@gmail.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-03-31T15:13:35Z",
+        "groups": [],
+        "user_permissions": []
+      }
+    }
+  ],
+  "user_profiles": [
+    {
+      "model": "core.userprofile",
+      "pk": 1,
+      "fields": {
+        "user": 2,
+        "user_type": "employee",
+        "organization": "",
+        "created_at": "2025-03-31T15:05:36.560Z"
+      }
+    },
+    {
+      "model": "core.userprofile",
+      "pk": 2,
+      "fields": {
+        "user": 5,
+        "user_type": "employee",
+        "organization": "",
+        "created_at": "2025-03-31T15:06:04.357Z"
+      }
+    },
+    {
+      "model": "core.userprofile",
+      "pk": 3,
+      "fields": {
+        "user": 6,
+        "user_type": "employee",
+        "organization": "",
+        "created_at": "2025-03-31T15:11:13.993Z"
+      }
+    },
+    {
+      "model": "core.userprofile",
+      "pk": 4,
+      "fields": {
+        "user": 7,
+        "user_type": "it_owner",
+        "organization": "organization 1",
+        "created_at": "2025-03-31T15:13:35.973Z"
+      }
+    }
+  ],
+  "courses": [],
+  "phishing_templates": [],
+  "quizzes": [],
+  "questions": [],
+  "choices": [],
+  "quiz_attempts": [],
+  "phishing_tests": [],
+  "employee_groups": []
+}

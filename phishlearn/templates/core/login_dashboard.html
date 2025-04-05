@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Login Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="h3">Login Attempts</h1>
+    <table id="loginAttemptsTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>IP Address</th>
+                <th>Success</th>
+                <th>Browser Info</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in login_attempts %}
+            <tr>
+                <td>{{ attempt.username }}</td>
+                <td>{{ attempt.ip_address }}</td>
+                <td>{{ attempt.success|yesno:"Yes,No" }}</td>
+                <td>{{ attempt.browser_info }}</td>
+                <td>{{ attempt.timestamp }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No login attempts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Include DataTables CSS and JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#loginAttemptsTable').DataTable({
+            "order": [[ 4, "desc" ]] // Sort by timestamp descending by default
+        });
+    });
+</script>
+{% endblock %}

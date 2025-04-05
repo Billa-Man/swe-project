@@ -14,6 +14,8 @@ from .models import (
     PhishingTest,
     EmployeeGroup
 )
+import requests
+from django.conf import settings
 
 def home(request):
     return render(request, 'core/home.html')
@@ -220,3 +222,17 @@ def manage_templates(request):
     templates = PhishingTemplate.objects.all()
     context = {'templates': templates}
     return render(request, 'core/manage_templates.html', context)
+
+@login_required
+def login_dashboard(request):
+    # Fetch login attempts from Supabase
+    url = f"{settings.SUPABASE_URL}/rest/v1/core_loginattempt"
+    headers = {
+    "apikey": settings.SUPABASE_KEY,
+    "Content-Type": "application/json"
+    }
+    
+    response = requests.get(url, headers=headers)
+    login_attempts = response.json() if response.status_code == 200 else []
+
+    return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})

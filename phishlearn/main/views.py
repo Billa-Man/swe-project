@@ -3,6 +3,12 @@ from django.http import JsonResponse
 from django.db import connections
 from supabase import create_client, Client
 from django.conf import settings
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
+from django.shortcuts import redirect
+from core.models import LoginAttempt
+from django.contrib import messages
+import requests
 
 def home(request):
     return render(request, 'home.html')
@@ -40,3 +46,59 @@ def connection_check(request):
     
     return JsonResponse(status)
 
+def post_to_supabase(user, ip_address, success):
+    url = f"{settings.SUPABASE_URL}/rest/v1/login_attempts"
+    headers = {
+        "apikey": settings.SUPABASE_KEY,
+        "Content-Type": "application/json"
+    }
+    data = {
+        "user_id": user.id if user else None,
+        "ip_address": ip_address,
+        "success": success
+    }
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code != 201:
+        print("Failed to post to Supabase:", response.json())
+
+def login_view(request):
+    if request.method == 'POST':
+        # Bind the form with POST data
+        form = AuthenticationForm(request, data=request.POST)
+        # Get common information
+        ip_address = request.META.get('REMOTE_ADDR')
+        browser_info = request.META.get('HTTP_USER_AGENT', 'Unknown')
+        # Get the username from the POST data (this might be None if not provided)
+        username = request.POST.get('username', None)
+        
+        # Validate the form
+        if form.is_valid():
+            user = form.get_user()
+            success = True
+        else:
+            user = None
+            success = False
+
+        # Record the login attempt regardless of success
+        LoginAttempt.objects.create(
+            user=user,
+            success=success,
+            ip_address=ip_address,
+            username=username,
+            browser_info=browser_info
+        )
+
+        # Post to Supabase even if the credentials are wrong
+        post_to_supabase(user, ip_address, success)
+
+        # If successful, log the user in and redirect; otherwise, show an error
+        if success:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Invalid credentials. Please try again.")
+            return render(request, 'account/login.html', {'form': form})
+    else:
+        # Instantiate a blank authentication form
+        form = AuthenticationForm()
+    return render(request, 'account/login.html', {'form': form})

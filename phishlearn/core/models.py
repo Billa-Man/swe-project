@@ -96,3 +96,14 @@ class EmployeeGroup(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.it_owner.email}"
+
+class LoginAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    ip_address = models.GenericIPAddressField(null=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    success = models.BooleanField()
+    username = models.CharField(max_length=255, null=True)
+    browser_info = models.TextField(null=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.success} - {self.timestamp}"

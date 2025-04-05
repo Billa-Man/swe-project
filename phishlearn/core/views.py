@@ -231,12 +231,8 @@ def login_dashboard(request):
     "apikey": settings.SUPABASE_KEY,
     "Content-Type": "application/json"
     }
-
-    print(url)
-    print(headers)
     
     response = requests.get(url, headers=headers)
-    print(response.json())
     login_attempts = response.json() if response.status_code == 200 else []
 
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})

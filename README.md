@@ -78,17 +78,52 @@ cd phishlearn
 pip install -r requirements.txt
 ```
 
-### 3. Install Django
+### 3. Environment Configuration
+Create a `.env` file in the project root:
 ```
-python -m pip install django
+# Create .env file
+touch .env
 ```
+Open and add the following configuration to your .env file:
+```
+DATABASE_URL=your-postgres-url
+DJANGO_SECRET_KEY=your-secret-key-here
 
-### 4. Run the Django application
+
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-key
+        
+
+# Email Configuration
+# Replace these values with your actual Gmail credentials
+# EMAIL_HOST_USER should be your Gmail address
+# EMAIL_HOST_PASSWORD should be an App Password from your Google Account
+# To get an App Password:
+# 1. Go to https://myaccount.google.com/security
+# 2. Enable 2-Step Verification if not already enabled
+# 3. Go to App Passwords
+# 4. Select "Mail" and "Other (Custom name)"
+# 5. Enter "Django PhishLearn" as the name
+# 6. Copy the 16-character password generated
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-specific-password 
+```
+**Important:** Replace the placeholder values:
+
+**For security reasons:**
+- Never commit the .env file to version control
+- Keep your API keys and passwords secure
+- Make sure .env is included in your .gitignore file
+
+### 5. Run the Django application
 ```
 python manage.py runserver
 ```
 
-### 5. Visit the link to view project 
+### 6. Visit the link to view project 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ### (Optional) Check Connection

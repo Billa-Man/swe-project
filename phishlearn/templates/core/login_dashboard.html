@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Login Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="h3">Login Attempts</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>IP Address</th>
+                <th>Success</th>
+                <th>Browser Info</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in login_attempts %}
+            <tr>
+                <td>{{ attempt.username }}</td>
+                <td>{{ attempt.ip_address }}</td>
+                <td>{{ attempt.success|yesno:"Yes,No" }}</td>
+                <td>{{ attempt.browser_info }}</td>
+                <td>{{ attempt.timestamp }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No login attempts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

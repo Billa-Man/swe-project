@@ -49,7 +49,7 @@ def connection_check(request):
 def post_to_supabase(user, ip_address, success):
     url = f"{settings.SUPABASE_URL}/rest/v1/login_attempts"
     headers = {
-        "Authorization": f"Bearer {settings.SUPABASE_KEY}",
+        "apikey": settings.SUPABASE_KEY,
         "Content-Type": "application/json"
     }
     data = {

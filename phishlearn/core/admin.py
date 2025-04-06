@@ -10,7 +10,10 @@ from .models import (
     QuizAttempt,
     PhishingTemplate,
     PhishingTest,
-    EmployeeGroup
+    EmployeeGroup,
+    TrainingModule,
+    ModuleCompletion,
+    Notification
 )
 
 class UserProfileInline(admin.StackedInline):
@@ -87,3 +90,21 @@ class EmployeeGroupAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('name', 'it_owner__email')
     filter_horizontal = ('employees',)
+
+@admin.register(TrainingModule)
+class TrainingModuleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description')
+    list_filter = ('title',)
+    search_fields = ('title', 'description')
+
+@admin.register(ModuleCompletion)
+class ModuleCompletionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'module', 'score', 'completed_at')
+    list_filter = ('completed_at', 'score')
+    search_fields = ('user__email',)
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'message', 'is_read', 'created_at', 'link')
+    list_filter = ('is_read', 'created_at')
+    search_fields = ('user__email', 'message')

@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhishLearn - {% block title %}{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     {% block extra_css %}{% endblock %}
-    
-    <!-- Custom CSS for login/signup pages -->
+
     <style>
         :root {
             --primary-color: #5047e5;
             --primary-hover: #4338ca;
             --bg-color: #edf2fe;
         }
-        
         .auth-page {
             background-color: var(--bg-color);
             min-height: 100vh;
@@ -25,13 +23,11 @@
             display: flex;
             flex-direction: column;
         }
-        
         .auth-page .navbar {
             background-color: var(--bg-color) !important;
             padding: 1rem 0;
             margin-bottom: 2rem;
         }
-        
         .auth-page .navbar-brand {
             color: var(--primary-color) !important;
             font-weight: 600;
@@ -40,50 +36,39 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
         .auth-page .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
-        
         .auth-page .btn-primary:hover {
             background-color: var(--primary-hover);
             border-color: var(--primary-hover);
         }
-        
         .auth-page .text-primary {
             color: var(--primary-color) !important;
         }
-        
         .auth-page a {
             color: var(--primary-color);
         }
-        
         .auth-page a:hover {
             color: var(--primary-hover);
         }
-        
         .auth-page .card {
             border-radius: 1rem;
             border: none;
             margin-top: 1rem;
         }
-        
         .auth-page .form-control:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.25rem rgba(80, 71, 229, 0.25);
         }
-
         .auth-page .container {
             margin-top: auto;
             margin-bottom: auto;
         }
-
         .auth-page .card-body {
             padding: 2rem;
         }
-
-        /* Override Bootstrap's default primary color */
         .bg-primary {
             background-color: var(--primary-color) !important;
         }
@@ -101,10 +86,68 @@
         .navbar-dark.bg-primary {
             background-color: var(--primary-color) !important;
         }
+        .nav-icon {
+            position: relative;
+            display: inline-block;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 300px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .notification-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .notification-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .notification-item:hover {
+            background-color: #f8fafc;
+        }
+        .notification-content {
+            font-size: 0.875rem;
+        }
+        .notification-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        .notification-footer {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .notification-footer a {
+            color: #5047e5;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body class="{% block body_class %}{% endblock %}">
-    {% if request.path == '/accounts/login/' or request.path == '/accounts/signup/' %}
+{% if request.path == '/accounts/login/' or request.path == '/accounts/signup/' %}
     <nav class="navbar">
         <div class="container">
             <a class="navbar-brand" href="/">
@@ -113,7 +156,7 @@
             </a>
         </div>
     </nav>
-    {% else %}
+{% else %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">PhishLearn</a>
@@ -151,6 +194,40 @@
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
+                            <div class="nav-icon position-relative">
+                                <i class="fas fa-bell" id="notificationBell"></i>
+                                {% if notification_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ notification_count }}
+                                </span>
+                                {% endif %}
+                                <div class="notification-dropdown" id="notificationDropdown">
+                                    <div class="notification-header">
+                                        <h6 class="mb-0">Notifications</h6>
+                                    </div>
+                                    <div class="notification-body">
+                                        {% for notification in notifications %}
+                                        <a href="{{ notification.link }}" class="notification-item">
+                                            <div class="notification-content">
+                                                {{ notification.message }}
+                                            </div>
+                                            <div class="notification-time">
+                                                {{ notification.created_at|timesince }} ago
+                                            </div>
+                                        </a>
+                                        {% empty %}
+                                        <div class="text-center p-3">No new notifications</div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if notifications %}
+                                    <div class="notification-footer">
+                                        <a href="{% url 'mark_all_read' %}">Mark all as read</a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
                         </li>
                     {% else %}
@@ -165,30 +242,46 @@
             </div>
         </div>
     </nav>
+{% endif %}
+
+<div class="container mt-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
     {% endif %}
+    {% block content %}{% endblock %}
+</div>
 
-    <div class="container mt-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        {% block content %}{% endblock %}
+{% if request.path != '/accounts/login/' and request.path != '/accounts/signup/' %}
+<footer class="footer mt-5 py-3 bg-light">
+    <div class="container text-center">
+        <span class="text-muted">© 2024 PhishLearn. All rights reserved.</span>
     </div>
+</footer>
+{% endif %}
 
-    {% if request.path != '/accounts/login/' and request.path != '/accounts/signup/' %}
-    <footer class="footer mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">© 2024 PhishLearn. All rights reserved.</span>
-        </div>
-    </footer>
-    {% endif %}
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        if(notificationBell && notificationDropdown) {
+            notificationBell.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notificationDropdown.classList.toggle('show');
+            });
+            document.addEventListener('click', function() {
+                if (notificationDropdown.classList.contains('show')) {
+                    notificationDropdown.classList.remove('show');
+                }
+            });
+        }
+    });
+</script>
+{% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>

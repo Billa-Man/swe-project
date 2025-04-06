@@ -12,6 +12,8 @@ dj-database-url==2.1.0
 Django==4.2.20
 django-allauth==0.61.1
 django-crispy-forms==2.1
+django-fontawesome==1.0
+fontawesomefree==6.6.0
 gotrue==2.9.1
 gunicorn==23.0.0
 h11==0.14.0
@@ -32,6 +34,7 @@ PyJWT==2.10.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python3-openid==3.2.0
+PyYAML==6.0.2
 realtime==1.0.6
 requests==2.32.3
 requests-oauthlib==2.0.0

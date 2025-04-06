@@ -10,4 +10,5 @@ urlpatterns = [
     path('manage-employees/', views.manage_employees, name='manage_employees'),
     path('manage-courses/', views.manage_courses, name='manage_courses'),
     path('manage-templates/', views.manage_templates, name='manage_templates'),
+    path('mark-all-read/', views.mark_all_read, name='mark_all_read'),
 ] 

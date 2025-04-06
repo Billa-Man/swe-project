@@ -153,7 +153,13 @@
     
     .test-item {
         padding: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
         border-bottom: 1px solid #e2e8f0;
+    }
+
+    .test-item:hover {
+        background-color: #f8fafc;
     }
     
     .test-item:last-child {
@@ -376,24 +382,28 @@
             <div class="col-md-4">
                 <div class="upcoming-card">
                     <h2 class="progress-title">Upcoming Tests</h2>
-                    <div class="test-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="test-title">Email Security Basics</div>
-                                <div class="test-due">Due: Mar 15, 2025</div>
+                    <a href="{% url 'take_quiz' 1 %}" style="text-decoration: none; color: inherit;">
+                        <div class="test-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="test-title">Email Security Basics</div>
+                                    <div class="test-due">Due: Mar 15, 2025</div>
+                                </div>
+                                <span class="status-badge">Pending</span>
                             </div>
-                            <span class="status-badge">Pending</span>
                         </div>
-                    </div>
-                    <div class="test-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="test-title">Password Management</div>
-                                <div class="test-due">Due: Mar 20, 2025</div>
+                    </a>
+                    <a href="{% url 'take_quiz' 2 %}" style="text-decoration: none; color: inherit;">
+                        <div class="test-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="test-title">Password Management</div>
+                                    <div class="test-due">Due: Mar 20, 2025</div>
+                                </div>
+                                <span class="status-badge">Pending</span>
                             </div>
-                            <span class="status-badge">Pending</span>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>

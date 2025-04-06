@@ -101,6 +101,64 @@
         .navbar-dark.bg-primary {
             background-color: var(--primary-color) !important;
         }
+        .nav-icon {
+            position: relative;
+            display: inline-block;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 300px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .notification-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .notification-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .notification-item:hover {
+            background-color: #f8fafc;
+        }
+        .notification-content {
+            font-size: 0.875rem;
+        }
+        .notification-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        .notification-footer {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .notification-footer a {
+            color: #5047e5;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -149,15 +207,44 @@
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
+                            <div class="nav-icon position-relative">
+                                <i class="fas fa-bell" id="notificationBell"></i>
+                                {% if notification_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ notification_count }}
+                                </span>
+                                {% endif %}
+                                
+                                <div class="notification-dropdown" id="notificationDropdown">
+                                    <div class="notification-header">
+                                        <h6 class="mb-0">Notifications</h6>
+                                    </div>
+                                    <div class="notification-body">
+                                        {% for notification in notifications %}
+                                        <a href="{{ notification.link }}" class="notification-item">
+                                            <div class="notification-content">
+                                                {{ notification.message }}
+                                            </div>
+                                            <div class="notification-time">
+                                                {{ notification.created_at|timesince }} ago
+                                            </div>
+                                        </a>
+                                        {% empty %}
+                                        <div class="text-center p-3">No new notifications</div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if notifications %}
+                                    <div class="notification-footer">
+                                        <a href="{% url 'mark_all_read' %}">Mark all as read</a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
-                        </li>
                     {% endif %}
                 </ul>
             </div>
@@ -187,6 +274,27 @@
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle notification dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+    
+            if(notificationBell && notificationDropdown) {
+                notificationBell.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationDropdown.classList.toggle('show');
+                });
+    
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    if (notificationDropdown.classList.contains('show')) {
+                        notificationDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

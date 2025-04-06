@@ -107,3 +107,35 @@ class LoginAttempt(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.success} - {self.timestamp}"
+
+class TrainingModule(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    
+    def __str__(self):
+        return self.title
+
+class ModuleCompletion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    module = models.ForeignKey(TrainingModule, on_delete=models.CASCADE)
+    score = models.IntegerField()
+    completed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-completed_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.module.title}"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.message[:30]}"

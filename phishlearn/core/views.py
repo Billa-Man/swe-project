@@ -12,10 +12,14 @@ from .models import (
     QuizAttempt,
     PhishingTemplate,
     PhishingTest,
-    EmployeeGroup
+    EmployeeGroup,
+    TrainingModule,
+    ModuleCompletion, 
+    Notification
 )
 import requests
 from django.conf import settings
+from django.urls import reverse
 
 def home(request):
     return render(request, 'core/home.html')
@@ -32,11 +36,20 @@ def dashboard(request):
         courses = Course.objects.all()
         quiz_attempts = QuizAttempt.objects.filter(user=request.user)
         phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
+        completed_modules = ModuleCompletion.objects.filter(user=request.user)
+
+        # Get unread notifications
+        notifications = Notification.objects.filter(user=request.user, is_read=False)
+        notification_count = notifications.count()
         
         context = {
             'courses': courses,
             'quiz_attempts': quiz_attempts,
             'phishing_tests': phishing_tests,
+
+            'completed_modules': completed_modules,
+            'notifications': notifications,
+            'notification_count': notification_count,
         }
         return render(request, 'core/employee_dashboard.html', context)
     
@@ -92,13 +105,34 @@ def take_quiz(request, quiz_id):
                     score += 1
         
         # Calculate percentage score
-        percentage_score = (score / total_questions) * 100
+        percentage_score = int((score / total_questions) * 100)
         
         # Save quiz attempt
-        QuizAttempt.objects.create(
+        quiz_attempt = QuizAttempt.objects.create(
             user=request.user,
             quiz=quiz,
             score=percentage_score
+        )
+        
+        # Find or create corresponding training module
+        # Assuming the quiz's course corresponds to a training module
+        training_module, created = TrainingModule.objects.get_or_create(
+            title=quiz.course.title,
+            defaults={'description': f"Training module for {quiz.course.title}"}
+        )
+        
+        # Create or update module completion
+        ModuleCompletion.objects.update_or_create(
+            user=request.user,
+            module=training_module,
+            defaults={'score': percentage_score}
+        )
+        
+        # Create notification
+        Notification.objects.create(
+            user=request.user,
+            message=f"You've completed the quiz: {quiz.title} with a score of {percentage_score}%",
+            link=reverse('course_detail', args=[quiz.course.id])
         )
         
         messages.success(request, f'Quiz completed! Your score: {percentage_score}%')
@@ -109,6 +143,7 @@ def take_quiz(request, quiz_id):
         'questions': questions,
     }
     return render(request, 'core/take_quiz.html', context)
+
 
 @login_required
 def send_phishing_test(request):
@@ -236,3 +271,19 @@ def login_dashboard(request):
     login_attempts = response.json() if response.status_code == 200 else []
 
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})
+
+# apparently this function needs to be added to a utils.py file, double-check on this
+@login_required
+def assign_module_to_user(user, module_title, module_link=""):
+    # Create a notification
+    Notification.objects.create(
+        user=user,
+        message=f"New training module assigned: {module_title}",
+        link=module_link
+    )
+    # Any other logic needed for module assignment
+
+@login_required
+def mark_all_read(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return redirect('dashboard')

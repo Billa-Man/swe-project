@@ -39,6 +39,7 @@ class Quiz(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
+    due_date = models.DateTimeField(null=True, blank=True)  # Add this line
     
     def __str__(self):
         return f"{self.course.title} - {self.title}"
@@ -139,3 +140,17 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.message[:30]}"
+    
+class QuizAssignment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('overdue', 'Overdue')
+    ], default='pending')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.quiz.title}"

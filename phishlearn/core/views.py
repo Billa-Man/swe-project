@@ -225,11 +225,16 @@ def manage_templates(request):
 
 @login_required
 def login_dashboard(request):
+    # Check if user is IT owner or site admin
+    if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
+        messages.error(request, 'Unauthorized access')
+        return redirect('dashboard')
+        
     # Fetch login attempts from Supabase
     url = f"{settings.SUPABASE_URL}/rest/v1/core_loginattempt"
     headers = {
-    "apikey": settings.SUPABASE_KEY,
-    "Content-Type": "application/json"
+        "apikey": settings.SUPABASE_KEY,
+        "Content-Type": "application/json"
     }
     
     response = requests.get(url, headers=headers)

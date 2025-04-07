@@ -22,6 +22,15 @@ import requests
 from django.conf import settings
 from django.urls import reverse
 
+
+from .forms import EmployeeCreateForm, GroupCreateForm
+from .models import EmployeeGroup, UserProfile
+from django.db.models import Q
+from django.core.paginator import Paginator
+import logging
+
+logger = logging.getLogger(__name__)
+
 def home(request):
     return render(request, 'core/home.html')
 
@@ -213,6 +222,113 @@ def manage_employees(request):
     groups = EmployeeGroup.objects.filter(it_owner=request.user)
     context = {'groups': groups}
     return render(request, 'core/manage_employees.html', context)
+
+@login_required
+def list_employees(request):
+    logger.info("View list_employees() called")
+
+    search_query = request.GET.get('q', '')
+    group_filter = request.GET.get('group', '')
+
+    employees = User.objects.filter(userprofile__user_type='employee', is_staff=False).distinct().order_by('id')
+
+    
+    if search_query:
+        employees = employees.filter(
+            Q(username__icontains=search_query)  |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    if group_filter:
+        employees = employees.filter(employee_groups__id=group_filter)
+
+    paginator = Paginator(employees.distinct(), 20)  # 每页显示10个
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    groups = EmployeeGroup.objects.all()
+
+    return render(request, 'core/employee_list.html', {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'group_filter': group_filter,
+        'groups': groups,
+    })
+
+    
+
+@login_required
+def create_employee(request):
+    if request.method == 'POST':
+        form = EmployeeCreateForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.email
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            # UserProfile.objects.create(user=user, user_type='employee')
+
+            groups = form.cleaned_data['groups']
+            for group in groups:
+                group.employees.add(user)
+
+            messages.success(request, 'Employee created successfully.')
+            return redirect('list_employees')
+    else:
+        form = EmployeeCreateForm()
+    return render(request, 'core/create_employee.html', {'form': form})
+
+@login_required
+def create_group(request):
+    if request.method == 'POST':
+        form = GroupCreateForm(request.POST)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.it_owner = request.user
+            group.save()
+
+            email_list = form.cleaned_data['employee_emails'].split(',')
+            for email in email_list:
+                email = email.strip()
+                try:
+                    user = User.objects.get(email=email)
+                    group.employees.add(user)
+                except User.DoesNotExist:
+                    messages.warning(request, f'User with email {email} not found')
+
+            messages.success(request, 'Group created successfully.')
+            return redirect('group_list')
+    else:
+        form = GroupCreateForm()
+    return render(request, 'core/create_group.html', {'form': form})
+
+@login_required
+def group_list(request):
+    groups = EmployeeGroup.objects.filter(it_owner=request.user)
+    return render(request, 'core/group_list.html', {'groups': groups})
+
+@login_required
+def group_detail(request, group_id):
+    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
+    employees = group.employees.all()
+    return render(request, 'core/group_detail.html', {'group': group, 'employees': employees})
+
+@login_required
+def add_member_to_group(request, group_id):
+
+    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
+
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email, is_staff=False)
+            group.employees.add(user)
+            messages.success(request, f"{email} added to group.")
+        except User.DoesNotExist:
+            messages.error(request, f"No user found with email {email}.")
+        return redirect('group_detail', group_id=group.id)
 
 @login_required
 def manage_courses(request):

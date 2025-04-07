@@ -7,7 +7,12 @@ urlpatterns = [
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('quiz/<int:quiz_id>/', views.take_quiz, name='take_quiz'),
     path('send-phishing-test/', views.send_phishing_test, name='send_phishing_test'),
-    path('manage-employees/', views.manage_employees, name='manage_employees'),
+    path('manage-employees/', views.list_employees, name='manage_employees'),
     path('manage-courses/', views.manage_courses, name='manage_courses'),
     path('manage-templates/', views.manage_templates, name='manage_templates'),
+    path('create-employee/', views.create_employee, name='create_employee'),
+    path('groups/create/', views.create_group, name='create_group'),
+    path('groups-list/', views.group_list, name='group_list'),
+    path('groups/<int:group_id>/', views.group_detail, name='group_detail'),
+    path('groups/<int:group_id>/add/', views.add_member_to_group, name='add_member_to_group'),
 ] 

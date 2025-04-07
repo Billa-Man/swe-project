@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Employees{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Employees</h2>
+    <a href="{% url 'create_employee' %}" class="btn btn-primary">+ Create Employee</a>
+  </div>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+      <input type="search" name="q" class="form-control" placeholder="Search name or email..." value="{{ search_query }}">
+    </div>
+    <div class="col-md-4">
+      <select name="group" class="form-select">
+        <option value="">All Groups</option>
+        {% for group in groups %}
+          <option value="{{ group.id }}" {% if group.id|stringformat:"s" == group_filter %}selected{% endif %}>{{ group.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-secondary">Filter</button>
+    </div>
+  </form>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Username</th><th>Name</th><th>Email</th><th>Groups</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for employee in page_obj %}
+      <tr>
+        <td>{{ employee.username }}</td>
+        <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+        <td>{{ employee.email }}</td>
+        <td>
+          {% for group in employee.employee_groups.all %}
+            <span class="badge bg-secondary">{{ group.name }}</span>
+          {% empty %} — {% endfor %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">No employees found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&group={{ group_filter }}">Previous</a>
+        </li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&q={{ search_query }}&group={{ group_filter }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&group={{ group_filter }}">Next</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}

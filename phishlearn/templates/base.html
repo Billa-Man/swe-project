@@ -179,6 +179,9 @@
                                 <a class="nav-link" href="{% url 'manage_employees' %}">Manage Employees</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'group_list' %}">Manage Groups</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{% url 'send_phishing_test' %}">Send Phishing Test</a>
                             </li>
                         {% elif user.userprofile.user_type == 'site_admin' %}

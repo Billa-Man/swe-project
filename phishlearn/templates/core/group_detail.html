@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{{ group.name }} Members</h2>
+  <ul class="list-group mb-3">
+    {% for employee in employees %}
+      <li class="list-group-item">{{ employee.first_name }} {{ employee.last_name }} - {{ employee.email }}</li>
+    {% empty %}
+      <li class="list-group-item">No members in this group yet.</li>
+    {% endfor %}
+  </ul>
+
+  <!-- Trigger Button -->
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+    + Add Member
+  </button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="post" action="{% url 'add_member_to_group' group.id %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title" id="addMemberModalLabel">Add Member to {{ group.name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="email" name="email" class="form-control" placeholder="Enter employee email" required>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

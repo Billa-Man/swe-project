@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Your Groups</h2>
+  <ul class="list-group">
+    {% for group in groups %}
+      <li class="list-group-item d-flex justify-content-between">
+        {{ group.name }} ({{ group.employees.count }} members)
+        <a href="{% url 'group_detail' group.id %}" class="btn btn-sm btn-outline-primary">View</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No groups created yet.</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'create_group' %}" class="btn btn-success mt-3">+ Create Group</a>
+</div>
+{% endblock %}

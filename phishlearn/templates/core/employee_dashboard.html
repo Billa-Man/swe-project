@@ -504,8 +504,8 @@
             <div class="col-md-4">
                 <div class="upcoming-card">
                     <h2 class="progress-title">Upcoming Tests</h2>
-                    {% if upcoming_quizzes %}
-                        {% for assignment in upcoming_quizzes %}
+                    {% if quiz_assignments %}
+                        {% for assignment in quiz_assignments %}
                             <a href="{% url 'take_quiz' assignment.quiz.id %}" style="text-decoration: none; color: inherit;">
                                 <div class="test-item">
                                     <div class="d-flex justify-content-between align-items-start">

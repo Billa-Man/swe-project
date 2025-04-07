@@ -1,6 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models import Course, PhishingTemplate, UserProfile, Quiz, Question, Choice, QuizAttempt, PhishingTest, EmployeeGroup, TrainingModule, ModuleCompletion, Notification
+from core.models import (
+    Course, PhishingTemplate, 
+    UserProfile, Quiz, Question, 
+    Choice, QuizAttempt, PhishingTest, 
+    EmployeeGroup, TrainingModule, 
+    ModuleCompletion, Notification,
+    QuizAssignment
+)
 import json
 from django.db import transaction
 
@@ -40,6 +47,7 @@ class Command(BaseCommand):
                 self.import_model(Question, data.get('questions', []))
                 self.import_model(Choice, data.get('choices', []))
                 self.import_model(QuizAttempt, data.get('quiz_attempts', []))
+                self.import_model(QuizAssignment, data.get('quiz_assignments', []))
                 self.import_model(PhishingTest, data.get('phishing_tests', []))
                 self.import_model(EmployeeGroup, data.get('employee_groups', []))
                 self.import_model(TrainingModule, data.get('training_modules', []))

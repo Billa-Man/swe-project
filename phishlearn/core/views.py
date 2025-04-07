@@ -45,7 +45,7 @@ def dashboard(request):
         assigned_quizzes = QuizAssignment.objects.filter(
             user=request.user,
             status='pending'
-        ).exclude(quiz_id__in=attempted_quiz_ids).order_by('due_date')
+        ).order_by('due_date')
         
         context = {
             'courses': courses,
@@ -54,7 +54,7 @@ def dashboard(request):
             'completed_modules': completed_modules,
             'notifications': notifications,
             'notification_count': notification_count,
-            'upcoming_quizzes': assigned_quizzes,  # For the dashboard section
+            'quiz_assignments': assigned_quizzes,  
         }
         return render(request, 'core/employee_dashboard.html', context)
 
@@ -62,13 +62,21 @@ def dashboard(request):
         employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
         phishing_templates = PhishingTemplate.objects.all()
         sent_tests = PhishingTest.objects.filter(sent_by=request.user)
-
+        
+        # Add these lines to get all quizzes and employees
+        quizzes = Quiz.objects.all()
+        employees = User.objects.filter(userprofile__user_type='employee')
+        
         context = {
             'employee_groups': employee_groups,
             'phishing_templates': phishing_templates,
             'sent_tests': sent_tests,
+            'quizzes': quizzes,          # Add this
+            'employees': employees,      # Add this
         }
+        
         return render(request, 'core/it_owner_dashboard.html', context)
+
 
     else:
         users = User.objects.all()
@@ -275,30 +283,44 @@ def login_dashboard(request):
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})
 
 @login_required
-def assign_quiz_to_user(request, quiz_id, user_id):
+def assign_quiz_to_users(request):
     if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
         messages.error(request, 'Unauthorized access')
         return redirect('dashboard')
+    
+    if request.method == 'POST':
+        quiz_id = request.POST.get('quiz_id')
+        user_ids = request.POST.getlist('user_ids')
+        due_date_str = request.POST.get('due_date')
         
-    quiz = get_object_or_404(Quiz, id=quiz_id)
-    user = get_object_or_404(User, id=user_id)
-    due_date = timezone.now() + timezone.timedelta(days=14)  # Default 2 weeks
-    
-    # Create assignment
-    assignment = QuizAssignment.objects.create(
-        user=user,
-        quiz=quiz,
-        due_date=due_date
-    )
-    
-    # Create notification
-    Notification.objects.create(
-        user=user,
-        message=f"New quiz assigned: {quiz.title}",
-        link=reverse('take_quiz', args=[quiz.id])
-    )
-    
-    messages.success(request, f'Quiz successfully assigned to {user.username}')
+        # Parse due date or use default (14 days)
+        if due_date_str:
+            due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
+            due_date = timezone.make_aware(due_date) 
+        else:
+            due_date = timezone.now() + timezone.timedelta(days=14)
+            
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+        
+        for user_id in user_ids:
+            user = get_object_or_404(User, id=user_id)
+            
+            # Create assignment
+            QuizAssignment.objects.create(
+                user=user,
+                quiz=quiz,
+                due_date=due_date,
+            )
+            
+            # Create notification
+            Notification.objects.create(
+                user=user,
+                message=f"New quiz assigned: {quiz.title}",
+                link=reverse('take_quiz', args=[quiz.id])
+            )
+        
+        messages.success(request, f'Quiz successfully assigned to {len(user_ids)} users')
+        
     return redirect('dashboard')
 
 @login_required

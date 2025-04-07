@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}IT Owner Dashboard{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -46,7 +46,7 @@
     }
 
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: #1e293b;
         margin-bottom: 1.5rem;
@@ -57,164 +57,285 @@
     }
 
     .form-label {
-        display: block;
-        font-size: 0.875rem;
         font-weight: 500;
-        color: #64748b;
+        color: #4b5563;
         margin-bottom: 0.5rem;
     }
 
     .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         border-radius: 0.375rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-
-    .form-control:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        outline: none;
+        padding: 0.5rem 0.75rem;
     }
 
     .department-tags {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
     }
 
     .department-tag {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.375rem 0.75rem;
-        background-color: #e0e7ff;
+        background: #e0e7ff;
         color: #4338ca;
+        padding: 0.25rem 0.75rem;
         border-radius: 1rem;
         font-size: 0.875rem;
     }
 
-    .add-more {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.375rem 0.75rem;
+    .add-more-btn {
         color: #4338ca;
-        background-color: #f5f3ff;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        text-decoration: none;
-        gap: 0.25rem;
-    }
-
-    .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        background-color: #3b82f6;
-        color: white;
+        background: none;
         border: none;
-        border-radius: 0.375rem;
+        padding: 0.25rem 0.75rem;
         font-size: 0.875rem;
-        font-weight: 500;
         cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .btn-primary:hover {
-        background-color: #2563eb;
     }
 
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin-bottom: 1rem;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
 
-    .stat-item {
-        text-align: center;
+    .stat-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .stat-value {
-        font-size: 1.875rem;
+        font-size: 2rem;
         font-weight: 600;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value.open-rate {
+        color: #2563eb;
+    }
+
+    .stat-value.click-rate {
+        color: #059669;
+    }
+
+    .stat-value.bounce-rate {
+        color: #dc2626;
     }
 
     .stat-label {
-        color: #64748b;
+        color: #6b7280;
         font-size: 0.875rem;
-    }
-
-    .open-rate { color: #3b82f6; }
-    .click-rate { color: #10b981; }
-    .bounce-rate { color: #ef4444; }
-
-    .campaign-date {
-        text-align: center;
-        color: #64748b;
-        font-size: 0.875rem;
-        margin-top: 1rem;
     }
 
     .analytics-table {
         width: 100%;
         border-collapse: collapse;
+        background: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .analytics-table th {
+        background: #f8fafc;
+        padding: 1rem;
         text-align: left;
-        padding: 0.75rem 1rem;
-        color: #64748b;
         font-weight: 500;
-        font-size: 0.875rem;
-        border-bottom: 1px solid #e2e8f0;
+        color: #4b5563;
     }
 
     .analytics-table td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .progress-bar {
+        width: 150px;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: #4338ca;
+        border-radius: 4px;
     }
 
     .user-info {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
     }
 
     .user-avatar {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 2rem;
+        height: 2rem;
+        background: #4338ca;
         border-radius: 50%;
-        background-color: #f1f5f9;
         display: flex;
         align-items: center;
         justify-content: center;
+        color: white;
+        font-weight: 500;
     }
 
-    .user-details {
+    .campaign-actions {
+        text-align: right;
+        margin-top: 1rem;
+    }
+
+    .schedule-btn {
+        background: #4338ca;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .schedule-btn:hover {
+        background: #3730a3;
+    }
+
+    .last-campaign-info {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .action-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .action-card p {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+
+    .action-btn {
+        display: inline-block;
+        background: #4338ca;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .action-btn:hover {
+        background: #3730a3;
+        color: white;
+        text-decoration: none;
+    }
+
+    .nav-icon {
+        position: relative;
+        display: inline-block;
+        margin-right: 1rem;
+        cursor: pointer;
+    }
+
+    .nav-icon i {
+        font-size: 1.25rem;
+    }
+
+    .notification-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 300px;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 1000;
+        margin-top: 0.5rem;
+    }
+
+    .notification-dropdown.show {
+        display: block;
+    }
+
+    .notification-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .notification-header h6 {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .notification-body {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .notification-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: #1e293b;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .notification-item:hover {
+        background-color: #f8fafc;
+        text-decoration: none;
+    }
+
+    .notification-content {
         font-size: 0.875rem;
     }
 
-    .user-email {
-        color: #64748b;
+    .notification-time {
         font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.25rem;
     }
 
-    .progress-bar {
-        width: 100px;
-        height: 0.5rem;
-        background-color: #e2e8f0;
-        border-radius: 0.25rem;
-        overflow: hidden;
+    .notification-footer {
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
     }
 
-    .progress-fill {
-        height: 100%;
-        background-color: #10b981;
-        border-radius: 0.25rem;
+    .notification-footer a {
+        color: #4338ca;
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
     }
 </style>
 {% endblock %}
@@ -227,7 +348,39 @@
             PhishLearn IT Owner
         </a>
         <div class="nav-right">
-            <i class="fas fa-bell text-white"></i>
+            <div class="nav-icon position-relative">
+                <i class="fas fa-bell text-white" id="notificationBell"></i>
+                {% if notification_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ notification_count }}
+                </span>
+                {% endif %}
+                
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h6 class="mb-0">Notifications</h6>
+                    </div>
+                    <div class="notification-body">
+                        {% for notification in notifications %}
+                        <a href="{{ notification.link }}" class="notification-item">
+                            <div class="notification-content">
+                                {{ notification.message }}
+                            </div>
+                            <div class="notification-time">
+                                {{ notification.created_at|timesince }} ago
+                            </div>
+                        </a>
+                        {% empty %}
+                        <div class="text-center p-3">No new notifications</div>
+                        {% endfor %}
+                    </div>
+                    {% if notifications %}
+                    <div class="notification-footer">
+                        <a href="{% url 'mark_all_read' %}">Mark all as read</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
             <div class="profile-circle">
                 <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}" alt="Profile" class="w-100 h-100 rounded-circle">
             </div>
@@ -237,139 +390,160 @@
 {% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <div class="container">
-        <div class="section-title">Email Campaigns</div>
-        
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">Campaign Name</label>
-                    <input type="text" class="form-control" placeholder="Q1 Awareness Campaign" value="Q1 Awareness Campaign">
+<div class="dashboard-container">
+    <!-- Management Actions Section -->
+    <section class="mb-5">
+        <h2 class="section-title">Management Actions</h2>
+        <div class="action-cards">
+            <div class="action-card">
+                <h3>Course Management</h3>
+                <p>Assign and manage training courses for employees. Track progress and completion rates.</p>
+                <a href="{% url 'manage_course_assignments' %}" class="action-btn">Manage Courses</a>
+            </div>
+
+            <div class="action-card">
+                <h3>Quiz Management</h3>
+                <p>Create and assign quizzes, monitor performance, and review results.</p>
+                <a href="{% url 'manage_quiz_assignments' %}" class="action-btn">Manage Quizzes</a>
+            </div>
+
+            <div class="action-card">
+                <h3>Employee Groups</h3>
+                <p>Organize employees into groups for better management and targeted training.</p>
+                <a href="{% url 'manage_employees' %}" class="action-btn">Manage Groups</a>
+            </div>
+
+            <div class="action-card">
+                <h3>Phishing Tests</h3>
+                <p>Create and send phishing test campaigns to assess employee awareness.</p>
+                <a href="{% url 'send_phishing_test' %}" class="action-btn">Send Tests</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Email Campaigns Section -->
+    <section class="mb-5">
+        <h2 class="section-title">Email Campaigns</h2>
+        <div class="campaign-form">
+            <div class="form-group">
+                <label class="form-label">Campaign Name</label>
+                <input type="text" class="form-control" placeholder="Enter campaign name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Template</label>
+                <select class="form-control">
+                    <option value="">Select template</option>
+                    {% for template in phishing_templates %}
+                    <option value="{{ template.id }}">{{ template.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Departments</label>
+                <div class="department-tags">
+                    {% for group in employee_groups %}
+                    <span class="department-tag">{{ group.name }}</span>
+                    {% endfor %}
+                    <button class="add-more-btn">+ Add More</button>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">Template</label>
-                    <select class="form-control">
-                        <option>Password Reset</option>
-                        <option>Package Delivery</option>
-                        <option>IT Support</option>
-                    </select>
-                </div>
+            <div class="campaign-actions">
+                <button class="schedule-btn">Schedule Campaign</button>
             </div>
         </div>
+    </section>
 
-        <div class="form-group">
-            <label class="form-label">Target Departments</label>
-            <div class="department-tags">
-                <span class="department-tag">Marketing</span>
-                <span class="department-tag">Sales</span>
-                <a href="#" class="add-more">
-                    <i class="fas fa-plus"></i>
-                    Add More
-                </a>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-primary">Schedule Campaign</button>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="section-title">User Analytics</div>
-                <table class="analytics-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Department</th>
-                            <th>Progress</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    <!-- Analytics Section -->
+    <section class="mb-5">
+        <h2 class="section-title">User Analytics</h2>
+        <div class="analytics-table-container">
+            <table class="analytics-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Department</th>
+                        <th>Progress</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if employees %}
+                        {% for employee in employees %}
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar">SW</div>
-                                    <div class="user-details">
-                                        <div>Sarah Wilson</div>
-                                        <div class="user-email">sarah@company.com</div>
+                                    <div class="user-avatar">
+                                        {{ employee.first_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div>{{ employee.get_full_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ employee.email }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>Marketing</td>
+                            <td>{{ employee.userprofile.organization|default:"Not Assigned" }}</td>
                             <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 85%"></div>
-                                    </div>
-                                    <span>85%</span>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: {{ employee.progress }}%"></div>
                                 </div>
                             </td>
+                            <td>{{ employee.progress }}%</td>
                         </tr>
-                    </tbody>
-                </table>
-            </div>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">No employees found</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-            <div class="col-md-6">
-                <div class="section-title">Email Statistics</div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value open-rate">24%</div>
-                        <div class="stat-label">Open Rate</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value click-rate">12%</div>
-                        <div class="stat-label">Click Rate</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value bounce-rate">2%</div>
-                        <div class="stat-label">Bounce Rate</div>
-                    </div>
-                </div>
-                <div class="campaign-date">
-                    Last Campaign Performance • March 1-7, 2025
-                </div>
+    <!-- Email Statistics Section -->
+    <section>
+        <h2 class="section-title">Email Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value open-rate">{{ open_rate }}%</div>
+                <div class="stat-label">Open Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value click-rate">{{ click_rate }}%</div>
+                <div class="stat-label">Click Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value bounce-rate">{{ bounce_rate }}%</div>
+                <div class="stat-label">Bounce Rate</div>
             </div>
         </div>
-    </div>   
-    <div class="card mt-4">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Assign Quizzes</h3>
+        {% if latest_campaign %}
+        <div class="last-campaign-info">
+            Last Campaign Performance • {{ latest_campaign.sent_at|date:"M d, Y" }}
         </div>
-        <div class="card-body">
-            <form method="POST" action="{% url 'assign_quiz_to_users' %}">
-                {% csrf_token %}
-                <div class="form-group mb-3">
-                    <label>Select Quiz:</label>
-                    <select name="quiz_id" class="form-control" required>
-                        <option value="">-- Select a Quiz --</option>
-                        {% for quiz in quizzes %}
-                            <option value="{{ quiz.id }}">{{ quiz.title }} ({{ quiz.course.title }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label>Select Employees:</label>
-                    <select name="user_ids" class="form-control" multiple required>
-                        {% for employee in employees %}
-                            <option value="{{ employee.id }}">{{ employee.username }}</option>
-                        {% endfor %}
-                    </select>
-                    <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple employees</small>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label>Due Date:</label>
-                    <input type="date" name="due_date" class="form-control">
-                    <small class="form-text text-muted">If left blank, default due date will be 14 days from now</small>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Assign Quiz</button>
-            </form>
-        </div>
-    </div>
+        {% endif %}
+    </section>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener for the add more button
+    const addMoreBtn = document.querySelector('.add-more-btn');
+    if (addMoreBtn) {
+        addMoreBtn.addEventListener('click', function() {
+            // Implementation for adding more departments
+            console.log('Add more departments clicked');
+        });
+    }
+
+    // Add event listener for the schedule campaign button
+    const scheduleBtn = document.querySelector('.schedule-btn');
+    if (scheduleBtn) {
+        scheduleBtn.addEventListener('click', function() {
+            // Implementation for scheduling campaign
+            console.log('Schedule campaign clicked');
+        });
+    }
+});
+</script>
 {% endblock %} 

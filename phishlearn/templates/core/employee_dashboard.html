@@ -66,72 +66,6 @@
         margin-bottom: 1.5rem;
     }
     
-    .progress-circle {
-        width: 200px;
-        height: 200px;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .progress-circle svg {
-        width: 200px;
-        height: 200px;
-        position: absolute;
-        transform: rotate(-90deg);
-    }
-
-    .progress-circle circle {
-        fill: none;
-        stroke-width: 8;
-    }
-
-    .progress-circle .bg {
-        stroke: #e2e8f0;
-    }
-
-    .progress-circle .progress {
-        stroke: #5047e5;
-        stroke-linecap: round;
-        transition: stroke-dashoffset 0.5s;
-    }
-    
-    .progress-circle .percentage {
-        font-size: 2.5rem;
-        font-weight: 600;
-        color: #5047e5;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .progress-circle .label {
-        font-size: 0.875rem;
-        color: #64748b;
-    }
-    
-    .progress-legend {
-        margin-top: 1.5rem;
-    }
-    
-    .legend-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.75rem;
-        color: #64748b;
-    }
-    
-    .legend-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        margin-right: 0.75rem;
-    }
-    
-    .dot-completed { background-color: #5047e5; }
-    .dot-progress { background-color: #fbbf24; }
-    .dot-not-started { background-color: #e2e8f0; }
-    
     .upcoming-card {
         background: white;
         border-radius: 1rem;
@@ -341,8 +275,76 @@
     .table-container thead th {
         position: sticky;
         top: 0;
-        background-color: #fff; /* Match your background color */
+        background-color: #fff;
         z-index: 1;
+    }
+
+    .progress-container {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .progress-circle {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin: 0 auto;
+        background: conic-gradient(
+            #6610f2 calc(var(--progress) * 1%),
+            #e9ecef calc(var(--progress) * 1%)
+        );
+    }
+
+    .progress-circle::before {
+        content: '';
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        background: white;
+        border-radius: 50%;
+        top: 20px;
+        left: 20px;
+    }
+
+    .progress-value {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .progress-stats {
+        text-align: left;
+    }
+
+    .progress-stat {
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+        display: inline-block;
+    }
+
+    .dot.completed {
+        background-color: #6610f2;
+    }
+
+    .dot.in-progress {
+        background-color: #ffc107;
+    }
+
+    .dot.not-started {
+        background-color: #e9ecef;
     }
 </style>
 {% endblock %}
@@ -355,39 +357,6 @@
             PhishLearn
         </a>
         <div class="nav-icons">
-            <div class="nav-icon position-relative">
-                <i class="fas fa-bell" id="notificationBell"></i>
-                {% if notification_count > 0 %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {{ notification_count }}
-                </span>
-                {% endif %}
-                
-                <div class="notification-dropdown" id="notificationDropdown">
-                    <div class="notification-header">
-                        <h6 class="mb-0">Notifications</h6>
-                    </div>
-                    <div class="notification-body">
-                        {% for notification in notifications %}
-                        <a href="{{ notification.link }}" class="notification-item">
-                            <div class="notification-content">
-                                {{ notification.message }}
-                            </div>
-                            <div class="notification-time">
-                                {{ notification.created_at|timesince }} ago
-                            </div>
-                        </a>
-                        {% empty %}
-                        <div class="text-center p-3">No new notifications</div>
-                        {% endfor %}
-                    </div>
-                    {% if notifications %}
-                    <div class="notification-footer">
-                        <a href="{% url 'mark_all_read' %}">Mark all as read</a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
             <div class="profile-circle">
                 {{ user.first_name|first|upper }}{{ user.last_name|first|upper|default:user.email|first|upper }}
                 <div class="profile-dropdown">
@@ -411,104 +380,104 @@
 {% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <div class="container">
-        <div class="welcome-section">
-            <h1>Welcome back, {{ user.first_name|default:user.email }}!</h1>
-            <p>Track your progress and complete your training modules</p>
-        </div>
+<div class="container py-5">
+    <h1 class="mb-4">Your Progress</h1>
 
-        <div class="row">
-            <div class="col-md-8">
-                <div class="progress-card">
-                    <h2 class="progress-title">Your Progress</h2>
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="progress-circle">
-                                <svg>
-                                    <circle class="bg" cx="100" cy="100" r="90"/>
-                                    <circle class="progress" cx="100" cy="100" r="90"
-                                            stroke-dasharray="565.48"
-                                            stroke-dashoffset="141.37"/>
-                                </svg>
-                                <div class="text-center">
-                                    <div class="percentage">75%</div>
-                                    <div class="label">Completed</div>
-                                </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="progress-container">
+                        <div class="progress-circle" style="--progress: {{ progress_percentage }}">
+                            <div class="progress-value">
+                                <h2 class="mb-0">{{ progress_percentage }}%</h2>
+                                <p class="text-muted mb-0">Completed</p>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="progress-legend">
-                                <div class="legend-item">
-                                    <div class="legend-dot dot-completed"></div>
-                                    Completed: 6 modules
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-dot dot-progress"></div>
-                                    In Progress: 2 modules
-                                </div>
-                                <div class="legend-item">
-                                    <div class="legend-dot dot-not-started"></div>
-                                    Not Started: 2 modules
-                                </div>
+                        <div class="progress-stats mt-4">
+                            <div class="progress-stat">
+                                <span class="dot completed"></span>
+                                <span>Completed: {{ completed_count }} courses</span>
+                            </div>
+                            <div class="progress-stat">
+                                <span class="dot in-progress"></span>
+                                <span>In Progress: {{ in_progress_count }} courses</span>
+                            </div>
+                            <div class="progress-stat">
+                                <span class="dot not-started"></span>
+                                <span>Not Started: {{ not_started_count }} courses</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="recent-activity">
-                    <h2 class="progress-title">Quiz History</h2>
-                    <div class="progress-card">
-                        <div class="table-container" style="max-height: 300px; overflow-y: auto;">
-                            <table class="activity-table">
-                                <thead>
-                                    <tr>
-                                        <th>Quiz</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                        <th>Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for attempt in quiz_attempts %}
-                                    <tr>
-                                        <td>{{ attempt.quiz.title }}</td>
-                                        <td><span class="status-completed">Completed</span></td>
-                                        <td>{{ attempt.completed_at|date:"M d, Y" }}</td>
-                                        <td>{{ attempt.score }}%</td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="4" class="text-center">No quiz attempts yet</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>                
             </div>
+        </div>
 
-            <div class="col-md-4">
-                <div class="upcoming-card">
-                    <h2 class="progress-title">Upcoming Tests</h2>
-                    {% if quiz_assignments %}
-                        {% for assignment in quiz_assignments %}
-                            <a href="{% url 'take_quiz' assignment.quiz.id %}" style="text-decoration: none; color: inherit;">
-                                <div class="test-item">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="test-title">{{ assignment.quiz.title }}</div>
-                                            <div class="test-due">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
-                                        </div>
-                                        <span class="status-badge">{{ assignment.status|title }}</span>
+        <div class="col-md-6">
+            <div class="recent-activity">
+                <h2 class="progress-title">Quiz History</h2>
+                <div class="progress-card">
+                    <div class="table-container">
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Quiz</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in quiz_attempts %}
+                                <tr>
+                                    <td>{{ attempt.quiz.title }}</td>
+                                    <td><span class="status-completed">Completed</span></td>
+                                    <td>{{ attempt.completed_at|date:"M d, Y" }}</td>
+                                    <td>{{ attempt.score }}%</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No quiz attempts yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>                
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="upcoming-card">
+                <h2 class="progress-title">Upcoming Tests</h2>
+                {% if quiz_assignments %}
+                    {% for assignment in quiz_assignments %}
+                        <a href="{% url 'take_quiz' assignment.quiz.id %}" style="text-decoration: none; color: inherit;">
+                            <div class="test-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="test-title">{{ assignment.quiz.title }}</div>
+                                        <div class="test-due">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
                                     </div>
+                                    <span class="status-badge">{{ assignment.status|title }}</span>
                                 </div>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <div class="test-item">No pending tests</div>
-                    {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="test-item">No pending tests</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Training Courses</h5>
+                    <p class="card-text">Access and complete training courses to improve your cybersecurity awareness.</p>
+                    <a href="{% url 'course_list' %}" class="btn btn-primary">View Courses</a>
                 </div>
             </div>
         </div>
@@ -516,37 +485,8 @@
 </div>
 
 <script>
-    // Calculate progress circle
-    const circle = document.querySelector('.progress-circle .progress');
-    const radius = circle.getAttribute('r');
-    const circumference = 2 * Math.PI * radius;
-    const progress = 75;
-    
-    circle.style.strokeDasharray = `${circumference} ${circumference}`;
-    circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
-
-    notificationBell.addEventListener('click', function(e) {
-        console.log('Notification bell clicked');
-        e.stopPropagation();
-        notificationDropdown.classList.toggle('show');
-    });
-
-    // Toggle notification dropdown
     document.addEventListener('DOMContentLoaded', function() {
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-
-        notificationBell.addEventListener('click', function(e) {
-            e.stopPropagation();
-            notificationDropdown.classList.toggle('show');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function() {
-            if (notificationDropdown.classList.contains('show')) {
-                notificationDropdown.classList.remove('show');
-            }
-        });
+        // Remove the duplicate notification event listeners since they're in base.html
     });
 </script>
 {% endblock %} 

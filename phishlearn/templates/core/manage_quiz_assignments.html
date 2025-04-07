@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Manage Quiz Assignments</h2>
+
+    <!-- Assign Quiz Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Assign Quiz to Employees</h4>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="assign">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="quiz_id" class="form-label">Select Quiz</label>
+                        <select name="quiz_id" id="quiz_id" class="form-select" required>
+                            <option value="">Choose a quiz...</option>
+                            {% for quiz in quizzes %}
+                            <option value="{{ quiz.id }}">{{ quiz.title }} ({{ quiz.course.title }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="date" name="due_date" id="due_date" class="form-control">
+                        <small class="text-muted">If not set, default due date will be 14 days from now</small>
+                    </div>
+                </div>
+
+                {% if employee_groups %}
+                <div class="mb-3">
+                    <label class="form-label">Select Employee Group</label>
+                    <select class="form-select" id="employee_group" onchange="filterEmployees()">
+                        <option value="">All Employees</option>
+                        {% for group in employee_groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label">Select Employees</label>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="select-all" onchange="toggleAllEmployees()">
+                                    </th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Organization</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employees %}
+                                <tr class="employee-row" data-groups="{{ employee.employee_groups.all|join:',' }}">
+                                    <td>
+                                        <input type="checkbox" name="user_ids" value="{{ employee.id }}" class="employee-checkbox">
+                                    </td>
+                                    <td>{{ employee.get_full_name|default:employee.username }}</td>
+                                    <td>{{ employee.email }}</td>
+                                    <td>{{ employee.userprofile.organization }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Assign Quiz</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Assignments -->
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Current Quiz Assignments</h4>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Quiz</th>
+                            <th>Course</th>
+                            <th>Assigned Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                        <tr>
+                            <td>{{ assignment.user.get_full_name|default:assignment.user.username }}</td>
+                            <td>{{ assignment.quiz.title }}</td>
+                            <td>{{ assignment.quiz.course.title }}</td>
+                            <td>{{ assignment.assigned_date|date:"M d, Y" }}</td>
+                            <td>{{ assignment.due_date|date:"M d, Y"|default:"No due date" }}</td>
+                            <td>
+                                <span class="badge {% if assignment.status == 'completed' %}bg-success
+                                    {% elif assignment.status == 'overdue' %}bg-danger
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ assignment.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="remove">
+                                    <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove this assignment?')">
+                                        Remove
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No quiz assignments found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAllEmployees() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.getElementsByClassName('employee-checkbox');
+    for (let checkbox of checkboxes) {
+        if (checkbox.closest('tr').style.display !== 'none') {
+            checkbox.checked = selectAll.checked;
+        }
+    }
+}
+
+function filterEmployees() {
+    const groupSelect = document.getElementById('employee_group');
+    const selectedGroup = groupSelect.value;
+    const rows = document.getElementsByClassName('employee-row');
+    
+    for (let row of rows) {
+        if (!selectedGroup || row.dataset.groups.split(',').includes(selectedGroup)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    }
+    
+    // Uncheck "select all" if filtering
+    document.getElementById('select-all').checked = false;
+}
+</script>
+{% endblock %} 

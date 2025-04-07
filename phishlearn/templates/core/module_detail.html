@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'module_list' %}">Training Modules</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ module.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title mb-4">{{ module.title }}</h2>
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ module.description }}</p>
+            </div>
+
+            {% if module.course_set.exists %}
+            <div class="mb-4">
+                <h5>Associated Courses</h5>
+                <div class="list-group">
+                    {% for course in module.course_set.all %}
+                    <a href="{% url 'course_detail' course.id %}" class="list-group-item list-group-item-action">
+                        {{ course.title }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if completion %}
+            <div class="alert alert-success">
+                <h5>Module Completed!</h5>
+                <p>Completed on: {{ completion.completed_at|date:"F d, Y" }}</p>
+                <p>Score: {{ completion.score }}%</p>
+            </div>
+            {% endif %}
+
+            {% if quizzes %}
+            <div class="mt-4">
+                <h5>Module Quizzes</h5>
+                <div class="list-group">
+                    {% for quiz in quizzes %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ quiz.title }}</h6>
+                                <small>{{ quiz.description }}</small>
+                            </div>
+                            <a href="{% url 'take_quiz' quiz.id %}" class="btn btn-primary">
+                                {% if quiz.quizattempt_set.exists %}
+                                    Retake Quiz
+                                {% else %}
+                                    Take Quiz
+                                {% endif %}
+                            </a>
+                        </div>
+                        {% if quiz.quizattempt_set.exists %}
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                Last attempt: {{ quiz.quizattempt_set.first.completed_at|date:"M d, Y" }} - 
+                                Score: {{ quiz.quizattempt_set.first.score }}%
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if not completion %}
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Mark Module as Complete</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

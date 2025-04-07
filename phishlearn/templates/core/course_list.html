@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Training Courses</h2>
+    
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text">{{ course.description }}</p>
+                    
+                    {% if course.user_completion %}
+                        <div class="alert alert-success">
+                            <small>Completed on: {{ course.user_completion.completed_at|date:"M d, Y" }}</small>
+                        </div>
+                    {% elif course.user_progress %}
+                        <div class="alert alert-info">
+                            <small>In Progress - Started on: {{ course.user_progress.started_at|date:"M d, Y" }}</small>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <small>Not started yet</small>
+                        </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'course_detail' course.id %}" class="btn btn-primary mt-2">
+                        {% if course.user_completion %}
+                            Review Course
+                        {% elif course.user_progress %}
+                            Continue Course
+                        {% else %}
+                            Start Course
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No training courses available at the moment.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

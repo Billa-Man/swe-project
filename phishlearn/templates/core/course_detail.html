@@ -3,58 +3,92 @@
 {% block title %}{{ course.title }}{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-5">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li class="breadcrumb-item active">{{ course.title }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'course_list' %}">Training Courses</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
         </ol>
     </nav>
 
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-body">
-            <h1 class="card-title h2">{{ course.title }}</h1>
-            <p class="text-muted">Created by {{ course.created_by.email }} on {{ course.created_at|date:"M d, Y" }}</p>
-            <p class="card-text">{{ course.description }}</p>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2 class="h5 mb-0">Course Content</h2>
-        </div>
-        <div class="card-body">
-            {{ course.content|linebreaks }}
-        </div>
-    </div>
-
-    {% if quizzes %}
-        <div class="card">
-            <div class="card-header">
-                <h2 class="h5 mb-0">Quizzes</h2>
+            <h2 class="card-title mb-4">{{ course.title }}</h2>
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ course.description }}</p>
             </div>
-            <div class="card-body">
+
+            <div class="mb-4">
+                <h5>Course Content</h5>
+                <div class="content-section">
+                    {{ course.content|linebreaks }}
+                </div>
+            </div>
+
+            {% if completion %}
+            <div class="alert alert-success">
+                <h5>Course Completed!</h5>
+                <p>Completed on: {{ completion.completed_at|date:"F d, Y" }}</p>
+            </div>
+            {% elif progress %}
+            <div class="alert alert-info">
+                <h5>Course In Progress</h5>
+                <p>Started on: {{ progress.started_at|date:"F d, Y" }}</p>
+            </div>
+            {% endif %}
+
+            {% if quizzes %}
+            <div class="mt-4">
+                <h5>Course Quizzes</h5>
                 <div class="list-group">
                     {% for quiz in quizzes %}
-                        <a href="{% url 'take_quiz' quiz.id %}" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ quiz.title }}</h5>
-                                <small class="text-muted">
-                                    {% with attempt=quiz.quizattempt_set.filter.first %}
-                                        {% if attempt %}
-                                            Score: {{ attempt.score }}%
-                                        {% else %}
-                                            Not attempted
-                                        {% endif %}
-                                    {% endwith %}
-                                </small>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ quiz.title }}</h6>
+                                <small>{{ quiz.description }}</small>
                             </div>
-                            <p class="mb-1">{{ quiz.description }}</p>
-                        </a>
+                            <a href="{% url 'take_quiz' quiz.id %}" class="btn btn-primary">
+                                {% if quiz.quizattempt_set.exists %}
+                                    Retake Quiz
+                                {% else %}
+                                    Take Quiz
+                                {% endif %}
+                            </a>
+                        </div>
+                        {% if quiz.quizattempt_set.exists %}
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                Last attempt: {{ quiz.quizattempt_set.first.completed_at|date:"M d, Y" }} - 
+                                Score: {{ quiz.quizattempt_set.first.score }}%
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
+
+            {% if not completion %}
+            <div class="mt-4">
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="complete">
+                    <button type="submit" class="btn btn-success">Mark Course as Complete</button>
+                </form>
+                
+                {% if not progress %}
+                <form method="post" class="d-inline ms-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="mark_in_progress">
+                    <button type="submit" class="btn btn-info">Mark as In Progress</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
-    {% endif %}
+    </div>
 </div>
 {% endblock %} 

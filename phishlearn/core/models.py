@@ -31,6 +31,7 @@ class Course(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=False)
     
     def __str__(self):
         return self.title
@@ -80,14 +81,40 @@ class PhishingTemplate(models.Model):
 
 class PhishingTest(models.Model):
     template = models.ForeignKey(PhishingTemplate, on_delete=models.CASCADE)
-    sent_by = models.ForeignKey(User, related_name='sent_tests', on_delete=models.CASCADE)
-    sent_to = models.ForeignKey(User, related_name='received_tests', on_delete=models.CASCADE)
-    sent_at = models.DateTimeField(default=timezone.now)
+    sent_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_tests')
+    sent_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_tests')
+    sent_at = models.DateTimeField(auto_now_add=True)
+    opened = models.BooleanField(default=False)
+    opened_at = models.DateTimeField(null=True, blank=True)
     clicked = models.BooleanField(default=False)
     clicked_at = models.DateTimeField(null=True, blank=True)
-    
+    bounced = models.BooleanField(default=False)
+    bounced_at = models.DateTimeField(null=True, blank=True)
+    campaign_name = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-sent_at']
+
     def __str__(self):
-        return f"{self.template.title} - {self.sent_to.email}"
+        return f"Phishing Test - {self.template.name} - {self.sent_to.email}"
+
+    def mark_as_opened(self):
+        if not self.opened:
+            self.opened = True
+            self.opened_at = timezone.now()
+            self.save()
+
+    def mark_as_clicked(self):
+        if not self.clicked:
+            self.clicked = True
+            self.clicked_at = timezone.now()
+            self.save()
+
+    def mark_as_bounced(self):
+        if not self.bounced:
+            self.bounced = True
+            self.bounced_at = timezone.now()
+            self.save()
 
 class EmployeeGroup(models.Model):
     name = models.CharField(max_length=100)
@@ -109,16 +136,9 @@ class LoginAttempt(models.Model):
     def __str__(self):
         return f"{self.user} - {self.success} - {self.timestamp}"
 
-class TrainingModule(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    
-    def __str__(self):
-        return self.title
-
-class ModuleCompletion(models.Model):
+class CourseCompletion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    module = models.ForeignKey(TrainingModule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     score = models.IntegerField()
     completed_at = models.DateTimeField(auto_now_add=True)
     
@@ -126,7 +146,19 @@ class ModuleCompletion(models.Model):
         ordering = ['-completed_at']
     
     def __str__(self):
-        return f"{self.user.username} - {self.module.title}"
+        return f"{self.user.username} - {self.course.title}"
+
+class CourseProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    started_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-started_at']
+        unique_together = ['user', 'course']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title} (In Progress)"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
@@ -154,3 +186,16 @@ class QuizAssignment(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.quiz.title}"
+
+class CourseAssignment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    assigned_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_courses')
+    assigned_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ['user', 'course']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title}"

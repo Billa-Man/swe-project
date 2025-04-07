@@ -33,6 +33,11 @@
                             <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
                             <div class="form-text">You can use Markdown formatting for the content.</div>
                         </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_published" name="is_published">
+                            <label class="form-check-label" for="is_published">Publish Course</label>
+                            <div class="form-text">Check this to make the course visible to employees.</div>
+                        </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">Create Course</button>
                         </div>
@@ -71,12 +76,30 @@
                                                     Created by {{ course.created_by.email }} on {{ course.created_at|date:"M d, Y" }}
                                                     <br>
                                                     Last updated: {{ course.updated_at|date:"M d, Y" }}
+                                                    <br>
+                                                    Status: 
+                                                    {% if course.is_published %}
+                                                        <span class="badge bg-success">Published</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning">Draft</span>
+                                                    {% endif %}
                                                 </p>
                                             </div>
 
                                             <div class="mt-3">
                                                 <a href="{% url 'course_detail' course.id %}" class="btn btn-primary btn-sm">View Course</a>
-                                                <!-- Add edit and delete buttons if needed -->
+                                                <form method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="toggle_publish">
+                                                    <input type="hidden" name="course_id" value="{{ course.id }}">
+                                                    <button type="submit" class="btn btn-sm {% if course.is_published %}btn-warning{% else %}btn-success{% endif %}">
+                                                        {% if course.is_published %}
+                                                            Unpublish
+                                                        {% else %}
+                                                            Publish
+                                                        {% endif %}
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>

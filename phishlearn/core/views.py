@@ -13,23 +13,15 @@ from .models import (
     PhishingTemplate,
     PhishingTest,
     EmployeeGroup,
-    TrainingModule,
-    ModuleCompletion,
+    CourseCompletion,
     Notification, 
-    QuizAssignment
+    QuizAssignment,
+    CourseProgress,
+    CourseAssignment
 )
 import requests
 from django.conf import settings
 from django.urls import reverse
-
-
-from .forms import EmployeeCreateForm, GroupCreateForm
-from .models import EmployeeGroup, UserProfile
-from django.db.models import Q
-from django.core.paginator import Paginator
-import logging
-
-logger = logging.getLogger(__name__)
 
 def home(request):
     return render(request, 'core/home.html')
@@ -37,55 +29,113 @@ def home(request):
 @login_required
 def dashboard(request):
     try:
-        user_profile = UserProfile.objects.get(user=request.user)
-    except UserProfile.DoesNotExist:
-        user_profile = UserProfile.objects.create(user=request.user)
+        user_profile = request.user.userprofile
+        
+        if user_profile.user_type == 'employee':
+            # Get all published courses
+            all_courses = Course.objects.filter(is_published=True)
+            total_courses = all_courses.count()
+            
+            # Get completed courses
+            completed_courses = CourseCompletion.objects.filter(user=request.user)
+            completed_count = completed_courses.count()
+            completed_course_ids = completed_courses.values_list('course_id', flat=True)
+            
+            # Get in-progress courses from CourseProgress model
+            in_progress_courses = CourseProgress.objects.filter(
+                user=request.user,
+                course__in=all_courses
+            ).exclude(course_id__in=completed_course_ids)
+            in_progress_count = in_progress_courses.count()
+            
+            # Calculate not started count
+            not_started_count = total_courses - completed_count - in_progress_count
+            
+            # Calculate progress percentage
+            progress_percentage = int((completed_count / total_courses * 100) if total_courses > 0 else 0)
+            
+            # Get quiz attempts and phishing tests
+            quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')
+            phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
+            
+            # Get notifications
+            notifications = Notification.objects.filter(user=request.user, is_read=False)
+            notification_count = notifications.count()
+            
+            # Get assigned quizzes that haven't been attempted yet
+            attempted_quiz_ids = quiz_attempts.values_list('quiz_id', flat=True)
+            assigned_quizzes = QuizAssignment.objects.filter(
+                user=request.user,
+                status='pending'
+            ).order_by('due_date')
+            
+            context = {
+                'courses': all_courses,
+                'quiz_attempts': quiz_attempts,
+                'phishing_tests': phishing_tests,
+                'completed_courses': completed_courses,
+                'notifications': notifications,
+                'notification_count': notification_count,
+                'quiz_assignments': assigned_quizzes,
+                'progress_percentage': progress_percentage,
+                'completed_count': completed_count,
+                'in_progress_count': in_progress_count,
+                'not_started_count': not_started_count,
+                'total_courses': total_courses
+            }
+            return render(request, 'core/employee_dashboard.html', context)
 
-    if user_profile.user_type == 'employee':
-        courses = Course.objects.all()
-        quiz_attempts = QuizAttempt.objects.filter(user=request.user)
-        phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
-        completed_modules = ModuleCompletion.objects.filter(user=request.user)
-        notifications = Notification.objects.filter(user=request.user, is_read=False)
-        notification_count = notifications.count()
-        
-        # Get assigned quizzes that haven't been attempted yet
-        attempted_quiz_ids = quiz_attempts.values_list('quiz_id', flat=True)
-        assigned_quizzes = QuizAssignment.objects.filter(
-            user=request.user,
-            status='pending'
-        ).order_by('due_date')
-        
-        context = {
-            'courses': courses,
-            'quiz_attempts': quiz_attempts,
-            'phishing_tests': phishing_tests,
-            'completed_modules': completed_modules,
-            'notifications': notifications,
-            'notification_count': notification_count,
-            'quiz_assignments': assigned_quizzes,  
-        }
-        return render(request, 'core/employee_dashboard.html', context)
-
-    elif user_profile.user_type == 'it_owner':
-        employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
-        phishing_templates = PhishingTemplate.objects.all()
-        sent_tests = PhishingTest.objects.filter(sent_by=request.user)
-        
-        # Add these lines to get all quizzes and employees
-        quizzes = Quiz.objects.all()
-        employees = User.objects.filter(userprofile__user_type='employee')
-        
-        context = {
-            'employee_groups': employee_groups,
-            'phishing_templates': phishing_templates,
-            'sent_tests': sent_tests,
-            'quizzes': quizzes,          # Add this
-            'employees': employees,      # Add this
-        }
-        
-        return render(request, 'core/it_owner_dashboard.html', context)
-
+        elif user_profile.user_type == 'it_owner':
+            # Get employee groups and templates
+            employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
+            phishing_templates = PhishingTemplate.objects.all()
+            
+            # Get only active employees with complete profiles
+            employees = User.objects.filter(
+                userprofile__user_type='employee',
+                is_active=True
+            ).select_related('userprofile').exclude(
+                first_name='',
+                last_name=''
+            )
+            
+            # Calculate progress for each employee
+            for employee in employees:
+                total_courses = Course.objects.filter(is_published=True).count()
+                completed_courses = CourseCompletion.objects.filter(user=employee).count()
+                employee.progress = int((completed_courses / total_courses * 100) if total_courses > 0 else 0)
+            
+            # Get email campaign statistics
+            phishing_tests = PhishingTest.objects.all()
+            total_tests = phishing_tests.count()
+            if total_tests > 0:
+                opened_count = phishing_tests.filter(opened=True).count()
+                clicked_count = phishing_tests.filter(clicked=True).count()
+                bounced_count = phishing_tests.filter(bounced=True).count()
+                
+                open_rate = int((opened_count / total_tests) * 100)
+                click_rate = int((clicked_count / total_tests) * 100)
+                bounce_rate = int((bounced_count / total_tests) * 100)
+            else:
+                open_rate = click_rate = bounce_rate = 0
+            
+            # Get latest campaign date
+            latest_campaign = phishing_tests.order_by('-sent_at').first()
+            
+            context = {
+                'employee_groups': employee_groups,
+                'phishing_templates': phishing_templates,
+                'employees': employees,
+                'open_rate': open_rate,
+                'click_rate': click_rate,
+                'bounce_rate': bounce_rate,
+                'latest_campaign': latest_campaign
+            }
+            return render(request, 'core/it_owner_dashboard.html', context)
+            
+    except Exception as e:
+        messages.error(request, f'Error loading dashboard: {str(e)}')
+        return redirect('home')
 
     else:
         users = User.objects.all()
@@ -100,13 +150,76 @@ def dashboard(request):
         return render(request, 'core/admin_dashboard.html', context)
 
 @login_required
+def course_list(request):
+    courses = Course.objects.filter(is_published=True).prefetch_related('coursecompletion_set')
+    
+    # Annotate courses with user's completion and progress status
+    for course in courses:
+        course.user_completion = course.coursecompletion_set.filter(user=request.user).first()
+        course.user_progress = CourseProgress.objects.filter(user=request.user, course=course).first()
+    
+    context = {
+        'courses': courses
+    }
+    return render(request, 'core/course_list.html', context)
+
+@login_required
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
+    completion = CourseCompletion.objects.filter(user=request.user, course=course).first()
+    progress = CourseProgress.objects.filter(user=request.user, course=course).first()
     quizzes = Quiz.objects.filter(course=course)
-
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'complete' and not completion:
+            # Calculate the average score from all related quizzes
+            quiz_attempts = QuizAttempt.objects.filter(
+                user=request.user,
+                quiz__in=quizzes
+            )
+            
+            if quiz_attempts.exists():
+                average_score = sum(attempt.score for attempt in quiz_attempts) / quiz_attempts.count()
+            else:
+                average_score = 0
+            
+            completion = CourseCompletion.objects.create(
+                user=request.user,
+                course=course,
+                score=average_score
+            )
+            
+            # Remove in-progress status if exists
+            if progress:
+                progress.delete()
+            
+            messages.success(request, f'Congratulations! You have completed the {course.title} course.')
+            
+            # Create a notification
+            Notification.objects.create(
+                user=request.user,
+                message=f"You've completed the course: {course.title}",
+                link=reverse('course_detail', args=[course.id])
+            )
+        
+        elif action == 'mark_in_progress' and not completion and not progress:
+            # Mark the course as in progress
+            CourseProgress.objects.create(
+                user=request.user,
+                course=course
+            )
+            
+            messages.success(request, f'You have marked the {course.title} course as in progress.')
+        
+        return redirect('course_detail', course_id=course.id)
+    
     context = {
         'course': course,
-        'quizzes': quizzes,
+        'completion': completion,
+        'progress': progress,
+        'quizzes': quizzes
     }
     return render(request, 'core/course_detail.html', context)
 
@@ -134,16 +247,26 @@ def take_quiz(request, quiz_id):
             score=percentage_score
         )
 
-        training_module, created = TrainingModule.objects.get_or_create(
-            title=quiz.course.title,
-            defaults={'description': f"Training module for {quiz.course.title}"}
-        )
-
-        ModuleCompletion.objects.update_or_create(
+        # Update course completion if all quizzes are completed
+        course = quiz.course
+        all_course_quizzes = Quiz.objects.filter(course=course)
+        user_quiz_attempts = QuizAttempt.objects.filter(
             user=request.user,
-            module=training_module,
-            defaults={'score': percentage_score}
-        )
+            quiz__in=all_course_quizzes
+        ).values_list('quiz_id', flat=True)
+
+        if set(user_quiz_attempts) == set(all_course_quizzes.values_list('id', flat=True)):
+            # All quizzes completed, calculate average score
+            average_score = QuizAttempt.objects.filter(
+                user=request.user,
+                quiz__in=all_course_quizzes
+            ).aggregate(Avg('score'))['score__avg']
+
+            CourseCompletion.objects.update_or_create(
+                user=request.user,
+                course=course,
+                defaults={'score': round(average_score)}
+            )
 
         Notification.objects.create(
             user=request.user,
@@ -337,21 +460,35 @@ def manage_courses(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'toggle_publish':
+            course_id = request.POST.get('course_id')
+            course = get_object_or_404(Course, id=course_id)
+            course.is_published = not course.is_published
+            course.save()
+            status = 'published' if course.is_published else 'unpublished'
+            messages.success(request, f'Course "{course.title}" has been {status}.')
+            return redirect('manage_courses')
+        
+        # Handle course creation
         title = request.POST.get('title')
         description = request.POST.get('description')
         content = request.POST.get('content')
+        is_published = request.POST.get('is_published') == 'on'
 
         Course.objects.create(
             title=title,
             description=description,
             content=content,
-            created_by=request.user
+            created_by=request.user,
+            is_published=is_published
         )
 
         messages.success(request, 'Course created successfully')
-        return redirect('dashboard')
+        return redirect('manage_courses')
 
-    courses = Course.objects.all()
+    courses = Course.objects.all().order_by('-created_at')
     context = {'courses': courses}
     return render(request, 'core/manage_courses.html', context)
 
@@ -443,3 +580,222 @@ def assign_quiz_to_users(request):
 def mark_all_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect('dashboard')
+
+@login_required
+def module_list(request):
+    modules = TrainingModule.objects.all().prefetch_related('modulecompletion_set')
+    
+    # Annotate modules with user's completion status
+    for module in modules:
+        module.user_completion = module.modulecompletion_set.filter(user=request.user).first()
+    
+    context = {
+        'modules': modules
+    }
+    return render(request, 'core/module_list.html', context)
+
+@login_required
+def module_detail(request, module_id):
+    module = get_object_or_404(TrainingModule, id=module_id)
+    completion = ModuleCompletion.objects.filter(user=request.user, module=module).first()
+    quizzes = Quiz.objects.filter(course__in=module.course_set.all())
+    
+    if request.method == 'POST' and not completion:
+        # Calculate the average score from all related quizzes
+        quiz_attempts = QuizAttempt.objects.filter(
+            user=request.user,
+            quiz__in=quizzes
+        )
+        
+        if quiz_attempts.exists():
+            average_score = sum(attempt.score for attempt in quiz_attempts) / quiz_attempts.count()
+        else:
+            average_score = 0
+        
+        completion = ModuleCompletion.objects.create(
+            user=request.user,
+            module=module,
+            score=average_score
+        )
+        
+        messages.success(request, f'Congratulations! You have completed the {module.title} module.')
+        
+        # Create a notification
+        Notification.objects.create(
+            user=request.user,
+            message=f"You've completed the module: {module.title} with a score of {average_score}%",
+            link=reverse('module_detail', args=[module.id])
+        )
+        
+        return redirect('module_detail', module_id=module.id)
+    
+    context = {
+        'module': module,
+        'completion': completion,
+        'quizzes': quizzes
+    }
+    return render(request, 'core/module_detail.html', context)
+
+@login_required
+def manage_course_assignments(request):
+    if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
+        messages.error(request, 'Unauthorized access')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'assign':
+            course_id = request.POST.get('course_id')
+            user_ids = request.POST.getlist('user_ids')
+            due_date_str = request.POST.get('due_date')
+            
+            # Parse due date if provided
+            due_date = None
+            if due_date_str:
+                due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
+                due_date = timezone.make_aware(due_date)
+            
+            course = get_object_or_404(Course, id=course_id)
+            
+            for user_id in user_ids:
+                user = get_object_or_404(User, id=user_id)
+                
+                # Create or update assignment
+                CourseAssignment.objects.update_or_create(
+                    user=user,
+                    course=course,
+                    defaults={
+                        'assigned_by': request.user,
+                        'due_date': due_date
+                    }
+                )
+                
+                # Create notification
+                Notification.objects.create(
+                    user=user,
+                    message=f"New course assigned: {course.title}",
+                    link=reverse('course_detail', args=[course.id])
+                )
+            
+            messages.success(request, f'Course successfully assigned to {len(user_ids)} users')
+            
+        elif action == 'remove':
+            assignment_id = request.POST.get('assignment_id')
+            assignment = get_object_or_404(CourseAssignment, id=assignment_id)
+            
+            # Create notification about removal
+            Notification.objects.create(
+                user=assignment.user,
+                message=f"Course assignment removed: {assignment.course.title}",
+                link=reverse('course_list')
+            )
+            
+            assignment.delete()
+            messages.success(request, 'Course assignment removed successfully')
+    
+    # Get all employees
+    employees = User.objects.filter(userprofile__user_type='employee')
+    
+    # Get all published courses
+    courses = Course.objects.filter(is_published=True)
+    
+    # Get all course assignments
+    assignments = CourseAssignment.objects.all().select_related('user', 'course', 'assigned_by')
+    
+    # Get employee groups for IT owners
+    employee_groups = None
+    if request.user.userprofile.user_type == 'it_owner':
+        employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
+    
+    context = {
+        'employees': employees,
+        'courses': courses,
+        'assignments': assignments,
+        'employee_groups': employee_groups
+    }
+    
+    return render(request, 'core/manage_course_assignments.html', context)
+
+@login_required
+def manage_quiz_assignments(request):
+    if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
+        messages.error(request, 'Unauthorized access')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'assign':
+            quiz_id = request.POST.get('quiz_id')
+            user_ids = request.POST.getlist('user_ids')
+            due_date_str = request.POST.get('due_date')
+            
+            # Parse due date if provided
+            due_date = None
+            if due_date_str:
+                due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
+                due_date = timezone.make_aware(due_date)
+            else:
+                due_date = timezone.now() + timezone.timedelta(days=14)  # Default 14 days
+            
+            quiz = get_object_or_404(Quiz, id=quiz_id)
+            
+            for user_id in user_ids:
+                user = get_object_or_404(User, id=user_id)
+                
+                # Create or update assignment
+                QuizAssignment.objects.update_or_create(
+                    user=user,
+                    quiz=quiz,
+                    defaults={
+                        'due_date': due_date,
+                        'status': 'pending'
+                    }
+                )
+                
+                # Create notification
+                Notification.objects.create(
+                    user=user,
+                    message=f"New quiz assigned: {quiz.title}",
+                    link=reverse('take_quiz', args=[quiz.id])
+                )
+            
+            messages.success(request, f'Quiz successfully assigned to {len(user_ids)} users')
+            
+        elif action == 'remove':
+            assignment_id = request.POST.get('assignment_id')
+            assignment = get_object_or_404(QuizAssignment, id=assignment_id)
+            
+            # Create notification about removal
+            Notification.objects.create(
+                user=assignment.user,
+                message=f"Quiz assignment removed: {assignment.quiz.title}",
+                link=reverse('course_list')
+            )
+            
+            assignment.delete()
+            messages.success(request, 'Quiz assignment removed successfully')
+    
+    # Get all employees
+    employees = User.objects.filter(userprofile__user_type='employee')
+    
+    # Get all quizzes from published courses
+    quizzes = Quiz.objects.filter(course__is_published=True)
+    
+    # Get all quiz assignments
+    assignments = QuizAssignment.objects.all().select_related('user', 'quiz')
+    
+    # Get employee groups for IT owners
+    employee_groups = None
+    if request.user.userprofile.user_type == 'it_owner':
+        employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
+    
+    context = {
+        'employees': employees,
+        'quizzes': quizzes,
+        'assignments': assignments,
+        'employee_groups': employee_groups
+    }
+    
+    return render(request, 'core/manage_quiz_assignments.html', context)

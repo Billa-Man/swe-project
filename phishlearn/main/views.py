@@ -11,7 +11,7 @@ from django.contrib import messages
 import requests
 
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'core/home.html')
 
 def connection_check(request):
     status = {

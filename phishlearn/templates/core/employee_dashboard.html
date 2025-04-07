@@ -6,12 +6,13 @@
 <style>
     .navbar {
         background-color: #1e293b !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 1rem 2rem;
     }
 
     .navbar-brand {
         color: white !important;
-        font-weight: 600;
+        font-size: 1.25rem;
+        font-weight: 500;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -19,26 +20,13 @@
 
     .navbar-brand i {
         font-size: 1.25rem;
-        color: white;
+        color: white !important;
     }
 
-    .navbar-nav .nav-item {
+    .nav-right {
         display: flex;
         align-items: center;
-    }
-
-    .navbar-nav .nav-link {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 1.25rem;
-        padding: 0.5rem;
-        margin: 0 0.25rem;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-    }
-
-    .navbar-nav .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
+        gap: 1.5rem;
     }
 
     .dashboard {
@@ -266,6 +254,96 @@
     .profile-dropdown a:hover {
         background-color: #f8fafc;
     }
+
+    .nav-icon {
+        position: relative;
+        display: inline-block;
+        margin-right: 1rem;
+        cursor: pointer;
+        z-index: 1001;
+    }
+
+    .nav-icon i {
+        pointer-events: auto;
+        padding: 8px;
+    }
+
+    .notification-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 300px;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 1000;
+        margin-top: 0.5rem;
+    }
+
+    .notification-dropdown.show {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .notification-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .notification-body {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .notification-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #1e293b;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .notification-item:hover {
+        background-color: #f8fafc;
+    }
+
+    .notification-content {
+        font-size: 0.875rem;
+    }
+
+    .notification-time {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+    }
+
+    .notification-footer {
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .notification-footer a {
+        color: #5047e5;
+        text-decoration: none;
+        font-size: 0.875rem;
+    }
+
+    .table-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Optional: Make the table header sticky */
+    .table-container thead th {
+        position: sticky;
+        top: 0;
+        background-color: #fff; /* Match your background color */
+        z-index: 1;
+    }
 </style>
 {% endblock %}
 
@@ -277,8 +355,38 @@
             PhishLearn
         </a>
         <div class="nav-icons">
-            <div class="nav-icon">
-                <i class="fas fa-bell"></i>
+            <div class="nav-icon position-relative">
+                <i class="fas fa-bell" id="notificationBell"></i>
+                {% if notification_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ notification_count }}
+                </span>
+                {% endif %}
+                
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h6 class="mb-0">Notifications</h6>
+                    </div>
+                    <div class="notification-body">
+                        {% for notification in notifications %}
+                        <a href="{{ notification.link }}" class="notification-item">
+                            <div class="notification-content">
+                                {{ notification.message }}
+                            </div>
+                            <div class="notification-time">
+                                {{ notification.created_at|timesince }} ago
+                            </div>
+                        </a>
+                        {% empty %}
+                        <div class="text-center p-3">No new notifications</div>
+                        {% endfor %}
+                    </div>
+                    {% if notifications %}
+                    <div class="notification-footer">
+                        <a href="{% url 'mark_all_read' %}">Mark all as read</a>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
             <div class="profile-circle">
                 {{ user.first_name|first|upper }}{{ user.last_name|first|upper|default:user.email|first|upper }}
@@ -349,61 +457,58 @@
                 </div>
 
                 <div class="recent-activity">
-                    <h2 class="progress-title">Recent Activity</h2>
+                    <h2 class="progress-title">Quiz History</h2>
                     <div class="progress-card">
-                        <table class="activity-table">
-                            <thead>
-                                <tr>
-                                    <th>Module</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Score</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Phishing Awareness</td>
-                                    <td><span class="status-completed">Completed</span></td>
-                                    <td>Mar 10, 2025</td>
-                                    <td>95%</td>
-                                </tr>
-                                <tr>
-                                    <td>Social Engineering</td>
-                                    <td><span class="status-completed">Completed</span></td>
-                                    <td>Mar 8, 2025</td>
-                                    <td>88%</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                            <table class="activity-table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attempt in quiz_attempts %}
+                                    <tr>
+                                        <td>{{ attempt.quiz.title }}</td>
+                                        <td><span class="status-completed">Completed</span></td>
+                                        <td>{{ attempt.completed_at|date:"M d, Y" }}</td>
+                                        <td>{{ attempt.score }}%</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No quiz attempts yet</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                </div>                
             </div>
 
             <div class="col-md-4">
                 <div class="upcoming-card">
                     <h2 class="progress-title">Upcoming Tests</h2>
-                    <a href="{% url 'take_quiz' 1 %}" style="text-decoration: none; color: inherit;">
-                        <div class="test-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="test-title">Email Security Basics</div>
-                                    <div class="test-due">Due: Mar 15, 2025</div>
+                    {% if quiz_assignments %}
+                        {% for assignment in quiz_assignments %}
+                            <a href="{% url 'take_quiz' assignment.quiz.id %}" style="text-decoration: none; color: inherit;">
+                                <div class="test-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="test-title">{{ assignment.quiz.title }}</div>
+                                            <div class="test-due">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
+                                        </div>
+                                        <span class="status-badge">{{ assignment.status|title }}</span>
+                                    </div>
                                 </div>
-                                <span class="status-badge">Pending</span>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="{% url 'take_quiz' 2 %}" style="text-decoration: none; color: inherit;">
-                        <div class="test-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="test-title">Password Management</div>
-                                    <div class="test-due">Due: Mar 20, 2025</div>
-                                </div>
-                                <span class="status-badge">Pending</span>
-                            </div>
-                        </div>
-                    </a>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="test-item">No pending tests</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -419,5 +524,29 @@
     
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
     circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
+
+    notificationBell.addEventListener('click', function(e) {
+        console.log('Notification bell clicked');
+        e.stopPropagation();
+        notificationDropdown.classList.toggle('show');
+    });
+
+    // Toggle notification dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+
+        notificationBell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            if (notificationDropdown.classList.contains('show')) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+    });
 </script>
 {% endblock %} 

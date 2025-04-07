@@ -333,6 +333,43 @@
                 </div>
             </div>
         </div>
+    </div>   
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Assign Quizzes</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'assign_quiz_to_users' %}">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    <label>Select Quiz:</label>
+                    <select name="quiz_id" class="form-control" required>
+                        <option value="">-- Select a Quiz --</option>
+                        {% for quiz in quizzes %}
+                            <option value="{{ quiz.id }}">{{ quiz.title }} ({{ quiz.course.title }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Select Employees:</label>
+                    <select name="user_ids" class="form-control" multiple required>
+                        {% for employee in employees %}
+                            <option value="{{ employee.id }}">{{ employee.username }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple employees</small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label>Due Date:</label>
+                    <input type="date" name="due_date" class="form-control">
+                    <small class="form-text text-muted">If left blank, default due date will be 14 days from now</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Assign Quiz</button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %} 

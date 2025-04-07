@@ -1,6 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models import Course, PhishingTemplate, UserProfile, Quiz, Question, Choice, QuizAttempt, PhishingTest, EmployeeGroup, TrainingModule, ModuleCompletion, Notification
+from core.models import (
+    Course, PhishingTemplate, 
+    UserProfile, Quiz, Question, 
+    Choice, QuizAttempt, PhishingTest, 
+    EmployeeGroup, TrainingModule, 
+    ModuleCompletion, Notification,
+    QuizAssignment
+)
 import json
 from django.core.serializers import serialize
 
@@ -22,6 +29,7 @@ class Command(BaseCommand):
             'training_modules': json.loads(serialize('json', TrainingModule.objects.all())),
             'module_completions': json.loads(serialize('json', ModuleCompletion.objects.all())),
             'notifications': json.loads(serialize('json', Notification.objects.all())),
+            'quiz_assignments': json.loads(serialize('json', QuizAssignment.objects.all())),
         }
         
         with open('db_backup.json', 'w') as f:

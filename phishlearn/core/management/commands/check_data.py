@@ -1,7 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models import Course, PhishingTemplate, UserProfile, Quiz, Question, Choice, QuizAttempt, PhishingTest, EmployeeGroup, TrainingModule, ModuleCompletion, Notification
-
+from core.models import (
+    Course, PhishingTemplate, 
+    UserProfile, Quiz, Question, 
+    Choice, QuizAttempt, PhishingTest, 
+    EmployeeGroup, TrainingModule, 
+    ModuleCompletion, Notification,
+    QuizAssignment
+)
 class Command(BaseCommand):
     help = 'Check imported data counts'
 
@@ -20,6 +26,7 @@ class Command(BaseCommand):
             'TrainingModules': TrainingModule,
             'ModuleCompletions': ModuleCompletion,
             'Notifications': Notification,
+            'QuizAssignments': QuizAssignment,
         }
         
         for name, model in models.items():

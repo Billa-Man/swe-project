@@ -15,7 +15,8 @@ from .models import (
     EmployeeGroup,
     TrainingModule,
     ModuleCompletion,
-    Notification
+    Notification, 
+    QuizAssignment
 )
 import requests
 from django.conf import settings
@@ -38,7 +39,14 @@ def dashboard(request):
         completed_modules = ModuleCompletion.objects.filter(user=request.user)
         notifications = Notification.objects.filter(user=request.user, is_read=False)
         notification_count = notifications.count()
-
+        
+        # Get assigned quizzes that haven't been attempted yet
+        attempted_quiz_ids = quiz_attempts.values_list('quiz_id', flat=True)
+        assigned_quizzes = QuizAssignment.objects.filter(
+            user=request.user,
+            status='pending'
+        ).order_by('due_date')
+        
         context = {
             'courses': courses,
             'quiz_attempts': quiz_attempts,
@@ -46,6 +54,7 @@ def dashboard(request):
             'completed_modules': completed_modules,
             'notifications': notifications,
             'notification_count': notification_count,
+            'quiz_assignments': assigned_quizzes,  
         }
         return render(request, 'core/employee_dashboard.html', context)
 
@@ -53,13 +62,21 @@ def dashboard(request):
         employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
         phishing_templates = PhishingTemplate.objects.all()
         sent_tests = PhishingTest.objects.filter(sent_by=request.user)
-
+        
+        # Add these lines to get all quizzes and employees
+        quizzes = Quiz.objects.all()
+        employees = User.objects.filter(userprofile__user_type='employee')
+        
         context = {
             'employee_groups': employee_groups,
             'phishing_templates': phishing_templates,
             'sent_tests': sent_tests,
+            'quizzes': quizzes,          # Add this
+            'employees': employees,      # Add this
         }
+        
         return render(request, 'core/it_owner_dashboard.html', context)
+
 
     else:
         users = User.objects.all()
@@ -266,12 +283,45 @@ def login_dashboard(request):
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})
 
 @login_required
-def assign_module_to_user(user, module_title, module_link=""):
-    Notification.objects.create(
-        user=user,
-        message=f"New training module assigned: {module_title}",
-        link=module_link
-    )
+def assign_quiz_to_users(request):
+    if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
+        messages.error(request, 'Unauthorized access')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        quiz_id = request.POST.get('quiz_id')
+        user_ids = request.POST.getlist('user_ids')
+        due_date_str = request.POST.get('due_date')
+        
+        # Parse due date or use default (14 days)
+        if due_date_str:
+            due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
+            due_date = timezone.make_aware(due_date) 
+        else:
+            due_date = timezone.now() + timezone.timedelta(days=14)
+            
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+        
+        for user_id in user_ids:
+            user = get_object_or_404(User, id=user_id)
+            
+            # Create assignment
+            QuizAssignment.objects.create(
+                user=user,
+                quiz=quiz,
+                due_date=due_date,
+            )
+            
+            # Create notification
+            Notification.objects.create(
+                user=user,
+                message=f"New quiz assigned: {quiz.title}",
+                link=reverse('take_quiz', args=[quiz.id])
+            )
+        
+        messages.success(request, f'Quiz successfully assigned to {len(user_ids)} users')
+        
+    return redirect('dashboard')
 
 @login_required
 def mark_all_read(request):

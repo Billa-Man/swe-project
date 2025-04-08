@@ -56,6 +56,31 @@ def dashboard(request):
             status='pending'
         ).order_by('due_date')
         
+        # Calculate course completion statistics
+        all_courses = Course.objects.all()
+        total_courses = all_courses.count()
+        
+        # Get unique courses that the user has completed or in progress
+        completed_course_ids = set()
+        in_progress_course_ids = set()
+        
+        for attempt in quiz_attempts:
+            course_id = attempt.quiz.course.id
+            if attempt.score >= 70:  # Consider a score of 70% or above as 'complete'
+                completed_course_ids.add(course_id)
+            elif course_id not in completed_course_ids:
+                in_progress_course_ids.add(course_id)
+        
+        # Filter out completed course IDs from in_progress_course_ids
+        in_progress_course_ids = in_progress_course_ids - completed_course_ids
+        
+        completed_count = len(completed_course_ids)
+        in_progress_count = len(in_progress_course_ids)
+        not_started_count = total_courses - completed_count - in_progress_count
+        
+        # Make sure all counts are non-negative
+        not_started_count = max(0, not_started_count)
+        
         context = {
             'courses': courses,
             'quiz_attempts': quiz_attempts,
@@ -63,7 +88,11 @@ def dashboard(request):
             'completed_modules': completed_modules,
             'notifications': notifications,
             'notification_count': notification_count,
-            'quiz_assignments': assigned_quizzes,  
+            'quiz_assignments': assigned_quizzes,
+            'completed_count': completed_count,
+            'in_progress_count': in_progress_count,
+            'not_started_count': not_started_count,
+            'total_courses': total_courses,
         }
         return render(request, 'core/employee_dashboard.html', context)
 
@@ -443,3 +472,162 @@ def assign_quiz_to_users(request):
 def mark_all_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect('dashboard')
+
+@login_required
+def courses_list(request):
+    """View to display all available courses with completion status"""
+    courses = Course.objects.all()
+    
+    # Get all quiz attempts for this user
+    quiz_attempts = QuizAttempt.objects.filter(user=request.user)
+    completed_course_ids = set()
+    in_progress_course_ids = set()
+    courses_with_status = []
+    
+    # Identify completed and in-progress courses based on quiz attempts
+    for attempt in quiz_attempts:
+        course_id = attempt.quiz.course.id
+        if attempt.score >= 70:  # Consider a score of 70% or above as 'complete'
+            completed_course_ids.add(course_id)
+        elif course_id not in completed_course_ids:
+            in_progress_course_ids.add(course_id)
+    
+    # For each course, determine completion status
+    for course in courses:
+        course_data = {
+            'id': course.id,
+            'title': course.title,
+            'description': course.description,
+            'content': course.content,
+        }
+        
+        if course.id in completed_course_ids:
+            # Course is completed
+            course_quiz_attempts = quiz_attempts.filter(
+                quiz__course=course,
+                score__gte=70
+            )
+            if course_quiz_attempts.exists():
+                latest_attempt = course_quiz_attempts.latest('completed_at')
+                course_data['completion_status'] = 'completed'
+                course_data['completion_date'] = latest_attempt.completed_at
+                course_data['score'] = latest_attempt.score
+        elif course.id in in_progress_course_ids:
+            # Course is in progress
+            course_quiz_attempts = quiz_attempts.filter(
+                quiz__course=course
+            )
+            if course_quiz_attempts.exists():
+                latest_attempt = course_quiz_attempts.latest('completed_at')
+                course_data['completion_status'] = 'in_progress'
+                course_data['completion_date'] = latest_attempt.completed_at
+                course_data['score'] = latest_attempt.score
+        else:
+            course_data['completion_status'] = 'not_started'
+            course_data['completion_date'] = None
+            course_data['score'] = None
+        
+        courses_with_status.append(course_data)
+    
+    context = {
+        'courses': courses_with_status,
+    }
+    return render(request, 'core/courses_list.html', context)
+
+@login_required
+def course_view(request, course_id):
+    """View to display a specific course and allow marking as complete"""
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Check if the user has completed quizzes for this course
+    quiz_attempts = QuizAttempt.objects.filter(
+        user=request.user,
+        quiz__course=course
+    )
+    
+    if quiz_attempts.filter(score__gte=70).exists():
+        # If there's at least one attempt with score ≥ 70%, consider as completed
+        latest_attempt = quiz_attempts.filter(score__gte=70).latest('completed_at')
+        completion_status = 'completed'
+        completion_date = latest_attempt.completed_at
+        score = latest_attempt.score
+    elif quiz_attempts.exists():
+        # If there are attempts but none with score ≥ 70%, consider as in progress
+        latest_attempt = quiz_attempts.latest('completed_at')
+        completion_status = 'in_progress'
+        completion_date = latest_attempt.completed_at
+        score = latest_attempt.score
+    else:
+        # If no attempts, consider as not started
+        completion_status = 'not_started'
+        completion_date = None
+        score = None
+    
+    # Handle course completion requests
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        quizzes = Quiz.objects.filter(course=course)
+        
+        if action == 'complete':
+            # If there are no quizzes for this course, create a dummy one
+            if not quizzes.exists():
+                quiz = Quiz.objects.create(
+                    course=course,
+                    title=f"{course.title} Quiz",
+                    description=f"Quiz for {course.title}"
+                )
+                quizzes = [quiz]
+            
+            # Mark course as complete by creating a quiz attempt for each quiz
+            for quiz in quizzes:
+                QuizAttempt.objects.create(
+                    user=request.user,
+                    quiz=quiz,
+                    score=100  # Default score for self-marked completion
+                )
+            
+            Notification.objects.create(
+                user=request.user,
+                message=f"You've completed the course: {course.title}",
+                link=reverse('course_view', args=[course.id])
+            )
+            messages.success(request, f'Course marked as complete')
+            return redirect('course_view', course_id=course.id)
+            
+        elif action == 'in_progress':
+            # Mark first quiz as started with a low score to indicate in progress
+            if quizzes.exists():
+                QuizAttempt.objects.create(
+                    user=request.user,
+                    quiz=quizzes.first(),
+                    score=10  # Low score indicates in progress
+                )
+                completion_status = 'in_progress'
+                completion_date = timezone.now()
+                score = 10
+            else:
+                # If no quizzes exist, create one and mark it as in progress
+                quiz = Quiz.objects.create(
+                    course=course,
+                    title=f"{course.title} Quiz",
+                    description=f"Quiz for {course.title}"
+                )
+                QuizAttempt.objects.create(
+                    user=request.user,
+                    quiz=quiz,
+                    score=10  # Low score indicates in progress
+                )
+                completion_status = 'in_progress'
+                completion_date = timezone.now()
+                score = 10
+                
+            messages.success(request, f'Course marked as in progress')
+            return redirect('course_view', course_id=course.id)
+    
+    context = {
+        'course': course,
+        'completion_status': completion_status,
+        'completion_date': completion_date,
+        'score': score,
+    }
+    return render(request, 'core/course_view.html', context)

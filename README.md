@@ -63,7 +63,6 @@ cd swe-project/
 ```
 # Create virtual environment
 python3.12 -m venv swe_project
-python3.12 -m venv swe_project
 
 # Activate virtual environment
 # For Unix/macOS

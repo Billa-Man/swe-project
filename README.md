@@ -63,6 +63,7 @@ cd swe-project/
 ```
 # Create virtual environment
 python3.12 -m venv swe_project
+python3.12 -m venv swe_project
 
 # Activate virtual environment
 # For Unix/macOS
@@ -86,7 +87,7 @@ nano .env
 ```
 Paste the configuration from the #group-1 Slack channel to your .env 
 
-**Important:Paste the latest configuration from the #group-1 Slack channel to your .env and save** 
+**Important:** Replace the placeholder values:
 
 **For security reasons:**
 - Never commit the .env file to version control

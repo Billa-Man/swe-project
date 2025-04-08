@@ -13,7 +13,6 @@ from .models import (
     PhishingTemplate,
     PhishingTest,
     EmployeeGroup,
-    TrainingModule,
     ModuleCompletion,
     Notification, 
     QuizAssignment
@@ -43,7 +42,7 @@ def dashboard(request):
 
     if user_profile.user_type == 'employee':
         courses = Course.objects.all()
-        quiz_attempts = QuizAttempt.objects.filter(user=request.user)
+        quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')
         phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
         completed_modules = ModuleCompletion.objects.filter(user=request.user)
         notifications = Notification.objects.filter(user=request.user, is_read=False)
@@ -163,16 +162,11 @@ def take_quiz(request, quiz_id):
             score=percentage_score
         )
 
-        training_module, created = TrainingModule.objects.get_or_create(
-            title=quiz.course.title,
-            defaults={'description': f"Training module for {quiz.course.title}"}
-        )
-
-        ModuleCompletion.objects.update_or_create(
+        QuizAssignment.objects.filter(
             user=request.user,
-            module=training_module,
-            defaults={'score': percentage_score}
-        )
+            quiz=quiz,
+            status='pending'
+        ).update(status='completed')
 
         Notification.objects.create(
             user=request.user,
@@ -479,7 +473,7 @@ def courses_list(request):
     courses = Course.objects.all()
     
     # Get all quiz attempts for this user
-    quiz_attempts = QuizAttempt.objects.filter(user=request.user)
+    quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')
     completed_course_ids = set()
     in_progress_course_ids = set()
     courses_with_status = []

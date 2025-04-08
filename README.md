@@ -86,7 +86,7 @@ nano .env
 ```
 Paste the configuration from the #group-1 Slack channel to your .env 
 
-**Important:** Replace the placeholder values:
+**Important:Paste the latest configuration from the #group-1 Slack channel to your .env and save** 
 
 **For security reasons:**
 - Never commit the .env file to version control

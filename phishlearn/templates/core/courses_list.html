@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Training Courses{% endblock %}
+
+{% block extra_css %}
+<style>
+    .navbar {
+        background-color: #1e293b !important;
+        padding: 1rem 2rem;
+    }
+
+    .navbar-brand {
+        color: white !important;
+        font-size: 1.25rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .navbar-brand i {
+        font-size: 1.25rem;
+        color: white !important;
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .dashboard {
+        background-color: #f8fafc;
+        min-height: calc(100vh - 56px);
+        padding: 2rem 0;
+    }
+    
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 1.875rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-description {
+        color: #64748b;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .course-card {
+        background: white;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .course-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .course-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+    }
+    
+    .course-description {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+    }
+    
+    .course-footer {
+        padding: 1rem 1.5rem;
+        background-color: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .status-tag {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-completed {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-in-progress {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-not-started {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    
+    .course-action {
+        color: #5047e5;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+    
+    .course-action:hover {
+        text-decoration: underline;
+    }
+    
+    .completion-date {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Training Courses</h1>
+            <p class="page-description">Access and complete training courses to improve your cybersecurity awareness.</p>
+        </div>
+        
+        <div class="course-grid">
+            {% for course in courses %}
+            <div class="course-card">
+                <div class="course-content">
+                    <h3 class="course-title">{{ course.title }}</h3>
+                    <p class="course-description">{{ course.description }}</p>
+                    
+                    {% if course.completion_status == 'completed' %}
+                    <div class="completion-date">
+                        Completed on: {{ course.completion_date|date:"M d, Y" }}
+                    </div>
+                    {% elif course.completion_status == 'in_progress' %}
+                    <div class="completion-date" style="color: #856404;">
+                        Started on: {{ course.completion_date|date:"M d, Y" }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="course-footer">
+                    {% if course.completion_status == 'completed' %}
+                    <span class="status-tag status-completed">Completed</span>
+                    {% elif course.completion_status == 'in_progress' %}
+                    <span class="status-tag status-in-progress">In Progress</span>
+                    {% else %}
+                    <span class="status-tag status-not-started">Not Started</span>
+                    {% endif %}
+                    
+                    <a href="{% url 'course_view' course.id %}" class="course-action">
+                        {% if course.completion_status == 'completed' %}
+                        Review Course
+                        {% elif course.completion_status == 'in_progress' %}
+                        Continue Course
+                        {% else %}
+                        Start Course
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info">
+                No courses available at the moment.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -91,9 +91,20 @@ WSGI_APPLICATION = 'phishlearn.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
+
+DATABASE_URL = f"postgres://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+    'default': dj_database_url.parse(DATABASE_URL)
 }
+
+#DATABASES = {
+#   'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+#}
 
 
 # Password validation

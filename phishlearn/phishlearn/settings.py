@@ -184,3 +184,14 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Supabase Configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+
+# Fix to CSRF Issue
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000/admin/',
+    'http://127.0.0.1:8000/accounts/login/'
+    'http://127.0.0.1:8000/api/'
+    'http://127.0.0.1:8000/accounts/signup/'
+    
+]

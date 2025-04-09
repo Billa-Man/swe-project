@@ -84,9 +84,8 @@ Create a `.env` file in the project root:
 # Create .env file
 nano .env
 ```
-Paste the configuration from the #group-1 Slack channel to your .env 
 
-**Important:Paste the latest configuration from the #group-1 Slack channel to your .env and save** 
+**Important: Paste the latest configuration from the #group-1 Slack channel to your .env and save** 
 
 **For security reasons:**
 - Never commit the .env file to version control
@@ -100,6 +99,12 @@ python manage.py runserver
 
 ### 6. Visit the link to view project 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+[http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
+
+**username: faculty** 
+
+**password: faculty** 
 
 ### (Optional) Check Connection
 [http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)

@@ -27,3 +27,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('api/', include('main.urls'))
 ]
+
+admin.site.site_header = "PhishLearn Admin"  
+admin.site.site_title = "PhishLearn Admin Portal"  
+admin.site.index_title = "Welcome, PhishLearn Administrator!"  

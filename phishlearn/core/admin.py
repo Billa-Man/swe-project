@@ -12,7 +12,6 @@ from .models import (
     PhishingTest,
     EmployeeGroup,
     TrainingModule,
-    # ModuleCompletion,
     Notification
 )
 

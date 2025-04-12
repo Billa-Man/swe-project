@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,11 +91,11 @@ WSGI_APPLICATION = 'phishlearn.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
+USER = os.getenv("POSTGRES_USER")
+PASSWORD = os.getenv("POSTGRES_PASSWORD")
+HOST = os.getenv("DATABASE_HOST", "127.0.0.1")
+PORT = os.getenv("DATABASE_PORT", 5432)
+DBNAME = os.getenv("POSTGRES_DB")
 
 DATABASE_URL = f"postgres://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
 DATABASES = {
@@ -172,12 +172,6 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 
-
-# Static Files Configuration
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 # Email settings (for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -195,3 +189,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000/accounts/signup/'
     
 ]
+
+# Docker Configuration
+DEBUG = bool(os.environ.get("DEBUG", default=0))
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")

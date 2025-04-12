@@ -11,6 +11,8 @@ from core.models import (
 import json
 from django.db import transaction
 
+from loguru import logger
+
 class Command(BaseCommand):
     help = 'Import data from JSON file'
 
@@ -57,6 +59,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Successfully imported data'))
             
         except Exception as e:
+            logger.error(f'Error importing data: {str(e)}')
             self.stdout.write(self.style.ERROR(f'Error importing data: {str(e)}'))
 
     def import_model(self, model, data_list):

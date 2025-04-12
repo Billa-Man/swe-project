@@ -44,12 +44,10 @@ def dashboard(request):
         courses = Course.objects.all()
         quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')
         phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
-        # completed_modules = ModuleCompletion.objects.filter(user=request.user)
         notifications = Notification.objects.filter(user=request.user, is_read=False)
         notification_count = notifications.count()
         
         # Get assigned quizzes that haven't been attempted yet
-        attempted_quiz_ids = quiz_attempts.values_list('quiz_id', flat=True)
         assigned_quizzes = QuizAssignment.objects.filter(
             user=request.user,
             status='pending'
@@ -84,7 +82,6 @@ def dashboard(request):
             'courses': courses,
             'quiz_attempts': quiz_attempts,
             'phishing_tests': phishing_tests,
-            'completed_modules': completed_modules,
             'notifications': notifications,
             'notification_count': notification_count,
             'quiz_assignments': assigned_quizzes,
@@ -291,7 +288,6 @@ def create_employee(request):
             user.username = user.email
             user.set_password(form.cleaned_data['password'])
             user.save()
-            # UserProfile.objects.create(user=user, user_type='employee')
 
             groups = form.cleaned_data['groups']
             for group in groups:

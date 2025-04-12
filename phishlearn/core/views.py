@@ -13,7 +13,7 @@ from .models import (
     PhishingTemplate,
     PhishingTest,
     EmployeeGroup,
-    ModuleCompletion,
+    TrainingModule,
     Notification, 
     QuizAssignment
 )
@@ -44,7 +44,7 @@ def dashboard(request):
         courses = Course.objects.all()
         quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')
         phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
-        completed_modules = ModuleCompletion.objects.filter(user=request.user)
+        # completed_modules = ModuleCompletion.objects.filter(user=request.user)
         notifications = Notification.objects.filter(user=request.user, is_read=False)
         notification_count = notifications.count()
         
@@ -298,10 +298,22 @@ def create_employee(request):
                 group.employees.add(user)
 
             messages.success(request, 'Employee created successfully.')
-            return redirect('list_employees')
+            return redirect('manage_employees')
     else:
         form = EmployeeCreateForm()
     return render(request, 'core/create_employee.html', {'form': form})
+
+@login_required
+def delete_emplpoyee(request, employee_id):
+    if not request.user.userprofile.user_type == 'it_owner':
+        messages.error(request, 'Unauthorized access')
+        return redirect('manage_employees') 
+    
+    user = get_object_or_404(User, id = employee_id, userprofile__user_type='employee', is_staff=False)
+    user.delete()
+    messages.success(request, "Employee deleted successfully.")
+    return redirect('manage_employees') # this should be the name of url(in urls.py)
+    
 
 @login_required
 def create_group(request):
@@ -328,6 +340,19 @@ def create_group(request):
     return render(request, 'core/create_group.html', {'form': form})
 
 @login_required
+def delete_group(request, group_id):
+    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
+
+    if request.method == 'POST':
+        group.delete()
+        messages.success(request, 'Group deleted successfully.')
+        return redirect('group_list')
+
+    # 如果你想加一个确认页面也可以
+    messages.error(request, 'Invalid request method.')
+    return redirect('group_detail', group_id=group.id)
+
+@login_required
 def group_list(request):
     groups = EmployeeGroup.objects.filter(it_owner=request.user)
     return render(request, 'core/group_list.html', {'groups': groups})
@@ -352,6 +377,20 @@ def add_member_to_group(request, group_id):
         except User.DoesNotExist:
             messages.error(request, f"No user found with email {email}.")
         return redirect('group_detail', group_id=group.id)
+    
+@login_required
+def remove_employee_from_group(request, group_id, employee_id):
+    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
+    user = get_object_or_404(User, id=employee_id, is_staff=False)
+
+    if user in group.employees.all():
+        group.employees.remove(user)
+        messages.success(request, f"{user.email} has been removed from the group.")
+    else:
+        messages.warning(request, f"{user.email} is not in this group.")
+
+    return redirect('group_detail', group_id=group.id)
+
 
 @login_required
 def manage_courses(request):

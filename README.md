@@ -62,7 +62,7 @@ cd swe-project/
 ### 1. Virtual Environment Setup
 ```
 # Create virtual environment
-python3 -m venv swe_project
+python3.12 -m venv swe_project
 
 # Activate virtual environment
 # For Unix/macOS
@@ -82,36 +82,10 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 ```
 # Create .env file
-touch .env
+nano .env
 ```
-Open and add the following configuration to your .env file:
-```
-DATABASE_URL=your-postgres-url
-DJANGO_SECRET_KEY=your-secret-key-here
 
-
-SUPABASE_URL=your-supabase-url
-SUPABASE_KEY=your-supabase-key
-        
-
-# Email Configuration
-# Replace these values with your actual Gmail credentials
-# EMAIL_HOST_USER should be your Gmail address
-# EMAIL_HOST_PASSWORD should be an App Password from your Google Account
-# To get an App Password:
-# 1. Go to https://myaccount.google.com/security
-# 2. Enable 2-Step Verification if not already enabled
-# 3. Go to App Passwords
-# 4. Select "Mail" and "Other (Custom name)"
-# 5. Enter "Django PhishLearn" as the name
-# 6. Copy the 16-character password generated
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-specific-password 
-```
-**Important:** Replace the placeholder values:
+**Important: Paste the latest configuration from the #group-1 Slack channel to your .env and save** 
 
 **For security reasons:**
 - Never commit the .env file to version control
@@ -125,6 +99,12 @@ python manage.py runserver
 
 ### 6. Visit the link to view project 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+[http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
+
+**username: faculty** 
+
+**password: faculty** 
 
 ### (Optional) Check Connection
 [http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)

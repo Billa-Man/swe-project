@@ -91,9 +91,20 @@ WSGI_APPLICATION = 'phishlearn.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
+
+DATABASE_URL = f"postgres://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+    'default': dj_database_url.parse(DATABASE_URL)
 }
+
+#DATABASES = {
+#   'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+#}
 
 
 # Password validation
@@ -173,3 +184,14 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Supabase Configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+
+# Fix to CSRF Issue
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000/admin/',
+    'http://127.0.0.1:8000/accounts/login/'
+    'http://127.0.0.1:8000/api/'
+    'http://127.0.0.1:8000/accounts/signup/'
+    
+]

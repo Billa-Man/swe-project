@@ -441,15 +441,15 @@
                             <div class="progress-legend">
                                 <div class="legend-item">
                                     <div class="legend-dot dot-completed"></div>
-                                    Completed: 6 modules
+                                    Completed: {{ completed_count }} courses
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-dot dot-progress"></div>
-                                    In Progress: 2 modules
+                                    In Progress: {{ in_progress_count }} courses
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-dot dot-not-started"></div>
-                                    Not Started: 2 modules
+                                    Not Started: {{ not_started_count }} courses
                                 </div>
                             </div>
                         </div>
@@ -466,7 +466,6 @@
                                         <th>Quiz</th>
                                         <th>Status</th>
                                         <th>Date</th>
-                                        <th>Score</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -475,11 +474,10 @@
                                         <td>{{ attempt.quiz.title }}</td>
                                         <td><span class="status-completed">Completed</span></td>
                                         <td>{{ attempt.completed_at|date:"M d, Y" }}</td>
-                                        <td>{{ attempt.score }}%</td>
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="4" class="text-center">No quiz attempts yet</td>
+                                        <td colspan="3" class="text-center">No quiz attempts yet</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -492,23 +490,23 @@
             <div class="col-md-4">
                 <div class="upcoming-card">
                     <h2 class="progress-title">Upcoming Tests</h2>
-                    {% if quiz_assignments %}
-                        {% for assignment in quiz_assignments %}
-                            <a href="{% url 'take_quiz' assignment.quiz.id %}" style="text-decoration: none; color: inherit;">
-                                <div class="test-item">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="test-title">{{ assignment.quiz.title }}</div>
-                                            <div class="test-due">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
-                                        </div>
-                                        <span class="status-badge">{{ assignment.status|title }}</span>
-                                    </div>
-                                </div>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <div class="test-item">No pending tests</div>
-                    {% endif %}
+                    {% for assignment in quiz_assignments %}
+                        <a href="{% url 'take_quiz' assignment.quiz.id %}" style="text-decoration: none; color: inherit;">
+                            <div class="test-item">
+                                <div class="test-title">{{ assignment.quiz.title }}</div>
+                                <div class="test-due">Due: {{ assignment.due_date|date:"M d, Y"|default:"Not specified" }}</div>
+                                <div class="status-badge">{{ assignment.get_status_display }}</div>
+                            </div>
+                        </a>
+                    {% empty %}
+                        <div class="test-item">No upcoming tests</div>
+                    {% endfor %}
+                </div>
+
+                <div class="upcoming-card mt-4">
+                    <h2 class="progress-title">Training Courses</h2>
+                    <p class="mb-4">Access and complete training courses to improve your cybersecurity awareness.</p>
+                    <a href="{% url 'courses_list' %}" class="btn btn-primary">View Courses</a>
                 </div>
             </div>
         </div>
@@ -516,37 +514,33 @@
 </div>
 
 <script>
-    // Calculate progress circle
-    const circle = document.querySelector('.progress-circle .progress');
-    const radius = circle.getAttribute('r');
-    const circumference = 2 * Math.PI * radius;
-    const progress = 75;
-    
-    circle.style.strokeDasharray = `${circumference} ${circumference}`;
-    circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
-
-    notificationBell.addEventListener('click', function(e) {
-        console.log('Notification bell clicked');
-        e.stopPropagation();
-        notificationDropdown.classList.toggle('show');
-    });
-
-    // Toggle notification dropdown
     document.addEventListener('DOMContentLoaded', function() {
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-
-        notificationBell.addEventListener('click', function(e) {
-            e.stopPropagation();
-            notificationDropdown.classList.toggle('show');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function() {
-            if (notificationDropdown.classList.contains('show')) {
-                notificationDropdown.classList.remove('show');
-            }
-        });
+        // Calculate progress circle
+        const circle = document.querySelector('.progress-circle .progress');
+        const radius = circle.getAttribute('r');
+        const circumference = 2 * Math.PI * radius;
+        
+        // Get the counts from the legend items text
+        const completedText = document.querySelector('.legend-item:nth-child(1)').textContent;
+        const inProgressText = document.querySelector('.legend-item:nth-child(2)').textContent;
+        const notStartedText = document.querySelector('.legend-item:nth-child(3)').textContent;
+        
+        // Extract numbers using regex
+        const completedCount = parseInt(completedText.match(/\d+/)[0]);
+        const inProgressCount = parseInt(inProgressText.match(/\d+/)[0]);
+        const notStartedCount = parseInt(notStartedText.match(/\d+/)[0]);
+        
+        // Calculate total modules and completion percentage
+        const totalModules = completedCount + inProgressCount + notStartedCount;
+        const completionPercentage = Math.round((completedCount / totalModules) * 100);
+        
+        // Update the progress circle
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = circumference - (completionPercentage / 100) * circumference;
+        
+        // Update the text in the center of the circle to show the actual percentage
+        const percentageDisplay = document.querySelector('.percentage');
+        percentageDisplay.textContent = `${completionPercentage}%`;
     });
 </script>
 {% endblock %} 

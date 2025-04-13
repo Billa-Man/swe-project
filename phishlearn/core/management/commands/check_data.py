@@ -5,8 +5,7 @@ from core.models import (
     UserProfile, Quiz, Question, 
     Choice, QuizAttempt, PhishingTest, 
     EmployeeGroup, TrainingModule, 
-    ModuleCompletion, Notification,
-    QuizAssignment
+    Notification, QuizAssignment
 )
 class Command(BaseCommand):
     help = 'Check imported data counts'
@@ -24,7 +23,6 @@ class Command(BaseCommand):
             'PhishingTests': PhishingTest,
             'EmployeeGroups': EmployeeGroup,
             'TrainingModules': TrainingModule,
-            'ModuleCompletions': ModuleCompletion,
             'Notifications': Notification,
             'QuizAssignments': QuizAssignment,
         }

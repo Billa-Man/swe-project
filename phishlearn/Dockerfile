@@ -1,5 +1,5 @@
 # Stage 1: Base build stage
-FROM python:3.11-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Install curl
 RUN apt-get update && apt-get install -y curl
@@ -24,14 +24,14 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
  
 # Stage 2: Production stage
-FROM python:3.11-slim
+FROM python:3.12-slim
  
 RUN useradd -m -r appuser && \
    mkdir /app && \
    chown -R appuser /app
  
 # Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
  
 # Set the working directory

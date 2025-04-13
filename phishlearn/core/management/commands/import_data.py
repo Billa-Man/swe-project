@@ -5,8 +5,7 @@ from core.models import (
     UserProfile, Quiz, Question, 
     Choice, QuizAttempt, PhishingTest, 
     EmployeeGroup, TrainingModule, 
-    ModuleCompletion, Notification,
-    QuizAssignment
+    Notification, QuizAssignment
 )
 import json
 from django.db import transaction
@@ -53,7 +52,6 @@ class Command(BaseCommand):
                 self.import_model(PhishingTest, data.get('phishing_tests', []))
                 self.import_model(EmployeeGroup, data.get('employee_groups', []))
                 self.import_model(TrainingModule, data.get('training_modules', []))
-                self.import_model(ModuleCompletion, data.get('module_completions', []))
                 self.import_model(Notification, data.get('notifications', []))
 
             self.stdout.write(self.style.SUCCESS('Successfully imported data'))

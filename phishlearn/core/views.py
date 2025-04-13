@@ -97,7 +97,6 @@ def dashboard(request):
         phishing_templates = PhishingTemplate.objects.all()
         sent_tests = PhishingTest.objects.filter(sent_by=request.user)
         
-        # Add these lines to get all quizzes and employees
         quizzes = Quiz.objects.all()
         employees = User.objects.filter(userprofile__user_type='employee')
         
@@ -105,8 +104,8 @@ def dashboard(request):
             'employee_groups': employee_groups,
             'phishing_templates': phishing_templates,
             'sent_tests': sent_tests,
-            'quizzes': quizzes,          # Add this
-            'employees': employees,      # Add this
+            'quizzes': quizzes,
+            'employees': employees,
         }
         
         return render(request, 'core/it_owner_dashboard.html', context)
@@ -278,7 +277,6 @@ def list_employees(request):
     })
 
     
-
 @login_required
 def create_employee(request):
     if request.method == 'POST':
@@ -299,6 +297,7 @@ def create_employee(request):
         form = EmployeeCreateForm()
     return render(request, 'core/create_employee.html', {'form': form})
 
+
 @login_required
 def delete_emplpoyee(request, employee_id):
     if not request.user.userprofile.user_type == 'it_owner':
@@ -308,7 +307,7 @@ def delete_emplpoyee(request, employee_id):
     user = get_object_or_404(User, id = employee_id, userprofile__user_type='employee', is_staff=False)
     user.delete()
     messages.success(request, "Employee deleted successfully.")
-    return redirect('manage_employees') # this should be the name of url(in urls.py)
+    return redirect('manage_employees')
     
 
 @login_required
@@ -335,6 +334,7 @@ def create_group(request):
         form = GroupCreateForm()
     return render(request, 'core/create_group.html', {'form': form})
 
+
 @login_required
 def delete_group(request, group_id):
     group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
@@ -344,20 +344,22 @@ def delete_group(request, group_id):
         messages.success(request, 'Group deleted successfully.')
         return redirect('group_list')
 
-    # 如果你想加一个确认页面也可以
     messages.error(request, 'Invalid request method.')
     return redirect('group_detail', group_id=group.id)
+
 
 @login_required
 def group_list(request):
     groups = EmployeeGroup.objects.filter(it_owner=request.user)
     return render(request, 'core/group_list.html', {'groups': groups})
 
+
 @login_required
 def group_detail(request, group_id):
     group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
     employees = group.employees.all()
     return render(request, 'core/group_detail.html', {'group': group, 'employees': employees})
+
 
 @login_required
 def add_member_to_group(request, group_id):
@@ -374,6 +376,7 @@ def add_member_to_group(request, group_id):
             messages.error(request, f"No user found with email {email}.")
         return redirect('group_detail', group_id=group.id)
     
+
 @login_required
 def remove_employee_from_group(request, group_id, employee_id):
     group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
@@ -413,6 +416,7 @@ def manage_courses(request):
     context = {'courses': courses}
     return render(request, 'core/manage_courses.html', context)
 
+
 @login_required
 def manage_templates(request):
     if not request.user.userprofile.user_type == 'site_admin':
@@ -438,6 +442,7 @@ def manage_templates(request):
     context = {'templates': templates}
     return render(request, 'core/manage_templates.html', context)
 
+
 @login_required
 def login_dashboard(request):
     # Check if user is IT owner or site admin
@@ -456,6 +461,7 @@ def login_dashboard(request):
 
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})
 
+
 @login_required
 def assign_quiz_to_users(request):
     if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
@@ -467,12 +473,12 @@ def assign_quiz_to_users(request):
         user_ids = request.POST.getlist('user_ids')
         due_date_str = request.POST.get('due_date')
         
-        # Parse due date or use default (14 days)
+        # Parse due date or use default (7 days)
         if due_date_str:
             due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
             due_date = timezone.make_aware(due_date) 
         else:
-            due_date = timezone.now() + timezone.timedelta(days=14)
+            due_date = timezone.now() + timezone.timedelta(days=7)
             
         quiz = get_object_or_404(Quiz, id=quiz_id)
         
@@ -497,10 +503,12 @@ def assign_quiz_to_users(request):
         
     return redirect('dashboard')
 
+
 @login_required
 def mark_all_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect('dashboard')
+
 
 @login_required
 def courses_list(request):

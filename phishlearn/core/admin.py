@@ -96,12 +96,6 @@ class TrainingModuleAdmin(admin.ModelAdmin):
     list_filter = ('title',)
     search_fields = ('title', 'description')
 
-# @admin.register(ModuleCompletion)
-# class ModuleCompletionAdmin(admin.ModelAdmin):
-#     list_display = ('user', 'module', 'score', 'completed_at')
-#     list_filter = ('completed_at', 'score')
-#     search_fields = ('user__email',)
-
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'message', 'is_read', 'created_at', 'link')

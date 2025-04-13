@@ -53,22 +53,6 @@ def connection_check(request):
     
     return JsonResponse(status)
 
-def post_to_supabase(user, ip_address, success):
-    url = f"{settings.SUPABASE_URL}/rest/v1/core_loginattempt"
-    headers = {
-        "apikey": settings.SUPABASE_KEY,
-        "Content-Type": "application/json"
-    }
-    data = {
-        "user_id": user.id if user else None,
-        "ip_address": ip_address,
-        "success": success
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code != 201:
-        print("Failed to post to Supabase:", response.json())
-        logger.error(f"Failed to post to Supabase: {response.json()}")
-
 def login_view(request):
     if request.method == 'POST':
         # Bind the form with POST data
@@ -95,9 +79,6 @@ def login_view(request):
             username=username,
             browser_info=browser_info,
         )
-
-        # Post to Supabase even if the credentials are wrong
-        post_to_supabase(user, ip_address, success)
 
         # If successful, log the user in and redirect; otherwise, show an error
         if success:

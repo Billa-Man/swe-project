@@ -1,14 +1,8 @@
-/swe_project_env
+/swe_project
 *__pycache__/
 *.py[cod]
-.env
 .venv/
 .DS_Store
-
-# Django
-*.log
-*.sqlite3
-*.db
 
 # macOS
 .DS_Store

@@ -8,7 +8,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect
 from core.models import LoginAttempt
 from django.contrib import messages
+from django.utils.timezone import now
 import requests
+
+from loguru import logger
 
 def home(request):
     return render(request, 'core/home.html')
@@ -28,8 +31,10 @@ def connection_check(request):
     try:
         with connections['default'].cursor() as cursor:
             cursor.execute('SELECT 1')
+            logger.info("Database connection successful.")
             status['database'] = True
     except Exception as e:
+        logger.error(f"Database connection error: {str(e)}")
         status['errors'].append(f"Database Error: {str(e)}")
     
     # Test Supabase Client Connection
@@ -40,26 +45,13 @@ def connection_check(request):
         )
         # Try to fetch user (requires authentication)
         user = supabase.auth.get_user()
+        logger.info("Supabase client connection successful.")
         status['supabase_client'] = True
     except Exception as e:
         status['errors'].append(f"Supabase Error: {str(e)}")
+        logger.error(f"Supabase client connection error: {str(e)}")
     
     return JsonResponse(status)
-
-def post_to_supabase(user, ip_address, success):
-    url = f"{settings.SUPABASE_URL}/rest/v1/login_attempts"
-    headers = {
-        "apikey": settings.SUPABASE_KEY,
-        "Content-Type": "application/json"
-    }
-    data = {
-        "user_id": user.id if user else None,
-        "ip_address": ip_address,
-        "success": success
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code != 201:
-        print("Failed to post to Supabase:", response.json())
 
 def login_view(request):
     if request.method == 'POST':
@@ -85,11 +77,8 @@ def login_view(request):
             success=success,
             ip_address=ip_address,
             username=username,
-            browser_info=browser_info
+            browser_info=browser_info,
         )
-
-        # Post to Supabase even if the credentials are wrong
-        post_to_supabase(user, ip_address, success)
 
         # If successful, log the user in and redirect; otherwise, show an error
         if success:

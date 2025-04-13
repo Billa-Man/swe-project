@@ -109,13 +109,6 @@ class LoginAttempt(models.Model):
     def __str__(self):
         return f"{self.user} - {self.success} - {self.timestamp}"
 
-class TrainingModule(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    
-    def __str__(self):
-        return self.title
-
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     message = models.CharField(max_length=255)

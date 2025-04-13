@@ -4,7 +4,7 @@ from core.models import (
     Course, PhishingTemplate, 
     UserProfile, Quiz, Question, 
     Choice, QuizAttempt, PhishingTest, 
-    EmployeeGroup, TrainingModule, 
+    EmployeeGroup,
     Notification, QuizAssignment
 )
 class Command(BaseCommand):
@@ -22,7 +22,6 @@ class Command(BaseCommand):
             'QuizAttempts': QuizAttempt,
             'PhishingTests': PhishingTest,
             'EmployeeGroups': EmployeeGroup,
-            'TrainingModules': TrainingModule,
             'Notifications': Notification,
             'QuizAssignments': QuizAssignment,
         }

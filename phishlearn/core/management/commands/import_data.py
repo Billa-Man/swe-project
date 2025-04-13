@@ -4,7 +4,7 @@ from core.models import (
     Course, PhishingTemplate, 
     UserProfile, Quiz, Question, 
     Choice, QuizAttempt, PhishingTest, 
-    EmployeeGroup, TrainingModule, 
+    EmployeeGroup, 
     Notification, QuizAssignment
 )
 import json
@@ -51,7 +51,6 @@ class Command(BaseCommand):
                 self.import_model(QuizAssignment, data.get('quiz_assignments', []))
                 self.import_model(PhishingTest, data.get('phishing_tests', []))
                 self.import_model(EmployeeGroup, data.get('employee_groups', []))
-                self.import_model(TrainingModule, data.get('training_modules', []))
                 self.import_model(Notification, data.get('notifications', []))
 
             self.stdout.write(self.style.SUCCESS('Successfully imported data'))

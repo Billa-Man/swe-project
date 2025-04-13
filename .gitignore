@@ -1,4 +1,4 @@
-/swe_project
+/swe_project_env
 *__pycache__/
 *.py[cod]
 .env

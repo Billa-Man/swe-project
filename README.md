@@ -62,14 +62,14 @@ cd swe-project/
 ### 1. Virtual Environment Setup
 ```
 # Create virtual environment
-python3.12 -m venv swe_project
+python3.12 -m venv swe_project_env
 
 # Activate virtual environment
 # For Unix/macOS
-source swe_project/bin/activate
+source swe_project_env/bin/activate
 
 # For Windows
-# swe_project\Scripts\activate
+# swe_project_env\Scripts\activate
 ```
 
 ### 2. Go into the directory and install requirements

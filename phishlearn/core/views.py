@@ -13,7 +13,6 @@ from .models import (
     PhishingTemplate,
     PhishingTest,
     EmployeeGroup,
-    TrainingModule,
     Notification, 
     QuizAssignment
 )

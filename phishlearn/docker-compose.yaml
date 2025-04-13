@@ -29,5 +29,6 @@ services:
       SUPABASE_KEY: ${SUPABASE_KEY}
     env_file:
       - .env
+      
 volumes:
    postgres_data:

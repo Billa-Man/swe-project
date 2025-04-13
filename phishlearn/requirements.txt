@@ -53,4 +53,5 @@ typing-inspection==0.4.0
 typing_extensions==4.13.2
 urllib3==2.4.0
 websockets==14.2
+whitenoise==6.9.0
 yarl==1.19.0

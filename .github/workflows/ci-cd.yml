@@ -35,6 +35,13 @@ jobs:
         GOPHISH_API_URL=http://localhost:3333
         GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
         EOF
+
+    - name: Install Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+          -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version
     
     - name: Build Docker images
       run: docker-compose build

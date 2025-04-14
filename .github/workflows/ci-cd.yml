@@ -44,10 +44,10 @@ jobs:
         docker-compose --version
     
     - name: Build Docker images
-      run: docker-compose build
+      run: docker compose build
     
     - name: Start Docker containers
-      run: docker-compose up -d
+      run: docker compose up -d
     
     - name: Wait for services to be ready
       run: |

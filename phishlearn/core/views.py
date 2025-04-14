@@ -512,7 +512,7 @@ def mark_all_read(request):
 @login_required
 def courses_list(request):
     """View to display all available courses with completion status"""
-    courses = Course.objects.all()
+    courses = Course.objects.filter(is_published=True)
     
     # Get all quiz attempts for this user
     quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')

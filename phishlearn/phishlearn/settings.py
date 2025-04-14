@@ -195,3 +195,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Docker Configuration
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
+
+# gophish
+GOPHISH_API_URL=os.getenv('GOPHISH_API_URL')
+GOPHISH_API_KEY=os.getenv('GOPHISH_API_KEY')

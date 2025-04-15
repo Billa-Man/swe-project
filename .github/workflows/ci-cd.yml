@@ -2,9 +2,9 @@ name: PhishLearn CI/CD
 
 on:
   push:
-    branches: [ leileBranch ]
+    branches: [ main, dev, leileBranch ]
   pull_request:
-    branches: [ leileBranch ]
+    branches: [ main, dev, leileBranch ]
   workflow_dispatch:
 
 jobs:

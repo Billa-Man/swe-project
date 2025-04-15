@@ -47,6 +47,8 @@ jobs:
     - name: Check if docker-compose.yml exists
       run: |
         echo "Working directory: $(pwd)"
+        echo "Subdirectories:"
+        ls -d */
         if [ ! -f phishlearn/docker-compose.yml ]; then
           echo " docker-compose.yml not found in phishlearn/ directory"
           exit 1

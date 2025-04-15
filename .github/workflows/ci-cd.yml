@@ -92,9 +92,11 @@ jobs:
         sleep 15
     
     - name: Run migrations
+      working-directory: ./phishlearn
       run: docker-compose exec -T phishlearn python manage.py migrate
     
     - name: Create admin user
+      working-directory: ./phishlearn
       run: |
         docker-compose exec -T phishlearn python -c "
         import os
@@ -110,17 +112,21 @@ jobs:
         "
     
     - name: Run tests
+      working-directory: ./phishlearn
       run: docker-compose exec -T phishlearn python manage.py test
     
     - name: Check API endpoint
+      working-directory: ./phishlearn
       run: |
         echo "Checking API connection endpoint..."
         curl --retry 5 --retry-delay 3 -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/connection/ | grep 200 || echo "API endpoint not available"
     
     - name: Collect static files
+      working-directory: ./phishlearn
       run: docker-compose exec -T phishlearn python manage.py collectstatic --noinput
     
     - name: Stop Docker containers
+      working-directory: ./phishlearn
       run: docker-compose down
 
   deploy:

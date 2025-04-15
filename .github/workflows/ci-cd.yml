@@ -50,12 +50,7 @@ jobs:
         echo "Working directory: $(pwd)"
         echo "Subdirectories:"
         ls -la
-        if [ ! -f phishlearn/docker-compose.yml ]; then
-          echo " docker-compose.yml not found in phishlearn/ directory"
-          exit 1
-        else
-          echo " Found phishlearn/docker-compose.yml"
-        fi
+       
     
     - name: Build Docker images
       working-directory: ./phishlearn

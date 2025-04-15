@@ -80,7 +80,10 @@ jobs:
         GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
         EOF
     
-        echo "Created phishlearn/.env for Docker Compose"
+        echo "Created.env for Docker Compose"
+         echo "----------------------------------------------"
+         cat .env
+         echo "----------------------------------------------"
     
     - name: Start Docker containers
       working-directory: ./phishlearn

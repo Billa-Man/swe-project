@@ -55,6 +55,32 @@ jobs:
     - name: Build Docker images
       working-directory: ./phishlearn
       run: docker compose build
+
+    - name: Set up environment variables for Docker Compose
+      working-directory: ./phishlearn
+      run: |
+        mkdir -p phishlearn
+        cat << EOF > .env
+        DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+        DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+        EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}
+        EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+        DEBUG=True
+        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+        GOPHISH_API_URL=http://localhost:3333
+        GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
+        EOF
+    
+        echo "Created phishlearn/.env for Docker Compose"
     
     - name: Start Docker containers
       working-directory: ./phishlearn

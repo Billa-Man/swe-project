@@ -45,6 +45,7 @@ jobs:
         docker-compose --version
     
     - name: Check if docker-compose.yml exists
+      working-directory: ./phishlearn
       run: |
         echo "Working directory: $(pwd)"
         echo "Subdirectories:"

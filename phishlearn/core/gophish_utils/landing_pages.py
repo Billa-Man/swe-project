@@ -52,7 +52,7 @@ def get_landing_pages():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/pages",
+            f"{GOPHISH_API_URL}/api/pages/",
             headers=headers,
             verify=False
         )
@@ -60,7 +60,7 @@ def get_landing_pages():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error getting Landing Pages: {e}")
+        logger.error(f"Error getting landing pages: {e}")
         return None
 
 
@@ -94,14 +94,14 @@ def get_landing_page_with_id(id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Landing Page with ID {id} not found")
+        logger.error(f"Landing page with ID {id} not found")
         return None
     
 
-def create_template(id, name, html, capture_credentials, 
-                    capture_passwords, redirect_url, modified_date):                 
+def create_landing_page(id, name, html, capture_credentials, 
+                        capture_passwords, redirect_url, modified_date):                 
     """
-    Creates a sending profile.
+    Creates a landing page.
 
     Input:
         Landing Page structure
@@ -148,7 +148,7 @@ def create_template(id, name, html, capture_credentials,
     
 
 def modify_landing_page(id, name, html, capture_credentials, 
-                    capture_passwords, redirect_url, modified_date):  
+                        capture_passwords, redirect_url, modified_date):  
     """
     Modifies an existing landing page.
 
@@ -192,7 +192,7 @@ def modify_landing_page(id, name, html, capture_credentials,
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to modify profile. Check if template with id: {id} exists: {e}")
+        logger.error(f"Unable to modify landing page. Check if landing page with id: {id} exists: {e}")
         return None
 
 

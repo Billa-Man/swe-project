@@ -193,7 +193,7 @@ def modify_template(id, name, subject, text, html, modified_date, attachments):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to modify profile. Check if template with id: {id} exists: {e}")
+        logger.error(f"Unable to modify template. Check if template with id: {id} exists: {e}")
         return None
 
 def delete_template(id):
@@ -224,7 +224,7 @@ def delete_template(id):
         logger.error(f"Unable to delete template. Check if template with id: {id} exists: {e}")
         return None
     
-def import_template(convert_links, content):
+def import_email(convert_links, content):
     """
     Imports an email as a template.
     Input:

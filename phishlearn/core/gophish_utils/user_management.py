@@ -60,7 +60,7 @@ def get_users():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/users",
+            f"{GOPHISH_API_URL}/api/users/",
             headers=headers,
             verify=False
         )

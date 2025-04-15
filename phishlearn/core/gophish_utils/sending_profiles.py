@@ -15,6 +15,20 @@ GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY')
 
 # Docs: https://docs.getgophish.com/api-documentation
 
+# Sending profile structure:
+# {
+#   id                 : int64
+#   name               : string
+#   username           : string (optional)
+#   password           : string (optional)
+#   host               : string
+#   interface_type     : string
+#   from_address       : string
+#   ignore_cert_errors : boolean (default:false)
+#   modified_date      : string(datetime)
+#   headers            : array({key: string, value: string}) (optional)
+# }
+
 def get_sending_profiles():
     """
     Gets a list of the sending profiles created by the authenticated user.
@@ -47,7 +61,7 @@ def get_sending_profiles():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/smtp",
+            f"{GOPHISH_API_URL}/api/smtp/",
             headers=headers,
             verify=False
         )
@@ -101,7 +115,7 @@ def get_sending_profile_with_id(id):
         return None
     
 def create_sending_profile(id, name, host, interface_type, from_address, modified_date
-                          ,ignore_cert_errors=True, username="", password="", profile_headers=None):
+                           , ignore_cert_errors=True, username="", password="", profile_headers=None):
     
     """
     Creates a sending profile.
@@ -168,11 +182,11 @@ def create_sending_profile(id, name, host, interface_type, from_address, modifie
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to create profile: {e}")
+        logger.error(f"Unable to create a sending profile: {e}")
         return None
     
-def modify_sending_profile(id, name, username, password, host, interface_type, 
-                           from_address, ignore_cert_errors, modified_date, profile_headers):
+def modify_sending_profile(id, name, host, interface_type, from_address, modified_date
+                           , ignore_cert_errors=True, username="", password="", profile_headers=None):
     """
     Modifies an existing sending profile.
 
@@ -238,7 +252,7 @@ def modify_sending_profile(id, name, username, password, host, interface_type,
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to modify profile. Check if profile with id: {id} exists: {e}")
+        logger.error(f"Unable to modify sending profile. Check if sending profile with id: {id} exists: {e}")
         return None
 
 def delete_sending_profile(id):
@@ -266,5 +280,5 @@ def delete_sending_profile(id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to delete profile. Check if profile with id: {id} exists: {e}")
+        logger.error(f"Unable to delete sending profile. Check if sending profile with id: {id} exists: {e}")
         return None

@@ -152,7 +152,7 @@ def get_groups_summary():
         logger.error(f"Error getting groups: {e}")
         return None
 
-def get_group_with_id(id):
+def get_group_summary_with_id(id):
     """
     Returns a summary for a group with the provided ID.
     Returns a 404: Not Found error if the specified template doesn't exist.
@@ -236,10 +236,10 @@ def create_group(id, name, modified_date, targets):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to create template: {e}")
+        logger.error(f"Unable to create group: {e}")
         return None
     
-def modify_template(id, name, modified_date, targets):
+def modify_group(id, name, modified_date, targets):
     """
     Modifies an existing group.
     The request must include the complete group JSON, not just the fields you're wanting to update. 
@@ -278,7 +278,7 @@ def modify_template(id, name, modified_date, targets):
 
     try:
         response = requests.put(
-            f"{GOPHISH_API_URL}/api/templates/{id}",
+            f"{GOPHISH_API_URL}/api/groups/{id}",
             data=data,
             headers=headers,
             verify=False
@@ -287,7 +287,7 @@ def modify_template(id, name, modified_date, targets):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to modify profile. Check if template with id: {id} exists: {e}")
+        logger.error(f"Unable to modify group. Check if group with id: {id} exists: {e}")
         return None
 
 def delete_group(id):
@@ -359,6 +359,6 @@ def import_group(file):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to import email: {e}")
+        logger.error(f"Unable to import group: {e}")
         return None
 

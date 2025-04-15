@@ -37,7 +37,7 @@ GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY')
 # The template, page, groups, and smtp objects are all Gophish objects. 
 # Their format can be found at their various API endpoints.
 
-# Event structure:
+# Campaign Event structure:
 # Gophish keeps track of every event for a campaign in it's timeline. Each event has the following format:
 # {
 #   email                : string
@@ -46,14 +46,15 @@ GOPHISH_API_KEY = os.getenv('GOPHISH_API_KEY')
 #   details              : string(JSON)
 # }
 
-# The details field is a string containing JSON which contains the raw data about an event (such as credentials that were submitted, user-agent information, and more). 
+# The details field is a string containing JSON which contains the raw data about an event 
+# (such as credentials that were submitted, user-agent information, and more). 
 # The details field has the following format:
 # {
 #   payload              : object
 #   browser              : object
 # }
 
-# Results structure:
+# Campaign Results structure:
 # In addition to this, campaign results are maintained in the results attribute. 
 # This has a format similar to the members of a Group, in that they have the following structure:
 # {
@@ -184,7 +185,7 @@ def get_campaigns():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/campaigns",
+            f"{GOPHISH_API_URL}/api/campaigns/",
             headers=headers,
             verify=False
         )
@@ -316,14 +317,19 @@ def get_campaign_with_id(id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Campaign with ID {id} not found")
+        logger.error(f"Campaign with ID {id} not found: {e}")
         return None
     
+
 def create_campaign(id, name, created_date, launch_date, send_by_date, 
                     completed_date, template, page, status, results, groups, 
                     timeline, smtp, url):                 
     """
     Creates and launches a new campaign.
+
+    This method expects the campaign to be provided in JSON format. 
+    For the various objects in a campaign, such as the template, landing page, or sending profile, you need to provide the name attribute.
+
     You can schedule a campaign to launch at a later time. To do this, simply put the desired time you want the campaign to launch in the launch_date attribute. 
     Gophish expects the date to be provided in ISO8601 format.
     Without setting a launch date, Gophish launches the campaign immediately.
@@ -536,7 +542,7 @@ def get_campaign_results(id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to fetch results. Check if campaign with id: {id} exists: {e}")
+        logger.error(f"Unable to fetch campaign results. Check if campaign with id: {id} exists: {e}")
         return None
 
 def get_campaign_summary(id):
@@ -579,8 +585,8 @@ def get_campaign_summary(id):
     }
 
     try:
-        response = requests.delete(
-            f"{GOPHISH_API_URL}/api/templates/{id}",
+        response = requests.get(
+            f"{GOPHISH_API_URL}/api/campaigns/{id}/summary",
             headers=headers,
             verify=False
         )
@@ -588,7 +594,7 @@ def get_campaign_summary(id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to delete template. Check if template with id: {id} exists: {e}")
+        logger.error(f"Unable to get campaign summary. Check if campaign with id: {id} exists: {e}")
         return None
     
 def delete_campaign(id):

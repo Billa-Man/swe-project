@@ -18,6 +18,8 @@ from loguru import logger
 
 from loguru import logger
 
+from loguru import logger
+
 def home(request):
     return render(request, 'core/home.html')
 

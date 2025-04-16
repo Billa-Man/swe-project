@@ -29,6 +29,8 @@ import logging
 
 from .gophish_api import create_campaign, get_campaigns, get_campaign_status
 
+from .gophish_api import create_campaign, get_campaigns, get_campaign_status
+
 logger = logging.getLogger(__name__)
 
 def home(request):
@@ -109,6 +111,9 @@ def dashboard(request):
             'sent_tests': sent_tests,
             'quizzes': quizzes,
             'employees': employees,
+            'quizzes': quizzes,
+            'employees': employees,
+            'campaigns': campaigns,
         }
         
         return render(request, 'core/it_owner_dashboard.html', context)
@@ -280,8 +285,6 @@ def list_employees(request):
     })
 
     
-
-    
 @login_required
 def create_employee(request):
     if request.method == 'POST':
@@ -298,23 +301,9 @@ def create_employee(request):
 
             messages.success(request, 'Employee created successfully.')
             return redirect('manage_employees')
-            return redirect('manage_employees')
     else:
         form = EmployeeCreateForm()
     return render(request, 'core/create_employee.html', {'form': form})
-
-
-@login_required
-def delete_emplpoyee(request, employee_id):
-    if not request.user.userprofile.user_type == 'it_owner':
-        messages.error(request, 'Unauthorized access')
-        return redirect('manage_employees') 
-    
-    user = get_object_or_404(User, id = employee_id, userprofile__user_type='employee', is_staff=False)
-    user.delete()
-    messages.success(request, "Employee deleted successfully.")
-    return redirect('manage_employees')
-    
 
 
 @login_required
@@ -367,25 +356,10 @@ def delete_group(request, group_id):
     return redirect('group_detail', group_id=group.id)
 
 
-
-@login_required
-def delete_group(request, group_id):
-    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
-
-    if request.method == 'POST':
-        group.delete()
-        messages.success(request, 'Group deleted successfully.')
-        return redirect('group_list')
-
-    messages.error(request, 'Invalid request method.')
-    return redirect('group_detail', group_id=group.id)
-
-
 @login_required
 def group_list(request):
     groups = EmployeeGroup.objects.filter(it_owner=request.user)
     return render(request, 'core/group_list.html', {'groups': groups})
-
 
 
 @login_required
@@ -393,7 +367,6 @@ def group_detail(request, group_id):
     group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
     employees = group.employees.all()
     return render(request, 'core/group_detail.html', {'group': group, 'employees': employees})
-
 
 
 @login_required
@@ -410,21 +383,6 @@ def add_member_to_group(request, group_id):
         except User.DoesNotExist:
             messages.error(request, f"No user found with email {email}.")
         return redirect('group_detail', group_id=group.id)
-    
-
-@login_required
-def remove_employee_from_group(request, group_id, employee_id):
-    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
-    user = get_object_or_404(User, id=employee_id, is_staff=False)
-
-    if user in group.employees.all():
-        group.employees.remove(user)
-        messages.success(request, f"{user.email} has been removed from the group.")
-    else:
-        messages.warning(request, f"{user.email} is not in this group.")
-
-    return redirect('group_detail', group_id=group.id)
-
     
 
 @login_required
@@ -467,7 +425,6 @@ def manage_courses(request):
     return render(request, 'core/manage_courses.html', context)
 
 
-
 @login_required
 def manage_templates(request):
     if not request.user.userprofile.user_type == 'site_admin':
@@ -494,7 +451,6 @@ def manage_templates(request):
     return render(request, 'core/manage_templates.html', context)
 
 
-
 @login_required
 def login_dashboard(request):
     # Check if user is IT owner or site admin
@@ -514,7 +470,6 @@ def login_dashboard(request):
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})
 
 
-
 @login_required
 def assign_quiz_to_users(request):
     if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
@@ -526,7 +481,6 @@ def assign_quiz_to_users(request):
         user_ids = request.POST.getlist('user_ids')
         due_date_str = request.POST.get('due_date')
         
-        # Parse due date or use default (7 days)
         # Parse due date or use default (7 days)
         if due_date_str:
             due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
@@ -558,12 +512,10 @@ def assign_quiz_to_users(request):
     return redirect('dashboard')
 
 
-
 @login_required
 def mark_all_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect('dashboard')
-
 
 
 @login_required
@@ -724,6 +676,73 @@ def course_view(request, course_id):
         'score': score,
     }
     return render(request, 'core/course_view.html', context)
+
+@login_required
+def create_campaign_view(request):
+    if request.method == 'POST':
+        name = request.POST['campaign_name']
+        sender_email = request.POST['sender_email']
+        target_group = request.POST['target_group']
+        email_template_id = request.POST['email_template']
+        url = request.POST['url']
+
+        campaign_response = create_campaign(name, sender_email, target_group, email_template_id, url)
+        return render(request, 'campaign_created.html', {'campaign': campaign_response})
+    return render(request, 'create_campaign.html')
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .gophish_api import create_campaign, get_campaigns, get_email_templates, get_employee_groups
+
+def send_phishing_test(request):
+    # Get templates and groups for the form
+    templates = get_email_templates()  # Implement this to fetch from GoPhish
+    employee_groups = get_employee_groups()  # Implement this to fetch from GoPhish
+    
+    if request.method == 'POST':
+        # Extract form data
+        campaign_name = request.POST.get('campaign_name')
+        sender_email = request.POST.get('sender_email')
+        target_group = request.POST.get('target_group')
+        email_template_id = request.POST.get('email_template_id')
+        url = request.POST.get('url')
+        
+        # Create campaign in GoPhish
+        response = create_campaign(
+            name=campaign_name,
+            sender_email=sender_email,
+            target_group=target_group,
+            email_template_id=email_template_id,
+            url=url
+        )
+        
+        if 'id' in response:
+            messages.success(request, f"Campaign '{campaign_name}' created successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, f"Error creating campaign: {response.get('message', 'Unknown error')}")
+    
+    return render(request, 'core/send_phishing_test.html', {
+        'templates': templates,
+        'employee_groups': employee_groups,
+    })
+
+from django.http import JsonResponse
+from .gophish_api import get_campaigns, get_campaign_status
+
+def gophish_campaigns_api(request):
+    campaigns = get_campaigns()
+    return JsonResponse(campaigns, safe=False)
+
+def gophish_template_preview_api(request, template_id):
+    # This would need implementation based on how GoPhish provides template previews
+    # You might need to fetch the template details from GoPhish
+    # For now, returning a placeholder
+    return JsonResponse({
+        'name': 'Template Name',
+        'html': '<p>Template HTML content would go here.</p>'
+    })
+
 
 @login_required
 def create_campaign_view(request):

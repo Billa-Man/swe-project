@@ -66,7 +66,7 @@ def get_groups():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/groups/",
+            f"{GOPHISH_API_URL}/groups/",
             headers=headers,
             verify=False
         )
@@ -110,7 +110,7 @@ def get_group_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/groups/{id}",
+            f"{GOPHISH_API_URL}/groups/{id}",
             headers=headers,
             verify=False
         )
@@ -141,7 +141,7 @@ def get_groups_summary():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/groups/summary",
+            f"{GOPHISH_API_URL}/groups/summary",
             headers=headers,
             verify=False
         )
@@ -172,7 +172,7 @@ def get_group_summary_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/groups/{id}/summary",
+            f"{GOPHISH_API_URL}/groups/{id}/summary",
             headers=headers,
             verify=False
         )
@@ -227,7 +227,7 @@ def create_group(id, name, modified_date, targets):
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/groups/",
+            f"{GOPHISH_API_URL}/groups/",
             data=data,
             headers=headers,
             verify=False
@@ -278,7 +278,7 @@ def modify_group(id, name, modified_date, targets):
 
     try:
         response = requests.put(
-            f"{GOPHISH_API_URL}/api/groups/{id}",
+            f"{GOPHISH_API_URL}/groups/{id}",
             data=data,
             headers=headers,
             verify=False
@@ -307,7 +307,7 @@ def delete_group(id):
 
     try:
         response = requests.delete(
-            f"{GOPHISH_API_URL}/api/groups/{id}",
+            f"{GOPHISH_API_URL}/groups/{id}",
             headers=headers,
             verify=False
         )
@@ -350,7 +350,7 @@ def import_group(file):
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/import/group",
+            f"{GOPHISH_API_URL}/import/group",
             headers=headers,
             data=data,
             verify=False

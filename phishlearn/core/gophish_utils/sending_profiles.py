@@ -61,7 +61,7 @@ def get_sending_profiles():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/smtp/",
+            f"{GOPHISH_API_URL}/smtp/",
             headers=headers,
             verify=False
         )
@@ -103,7 +103,7 @@ def get_sending_profile_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/smtp/{id}",
+            f"{GOPHISH_API_URL}/smtp/{id}",
             headers=headers,
             verify=False
         )
@@ -173,7 +173,7 @@ def create_sending_profile(id, name, host, interface_type, from_address, modifie
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/smtp",
+            f"{GOPHISH_API_URL}/smtp",
             data=data,
             headers=headers,
             verify=False
@@ -243,7 +243,7 @@ def modify_sending_profile(id, name, host, interface_type, from_address, modifie
 
     try:
         response = requests.put(
-            f"{GOPHISH_API_URL}/api/smtp/{id}",
+            f"{GOPHISH_API_URL}/smtp/{id}",
             data=data,
             headers=headers,
             verify=False
@@ -272,7 +272,7 @@ def delete_sending_profile(id):
 
     try:
         response = requests.delete(
-            f"{GOPHISH_API_URL}/api/smtp/{id}",
+            f"{GOPHISH_API_URL}/smtp/{id}",
             headers=headers,
             verify=False
         )

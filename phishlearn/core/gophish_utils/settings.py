@@ -33,7 +33,7 @@ def reset_api_key():
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/reset",
+            f"{GOPHISH_API_URL}/reset",
             headers=headers,
             verify=False
         )

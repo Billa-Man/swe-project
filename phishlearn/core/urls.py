@@ -22,5 +22,8 @@ urlpatterns = [
     path('courses/', views.courses_list, name='courses_list'),
     path('courses/<int:course_id>/', views.course_view, name='course_view'), 
     path('my-profile/', views.my_profile, name='my_profile'),
-    path('change-password/', views.change_password, name='change_password'),  
+    path('change-password/', views.change_password, name='change_password'),
+
+    # GoPhish
+    path("reset-api-key/", views.reset_api_key_view, name="reset_api_key"),  
 ] 

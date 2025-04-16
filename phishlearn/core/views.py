@@ -31,6 +31,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
+import os
+
 logger = logging.getLogger(__name__)
 
 def home(request):
@@ -671,3 +673,19 @@ def change_password(request):
         return redirect('my_profile')
     
     return redirect('my_profile')
+
+##### GOPHISH #####
+
+from .gophish_utils.settings import reset_api_key
+
+def reset_api_key_view(request):
+    context = {}
+    if request.method == "POST":
+        result = reset_api_key()
+        if result and result.get("success"):
+            messages.success(request, f"API Key Reset! Make sure to update the .env file with this value and restart the application.")
+            context["api_key"] = result.get("data")
+            os.environ['GOPHISH_API_KEY'] = context["api_key"]
+        else:
+            messages.error(request, "Failed to reset API key. Please try again.")
+    return render(request, "gophish/reset_api_key.html", context)

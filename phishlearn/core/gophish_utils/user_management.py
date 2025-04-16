@@ -60,7 +60,7 @@ def get_users():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/users/",
+            f"{GOPHISH_API_URL}/users/",
             headers=headers,
             verify=False
         )
@@ -97,7 +97,7 @@ def get_user_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/users/{id}",
+            f"{GOPHISH_API_URL}/users/{id}",
             headers=headers,
             verify=False
         )
@@ -139,7 +139,7 @@ def create_user(role, password, username):
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/users/",
+            f"{GOPHISH_API_URL}/users/",
             data=data,
             headers=headers,
             verify=False
@@ -183,7 +183,7 @@ def modify_user(role, password, username):
 
     try:
         response = requests.put(
-            f"{GOPHISH_API_URL}/api/users/{id}",
+            f"{GOPHISH_API_URL}/users/{id}",
             data=data,
             headers=headers,
             verify=False
@@ -213,7 +213,7 @@ def delete_user(id):
 
     try:
         response = requests.delete(
-            f"{GOPHISH_API_URL}/api/users/{id}",
+            f"{GOPHISH_API_URL}/users/{id}",
             headers=headers,
             verify=False
         )

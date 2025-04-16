@@ -8,7 +8,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect
 from core.models import LoginAttempt
 from django.contrib import messages
+from django.utils.timezone import now
 import requests
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+
+from loguru import logger
 
 def home(request):
     return render(request, 'core/home.html')
@@ -28,8 +34,10 @@ def connection_check(request):
     try:
         with connections['default'].cursor() as cursor:
             cursor.execute('SELECT 1')
+            logger.info("Database connection successful.")
             status['database'] = True
     except Exception as e:
+        logger.error(f"Database connection error: {str(e)}")
         status['errors'].append(f"Database Error: {str(e)}")
     
     # Test Supabase Client Connection
@@ -40,26 +48,13 @@ def connection_check(request):
         )
         # Try to fetch user (requires authentication)
         user = supabase.auth.get_user()
+        logger.info("Supabase client connection successful.")
         status['supabase_client'] = True
     except Exception as e:
         status['errors'].append(f"Supabase Error: {str(e)}")
+        logger.error(f"Supabase client connection error: {str(e)}")
     
     return JsonResponse(status)
-
-def post_to_supabase(user, ip_address, success):
-    url = f"{settings.SUPABASE_URL}/rest/v1/login_attempts"
-    headers = {
-        "apikey": settings.SUPABASE_KEY,
-        "Content-Type": "application/json"
-    }
-    data = {
-        "user_id": user.id if user else None,
-        "ip_address": ip_address,
-        "success": success
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code != 201:
-        print("Failed to post to Supabase:", response.json())
 
 def login_view(request):
     if request.method == 'POST':
@@ -85,11 +80,8 @@ def login_view(request):
             success=success,
             ip_address=ip_address,
             username=username,
-            browser_info=browser_info
+            browser_info=browser_info,
         )
-
-        # Post to Supabase even if the credentials are wrong
-        post_to_supabase(user, ip_address, success)
 
         # If successful, log the user in and redirect; otherwise, show an error
         if success:
@@ -102,3 +94,36 @@ def login_view(request):
         # Instantiate a blank authentication form
         form = AuthenticationForm()
     return render(request, 'account/login.html', {'form': form})
+
+@login_required
+def my_profile(request):
+    return render(request, 'main/profile.html')
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Verify current password
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect')
+            return redirect('my_profile')
+        
+        # Check if new passwords match
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match')
+            return redirect('my_profile')
+        
+        # Change password
+        request.user.set_password(new_password)
+        request.user.save()
+        
+        # Update session to prevent logout
+        update_session_auth_hash(request, request.user)
+        
+        messages.success(request, 'Password changed successfully')
+        return redirect('my_profile')
+    
+    return redirect('my_profile')

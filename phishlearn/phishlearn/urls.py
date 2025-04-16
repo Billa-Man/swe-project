@@ -25,7 +25,7 @@ urlpatterns = [
     path('accounts/login/', login_view, name='login_view'),
     path('accounts/', include('allauth.urls')),
     path('', include('core.urls')),
-    path('api/', include('main.urls'))
+    path('', include('main.urls'))
 ]
 
 admin.site.site_header = "PhishLearn Admin"  

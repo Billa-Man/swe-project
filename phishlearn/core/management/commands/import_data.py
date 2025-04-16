@@ -4,12 +4,13 @@ from core.models import (
     Course, PhishingTemplate, 
     UserProfile, Quiz, Question, 
     Choice, QuizAttempt, PhishingTest, 
-    EmployeeGroup, TrainingModule, 
-    ModuleCompletion, Notification,
-    QuizAssignment
+    EmployeeGroup, 
+    Notification, QuizAssignment
 )
 import json
 from django.db import transaction
+
+from loguru import logger
 
 class Command(BaseCommand):
     help = 'Import data from JSON file'
@@ -50,13 +51,12 @@ class Command(BaseCommand):
                 self.import_model(QuizAssignment, data.get('quiz_assignments', []))
                 self.import_model(PhishingTest, data.get('phishing_tests', []))
                 self.import_model(EmployeeGroup, data.get('employee_groups', []))
-                self.import_model(TrainingModule, data.get('training_modules', []))
-                self.import_model(ModuleCompletion, data.get('module_completions', []))
                 self.import_model(Notification, data.get('notifications', []))
 
             self.stdout.write(self.style.SUCCESS('Successfully imported data'))
             
         except Exception as e:
+            logger.error(f'Error importing data: {str(e)}')
             self.stdout.write(self.style.ERROR(f'Error importing data: {str(e)}'))
 
     def import_model(self, model, data_list):

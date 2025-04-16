@@ -39,7 +39,7 @@ class Quiz(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    due_date = models.DateTimeField(null=True, blank=True)  # Add this line
+    due_date = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.course.title} - {self.title}"
@@ -108,25 +108,6 @@ class LoginAttempt(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.success} - {self.timestamp}"
-
-class TrainingModule(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    
-    def __str__(self):
-        return self.title
-
-class ModuleCompletion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    module = models.ForeignKey(TrainingModule, on_delete=models.CASCADE)
-    score = models.IntegerField()
-    completed_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-completed_at']
-    
-    def __str__(self):
-        return f"{self.user.username} - {self.module.title}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

@@ -145,3 +145,4 @@ To get the API keys for GoPhish,
 - Go to [http://127.0.0.1:3333/](http://127.0.0.1:3333/) and login with those credentials.
 - Reset the password
 - Go to user settings and find your API Key
+- Use this API Key to replace the key in the .env file

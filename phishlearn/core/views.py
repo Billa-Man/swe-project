@@ -98,8 +98,6 @@ def dashboard(request):
         
         quizzes = Quiz.objects.all()
         employees = User.objects.filter(userprofile__user_type='employee')
-
-        campaigns = get_campaigns()  # Fetch all campaigns
         
         context = {
             'employee_groups': employee_groups,
@@ -107,7 +105,6 @@ def dashboard(request):
             'sent_tests': sent_tests,
             'quizzes': quizzes,
             'employees': employees,
-            'campaigns': campaigns,
         }
         
         return render(request, 'core/it_owner_dashboard.html', context)
@@ -637,17 +634,3 @@ def course_view(request, course_id):
         'score': score,
     }
     return render(request, 'core/course_view.html', context)
-
-@login_required
-def create_campaign_view(request):
-    if request.method == 'POST':
-        name = request.POST['campaign_name']
-        sender_email = request.POST['sender_email']
-        target_group = request.POST['target_group']
-        email_template_id = request.POST['email_template']
-        url = request.POST['url']
-
-        campaign_response = create_campaign(name, sender_email, target_group, email_template_id, url)
-        return render(request, 'campaign_created.html', {'campaign': campaign_response})
-    return render(request, 'create_campaign.html')
-

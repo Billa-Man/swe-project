@@ -13,7 +13,6 @@ from .models import (
     PhishingTemplate,
     PhishingTest,
     EmployeeGroup,
-    ModuleCompletion,
     Notification, 
     QuizAssignment
 )
@@ -44,12 +43,10 @@ def dashboard(request):
         courses = Course.objects.all()
         quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')
         phishing_tests = PhishingTest.objects.filter(sent_to=request.user)
-        completed_modules = ModuleCompletion.objects.filter(user=request.user)
         notifications = Notification.objects.filter(user=request.user, is_read=False)
         notification_count = notifications.count()
         
         # Get assigned quizzes that haven't been attempted yet
-        attempted_quiz_ids = quiz_attempts.values_list('quiz_id', flat=True)
         assigned_quizzes = QuizAssignment.objects.filter(
             user=request.user,
             status='pending'
@@ -84,7 +81,6 @@ def dashboard(request):
             'courses': courses,
             'quiz_attempts': quiz_attempts,
             'phishing_tests': phishing_tests,
-            'completed_modules': completed_modules,
             'notifications': notifications,
             'notification_count': notification_count,
             'quiz_assignments': assigned_quizzes,
@@ -100,7 +96,6 @@ def dashboard(request):
         phishing_templates = PhishingTemplate.objects.all()
         sent_tests = PhishingTest.objects.filter(sent_by=request.user)
         
-        # Add these lines to get all quizzes and employees
         quizzes = Quiz.objects.all()
         employees = User.objects.filter(userprofile__user_type='employee')
         
@@ -108,8 +103,8 @@ def dashboard(request):
             'employee_groups': employee_groups,
             'phishing_templates': phishing_templates,
             'sent_tests': sent_tests,
-            'quizzes': quizzes,          # Add this
-            'employees': employees,      # Add this
+            'quizzes': quizzes,
+            'employees': employees,
         }
         
         return render(request, 'core/it_owner_dashboard.html', context)
@@ -184,39 +179,6 @@ def take_quiz(request, quiz_id):
     return render(request, 'core/take_quiz.html', context)
 
 @login_required
-def send_phishing_test(request):
-    if not request.user.userprofile.user_type == 'it_owner':
-        messages.error(request, 'Unauthorized access')
-        return redirect('dashboard')
-
-    if request.method == 'POST':
-        template_id = request.POST.get('template')
-        employee_ids = request.POST.getlist('employees')
-
-        template = get_object_or_404(PhishingTemplate, id=template_id)
-
-        for employee_id in employee_ids:
-            employee = get_object_or_404(User, id=employee_id)
-            PhishingTest.objects.create(
-                template=template,
-                sent_by=request.user,
-                sent_to=employee,
-                sent_at=timezone.now()
-            )
-
-        messages.success(request, 'Phishing test emails sent successfully')
-        return redirect('dashboard')
-
-    templates = PhishingTemplate.objects.all()
-    employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
-
-    context = {
-        'templates': templates,
-        'employee_groups': employee_groups,
-    }
-    return render(request, 'core/send_phishing_test.html', context)
-
-@login_required
 def manage_employees(request):
     if not request.user.userprofile.user_type == 'it_owner':
         messages.error(request, 'Unauthorized access')
@@ -281,7 +243,6 @@ def list_employees(request):
     })
 
     
-
 @login_required
 def create_employee(request):
     if request.method == 'POST':
@@ -291,17 +252,29 @@ def create_employee(request):
             user.username = user.email
             user.set_password(form.cleaned_data['password'])
             user.save()
-            # UserProfile.objects.create(user=user, user_type='employee')
 
             groups = form.cleaned_data['groups']
             for group in groups:
                 group.employees.add(user)
 
             messages.success(request, 'Employee created successfully.')
-            return redirect('list_employees')
+            return redirect('manage_employees')
     else:
         form = EmployeeCreateForm()
     return render(request, 'core/create_employee.html', {'form': form})
+
+
+@login_required
+def delete_emplpoyee(request, employee_id):
+    if not request.user.userprofile.user_type == 'it_owner':
+        messages.error(request, 'Unauthorized access')
+        return redirect('manage_employees') 
+    
+    user = get_object_or_404(User, id = employee_id, userprofile__user_type='employee', is_staff=False)
+    user.delete()
+    messages.success(request, "Employee deleted successfully.")
+    return redirect('manage_employees')
+    
 
 @login_required
 def create_group(request):
@@ -327,16 +300,32 @@ def create_group(request):
         form = GroupCreateForm()
     return render(request, 'core/create_group.html', {'form': form})
 
+
+@login_required
+def delete_group(request, group_id):
+    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
+
+    if request.method == 'POST':
+        group.delete()
+        messages.success(request, 'Group deleted successfully.')
+        return redirect('group_list')
+
+    messages.error(request, 'Invalid request method.')
+    return redirect('group_detail', group_id=group.id)
+
+
 @login_required
 def group_list(request):
     groups = EmployeeGroup.objects.filter(it_owner=request.user)
     return render(request, 'core/group_list.html', {'groups': groups})
+
 
 @login_required
 def group_detail(request, group_id):
     group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
     employees = group.employees.all()
     return render(request, 'core/group_detail.html', {'group': group, 'employees': employees})
+
 
 @login_required
 def add_member_to_group(request, group_id):
@@ -352,6 +341,21 @@ def add_member_to_group(request, group_id):
         except User.DoesNotExist:
             messages.error(request, f"No user found with email {email}.")
         return redirect('group_detail', group_id=group.id)
+    
+
+@login_required
+def remove_employee_from_group(request, group_id, employee_id):
+    group = get_object_or_404(EmployeeGroup, id=group_id, it_owner=request.user)
+    user = get_object_or_404(User, id=employee_id, is_staff=False)
+
+    if user in group.employees.all():
+        group.employees.remove(user)
+        messages.success(request, f"{user.email} has been removed from the group.")
+    else:
+        messages.warning(request, f"{user.email} is not in this group.")
+
+    return redirect('group_detail', group_id=group.id)
+
 
 @login_required
 def manage_courses(request):
@@ -378,6 +382,7 @@ def manage_courses(request):
     context = {'courses': courses}
     return render(request, 'core/manage_courses.html', context)
 
+
 @login_required
 def manage_templates(request):
     if not request.user.userprofile.user_type == 'site_admin':
@@ -403,6 +408,7 @@ def manage_templates(request):
     context = {'templates': templates}
     return render(request, 'core/manage_templates.html', context)
 
+
 @login_required
 def login_dashboard(request):
     # Check if user is IT owner or site admin
@@ -421,6 +427,7 @@ def login_dashboard(request):
 
     return render(request, 'core/login_dashboard.html', {'login_attempts': login_attempts})
 
+
 @login_required
 def assign_quiz_to_users(request):
     if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
@@ -432,12 +439,12 @@ def assign_quiz_to_users(request):
         user_ids = request.POST.getlist('user_ids')
         due_date_str = request.POST.get('due_date')
         
-        # Parse due date or use default (14 days)
+        # Parse due date or use default (7 days)
         if due_date_str:
             due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
             due_date = timezone.make_aware(due_date) 
         else:
-            due_date = timezone.now() + timezone.timedelta(days=14)
+            due_date = timezone.now() + timezone.timedelta(days=7)
             
         quiz = get_object_or_404(Quiz, id=quiz_id)
         
@@ -462,15 +469,17 @@ def assign_quiz_to_users(request):
         
     return redirect('dashboard')
 
+
 @login_required
 def mark_all_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect('dashboard')
 
+
 @login_required
 def courses_list(request):
     """View to display all available courses with completion status"""
-    courses = Course.objects.all()
+    courses = Course.objects.filter(is_published=True)
     
     # Get all quiz attempts for this user
     quiz_attempts = QuizAttempt.objects.filter(user=request.user).order_by('-completed_at')

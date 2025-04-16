@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Send Phishing Test{% endblock %}
+{% block title %}Send Phishing Test with GoPhish{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -15,49 +15,54 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="h5 mb-0">Send Phishing Test</h2>
+                    <h2 class="h5 mb-0">Send Phishing Test with GoPhish</h2>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
+                        
+                        <!-- Campaign Name -->
                         <div class="mb-3">
-                            <label for="template" class="form-label">Select Template</label>
-                            <select class="form-select" id="template" name="template" required>
+                            <label for="campaign_name" class="form-label">Campaign Name</label>
+                            <input type="text" class="form-control" id="campaign_name" name="campaign_name" required>
+                        </div>
+                        
+                        <!-- Sender Email -->
+                        <div class="mb-3">
+                            <label for="sender_email" class="form-label">Sender Email</label>
+                            <input type="email" class="form-control" id="sender_email" name="sender_email" required>
+                        </div>
+                        
+                        <!-- Email Template -->
+                        <div class="mb-3">
+                            <label for="template" class="form-label">Select Email Template</label>
+                            <select class="form-select" id="template" name="email_template_id" required>
                                 <option value="">Choose a template...</option>
                                 {% for template in templates %}
                                     <option value="{{ template.id }}">{{ template.title }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-
+                        
+                        <!-- Landing Page URL -->
                         <div class="mb-3">
-                            <label class="form-label">Select Employees</label>
-                            {% for group in employee_groups %}
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <div class="form-check">
-                                            <input class="form-check-input group-check" type="checkbox" id="group{{ group.id }}" data-group="{{ group.id }}">
-                                            <label class="form-check-label" for="group{{ group.id }}">
-                                                {{ group.name }} ({{ group.employees.count }} employees)
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        {% for employee in group.employees.all %}
-                                            <div class="form-check">
-                                                <input class="form-check-input employee-check" type="checkbox" name="employees" value="{{ employee.id }}" id="employee{{ employee.id }}" data-group="{{ group.id }}">
-                                                <label class="form-check-label" for="employee{{ employee.id }}">
-                                                    {{ employee.email }}
-                                                </label>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endfor %}
+                            <label for="landing_url" class="form-label">Landing Page URL</label>
+                            <input type="url" class="form-control" id="landing_url" name="url" required>
+                        </div>
+
+                        <!-- Target Groups -->
+                        <div class="mb-3">
+                            <label class="form-label">Select Target Groups</label>
+                            <select class="form-select" id="target_group" name="target_group" required>
+                                <option value="">Choose a target group...</option>
+                                {% for group in employee_groups %}
+                                    <option value="{{ group.id }}">{{ group.name }} ({{ group.employees.count }} employees)</option>
+                                {% endfor %}
+                            </select>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Send Test</button>
+                            <button type="submit" class="btn btn-primary">Launch Campaign</button>
                             <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
@@ -76,6 +81,18 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- GoPhish Campaign Status -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Recent Campaigns</h2>
+                </div>
+                <div class="card-body">
+                    <div id="campaignStatus">
+                        <p class="text-muted mb-0">Campaign status will appear here.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -83,35 +100,67 @@
 
 {% block extra_js %}
 <script>
-    // Handle group checkboxes
-    document.querySelectorAll('.group-check').forEach(groupCheck => {
-        groupCheck.addEventListener('change', function() {
-            const groupId = this.dataset.group;
-            const employeeChecks = document.querySelectorAll(`.employee-check[data-group="${groupId}"]`);
-            employeeChecks.forEach(check => check.checked = this.checked);
-        });
-    });
-
     // Handle template preview
     document.getElementById('template').addEventListener('change', function() {
         const templateId = this.value;
         const preview = document.getElementById('templatePreview');
         
         if (templateId) {
-            const template = Array.from(this.options).find(option => option.value === templateId);
-            if (template) {
-                preview.innerHTML = `
-                    <h3 class="h6">${template.text}</h3>
-                    <hr>
-                    <div class="template-content">
-                        <!-- Template content would be loaded here -->
-                        <p><em>Template content preview will be displayed here.</em></p>
-                    </div>
-                `;
-            }
+            // Fetch template preview from GoPhish API
+            fetch(`/api/gophish/template-preview/${templateId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    preview.innerHTML = `
+                        <h3 class="h6">${data.name}</h3>
+                        <hr>
+                        <div class="template-content">
+                            ${data.html}
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    preview.innerHTML = '<p class="text-danger">Error loading template preview.</p>';
+                    console.error('Error:', error);
+                });
         } else {
             preview.innerHTML = '<p class="text-muted mb-0">Select a template to preview its content.</p>';
         }
     });
+    
+    // Load recent campaigns
+    function loadRecentCampaigns() {
+        const campaignStatus = document.getElementById('campaignStatus');
+        
+        fetch('/api/gophish/campaigns/')
+            .then(response => response.json())
+            .then(campaigns => {
+                if (campaigns.length === 0) {
+                    campaignStatus.innerHTML = '<p class="text-muted">No recent campaigns.</p>';
+                    return;
+                }
+                
+                let html = '<ul class="list-group">';
+                campaigns.slice(0, 5).forEach(campaign => {
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${campaign.name}
+                            <span class="badge bg-${campaign.status === 'In Progress' ? 'primary' : campaign.status === 'Completed' ? 'success' : 'secondary'} rounded-pill">
+                                ${campaign.status}
+                            </span>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                
+                campaignStatus.innerHTML = html;
+            })
+            .catch(error => {
+                campaignStatus.innerHTML = '<p class="text-danger">Error loading campaigns.</p>';
+                console.error('Error:', error);
+            });
+    }
+    
+    // Load campaigns when the page loads
+    document.addEventListener('DOMContentLoaded', loadRecentCampaigns);
 </script>
-{% endblock %} 
+{% endblock %}

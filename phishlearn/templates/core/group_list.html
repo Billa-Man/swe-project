@@ -4,9 +4,19 @@
   <h2>Your Groups</h2>
   <ul class="list-group">
     {% for group in groups %}
-      <li class="list-group-item d-flex justify-content-between">
-        {{ group.name }} ({{ group.employees.count }} members)
-        <a href="{% url 'group_detail' group.id %}" class="btn btn-sm btn-outline-primary">View</a>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ group.name }}</strong>
+          <span class="text-muted">({{ group.employees.count }} members)</span>
+        </div>
+        <div class="btn-group" role="group">
+          <a href="{% url 'group_detail' group.id %}" class="btn btn-sm btn-outline-primary">View</a>
+
+          <form method="post" action="{% url 'delete_group' group.id %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this group?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </div>
       </li>
     {% empty %}
       <li class="list-group-item">No groups created yet.</li>

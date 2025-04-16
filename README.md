@@ -53,35 +53,37 @@ phishlearn/
 
 ## Installation Steps
 
-First, clone the repository
+### 1. Clone the repository
+Begin by cloning the project repository and navigating into the project directory:
 ```
 git clone https://github.com/Billa-Man/swe-project.git
 cd swe-project/
 ```
 
-### 1. Virtual Environment Setup
+### 2. Set Up a Virtual Environment
+Create and activate a virtual environment for the project:
 ```
 # Create virtual environment
-python3.12 -m venv swe_project
+python3.12 -m venv swe_project_env
 
 # Activate virtual environment
-# For Unix/macOS
-source swe_project/bin/activate
+# For Unix/macOS:
+source swe_project_env/bin/activate
 
-# For Windows
-# swe_project\Scripts\activate
+# For Windows:
+swe_project_env\Scripts\activate
 ```
 
-### 2. Go into the directory and install requirements
+### 3. Install Project Dependencies
+Navigate to the `phishlearn` directory and install the required dependencies:
 ```
 cd phishlearn
-pip install -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 ```
 
-### 3. Environment Configuration
-Create a `.env` file in the project root:
+### 4. Configure Environment Variables
+Create a `.env` file in the root directory of the project to store configuration settings:
 ```
-# Create .env file
 nano .env
 ```
 
@@ -93,18 +95,44 @@ nano .env
 - Make sure .env is included in your .gitignore file
 
 ### 5. Run the Django application
+Start the development server using Django:
 ```
 python manage.py runserver
 ```
 
-### 6. Visit the link to view project 
+Access the application at:
+
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
 
-**username: faculty** 
+Admin Credentials:
 
-**password: faculty** 
+- Username: `faculty`
+- Password: `faculty` 
 
-### (Optional) Check Connection
+### 6. Docker Setup (Optional)
+If you prefer using Docker, ensure that Docker is installed on your system, then proceed with the following steps:
+
+```
+# Navigate to the phishlearn directory
+docker build -t django-docker .
+docker compose up --build
+```
+
+Access the application at:
+
+[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+[http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
+
+Admin Credentials:
+
+- Username: `faculty`
+- Password: `faculty`
+
+### (Optional) Verify API Connection
+
+To ensure proper connectivity, visit:
+
 [http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)

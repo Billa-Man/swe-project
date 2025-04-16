@@ -29,6 +29,15 @@ services:
       SUPABASE_KEY: ${SUPABASE_KEY}
     env_file:
       - .env
+
+  gophish:
+    image: gophish/gophish
+    container_name: gophish-docker
+    ports:
+      - "3333:3333"
+      - "8080:80"
+    restart:
+      unless-stopped
       
 volumes:
    postgres_data:

@@ -1,0 +1,11 @@
+/swe_project
+*__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+
+# macOS
+.DS_Store
+
+# vscode
+/.vscode

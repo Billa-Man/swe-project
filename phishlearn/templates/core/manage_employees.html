@@ -13,4 +13,26 @@
     </form>
   </div>
 
+<div class="container mt-4">
+  <h2>Create New Phishing Campaign</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">Create Campaign</button>
+    </form>
+</div>
+
+<div class="container mt-4">
+  <div class="card p-4 shadow-sm">
+      <h2 class="text-success">✅ Campaign Created Successfully</h2>
+      <ul class="list-unstyled mt-3">
+          <li><strong>Name:</strong> {{ campaign.name }}</li>
+          <li><strong>Launch Date:</strong> {{ campaign.launch_date }}</li>
+          <li><strong>Status:</strong> {{ campaign.status }}</li>
+          <li><strong>URL:</strong> <a href="{{ campaign.url }}" target="_blank">{{ campaign.url }}</a></li>
+          <li><strong>ID:</strong> {{ campaign.id }}</li>
+      </ul>
+  </div>
+</div>
+
 {% endblock %}

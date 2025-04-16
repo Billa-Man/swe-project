@@ -27,6 +27,8 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 import logging
 
+from .gophish_api import create_campaign, get_campaigns, get_campaign_status
+
 logger = logging.getLogger(__name__)
 
 def home(request):
@@ -98,6 +100,8 @@ def dashboard(request):
         
         quizzes = Quiz.objects.all()
         employees = User.objects.filter(userprofile__user_type='employee')
+
+        campaigns = get_campaigns()  # Fetch all campaigns
         
         context = {
             'employee_groups': employee_groups,
@@ -105,6 +109,7 @@ def dashboard(request):
             'sent_tests': sent_tests,
             'quizzes': quizzes,
             'employees': employees,
+            'campaigns': campaigns,
         }
         
         return render(request, 'core/it_owner_dashboard.html', context)
@@ -177,6 +182,39 @@ def take_quiz(request, quiz_id):
         'questions': questions,
     }
     return render(request, 'core/take_quiz.html', context)
+
+# @login_required
+# def send_phishing_test(request):
+#     if not request.user.userprofile.user_type == 'it_owner':
+#         messages.error(request, 'Unauthorized access')
+#         return redirect('dashboard')
+
+#     if request.method == 'POST':
+#         template_id = request.POST.get('template')
+#         employee_ids = request.POST.getlist('employees')
+
+#         template = get_object_or_404(PhishingTemplate, id=template_id)
+
+#         for employee_id in employee_ids:
+#             employee = get_object_or_404(User, id=employee_id)
+#             PhishingTest.objects.create(
+#                 template=template,
+#                 sent_by=request.user,
+#                 sent_to=employee,
+#                 sent_at=timezone.now()
+#             )
+
+#         messages.success(request, 'Phishing test emails sent successfully')
+#         return redirect('dashboard')
+
+#     templates = PhishingTemplate.objects.all()
+#     employee_groups = EmployeeGroup.objects.filter(it_owner=request.user)
+
+#     context = {
+#         'templates': templates,
+#         'employee_groups': employee_groups,
+#     }
+#     return render(request, 'core/send_phishing_test.html', context)
 
 @login_required
 def manage_employees(request):
@@ -634,3 +672,69 @@ def course_view(request, course_id):
         'score': score,
     }
     return render(request, 'core/course_view.html', context)
+
+@login_required
+def create_campaign_view(request):
+    if request.method == 'POST':
+        name = request.POST['campaign_name']
+        sender_email = request.POST['sender_email']
+        target_group = request.POST['target_group']
+        email_template_id = request.POST['email_template']
+        url = request.POST['url']
+
+        campaign_response = create_campaign(name, sender_email, target_group, email_template_id, url)
+        return render(request, 'campaign_created.html', {'campaign': campaign_response})
+    return render(request, 'create_campaign.html')
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .gophish_api import create_campaign, get_campaigns, get_email_templates, get_employee_groups
+
+def send_phishing_test(request):
+    # Get templates and groups for the form
+    templates = get_email_templates()  # Implement this to fetch from GoPhish
+    employee_groups = get_employee_groups()  # Implement this to fetch from GoPhish
+    
+    if request.method == 'POST':
+        # Extract form data
+        campaign_name = request.POST.get('campaign_name')
+        sender_email = request.POST.get('sender_email')
+        target_group = request.POST.get('target_group')
+        email_template_id = request.POST.get('email_template_id')
+        url = request.POST.get('url')
+        
+        # Create campaign in GoPhish
+        response = create_campaign(
+            name=campaign_name,
+            sender_email=sender_email,
+            target_group=target_group,
+            email_template_id=email_template_id,
+            url=url
+        )
+        
+        if 'id' in response:
+            messages.success(request, f"Campaign '{campaign_name}' created successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, f"Error creating campaign: {response.get('message', 'Unknown error')}")
+    
+    return render(request, 'core/send_phishing_test.html', {
+        'templates': templates,
+        'employee_groups': employee_groups,
+    })
+
+from django.http import JsonResponse
+from .gophish_api import get_campaigns, get_campaign_status
+
+def gophish_campaigns_api(request):
+    campaigns = get_campaigns()
+    return JsonResponse(campaigns, safe=False)
+
+def gophish_template_preview_api(request, template_id):
+    # This would need implementation based on how GoPhish provides template previews
+    # You might need to fetch the template details from GoPhish
+    # For now, returning a placeholder
+    return JsonResponse({
+        'name': 'Template Name',
+        'html': '<p>Template HTML content would go here.</p>'
+    })

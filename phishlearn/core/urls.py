@@ -6,6 +6,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('quiz/<int:quiz_id>/', views.take_quiz, name='take_quiz'),
+    # path('send-phishing-test/', views.send_phishing_test, name='send_phishing_test'),
     path('manage-employees/', views.list_employees, name='manage_employees'),
     path('manage-courses/', views.manage_courses, name='manage_courses'),
     path('manage-templates/', views.manage_templates, name='manage_templates'),
@@ -20,5 +21,8 @@ urlpatterns = [
     path('groups/<int:group_id>/remove/<int:employee_id>/', views.remove_employee_from_group, name='remove_employee_from_group'),
     path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
     path('courses/', views.courses_list, name='courses_list'),
-    path('courses/<int:course_id>/', views.course_view, name='course_view'),   
+    path('courses/<int:course_id>/', views.course_view, name='course_view'),
+    path('send-phishing-test/', views.send_phishing_test, name='send_phishing_test'),
+    path('api/gophish/campaigns/', views.gophish_campaigns_api, name='gophish_campaigns_api'),
+    path('api/gophish/template-preview/<int:template_id>/', views.gophish_template_preview_api, name='gophish_template_preview_api'),    
 ] 

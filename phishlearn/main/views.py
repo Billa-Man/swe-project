@@ -10,9 +10,7 @@ from core.models import LoginAttempt
 from django.contrib import messages
 from django.utils.timezone import now
 import requests
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
+
 
 from loguru import logger
 
@@ -94,36 +92,3 @@ def login_view(request):
         # Instantiate a blank authentication form
         form = AuthenticationForm()
     return render(request, 'account/login.html', {'form': form})
-
-@login_required
-def my_profile(request):
-    return render(request, 'main/profile.html')
-
-@login_required
-def change_password(request):
-    if request.method == 'POST':
-        current_password = request.POST.get('current_password')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        
-        # Verify current password
-        if not request.user.check_password(current_password):
-            messages.error(request, 'Current password is incorrect')
-            return redirect('my_profile')
-        
-        # Check if new passwords match
-        if new_password != confirm_password:
-            messages.error(request, 'New passwords do not match')
-            return redirect('my_profile')
-        
-        # Change password
-        request.user.set_password(new_password)
-        request.user.save()
-        
-        # Update session to prevent logout
-        update_session_auth_hash(request, request.user)
-        
-        messages.success(request, 'Password changed successfully')
-        return redirect('my_profile')
-    
-    return redirect('my_profile')

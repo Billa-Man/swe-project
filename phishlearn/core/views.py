@@ -634,3 +634,47 @@ def course_view(request, course_id):
         'score': score,
     }
     return render(request, 'core/course_view.html', context)
+
+# views.py (updated)
+from django.views.generic import View
+from django.http import JsonResponse
+from .gophish_utils.sending_profiles import create_sending_profile, get_sending_profiles
+from datetime import datetime
+import random
+
+class SendingProfilesView(View):
+    template_name = 'it_owner/sending_profiles.html'
+    
+    def get(self, request):
+        profiles = get_sending_profiles() or []
+        return render(request, self.template_name, {
+            'profiles': profiles,
+            'form_fields': [
+                {'name': 'name', 'label': 'Profile Name', 'type': 'text'},
+                {'name': 'host', 'label': 'SMTP Host', 'type': 'text'},
+                {'name': 'interface_type', 'label': 'Protocol', 'type': 'select', 'options': ['SMTP', 'AWS']},
+                {'name': 'from_address', 'label': 'From Email', 'type': 'email'},
+                {'name': 'username', 'label': 'Username', 'type': 'text'},
+                {'name': 'password', 'label': 'Password', 'type': 'password'},
+            ]
+        })
+
+    def post(self, request):
+        data = {
+            'id': random.randint(1, 1000000),
+            'name': request.POST.get('name'),
+            'host': request.POST.get('host'),
+            'interface_type': request.POST.get('interface_type'),
+            'from_address': request.POST.get('from_address'),
+            'username': request.POST.get('username'),
+            'password': request.POST.get('password'),
+            'ignore_cert_errors': request.POST.get('ignore_cert_errors', False),
+            'modified_date': datetime.now().isoformat(),
+            'profile_headers': []
+        }
+        
+        result = create_sending_profile(**data)
+        if result:
+            messages.success(request, 'Profile created successfully!')
+            return JsonResponse({'status': 'success', 'profile': result})
+        return JsonResponse({'status': 'error'}, status=400)

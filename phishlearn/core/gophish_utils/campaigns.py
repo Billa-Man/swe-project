@@ -185,7 +185,7 @@ def get_campaigns():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/campaigns/",
+            f"{GOPHISH_API_URL}/campaigns/",
             headers=headers,
             verify=False
         )
@@ -310,7 +310,7 @@ def get_campaign_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/campaigns/{id}",
+            f"{GOPHISH_API_URL}/campaigns/{id}",
             headers=headers,
             verify=False
         )
@@ -437,7 +437,7 @@ def create_campaign(id, name, created_date, launch_date, send_by_date,
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/campaigns/",
+            f"{GOPHISH_API_URL}/campaigns/",
             data=data,
             headers=headers,
             verify=False
@@ -534,7 +534,7 @@ def get_campaign_results(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/campaigns/{id}/results",
+            f"{GOPHISH_API_URL}/campaigns/{id}/results",
             headers=headers,
             verify=False
         )
@@ -586,7 +586,7 @@ def get_campaign_summary(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/campaigns/{id}/summary",
+            f"{GOPHISH_API_URL}/campaigns/{id}/summary",
             headers=headers,
             verify=False
         )
@@ -614,7 +614,7 @@ def delete_campaign(id):
 
     try:
         response = requests.delete(
-            f"{GOPHISH_API_URL}/api/campaigns/{id}",
+            f"{GOPHISH_API_URL}/campaigns/{id}",
             headers=headers,
             verify=False
         )
@@ -643,7 +643,7 @@ def complete_campaign(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/campaigns/{id}/complete",
+            f"{GOPHISH_API_URL}/campaigns/{id}/complete",
             headers=headers,
             verify=False
         )

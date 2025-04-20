@@ -131,7 +131,7 @@ Admin Credentials:
 - Username: `faculty`
 - Password: `faculty`
 
-### (Optional) Verify API Connection
+### (Optional) verify API Connection
 
 To ensure proper connectivity, visit:
 
@@ -146,3 +146,4 @@ To get the API keys for GoPhish,
 - Reset the password
 - Go to user settings and find your API Key
 - Use this API Key to replace the key in the .env file
+

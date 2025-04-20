@@ -11,8 +11,6 @@ from .models import (
     PhishingTemplate,
     PhishingTest,
     EmployeeGroup,
-    TrainingModule,
-    ModuleCompletion,
     Notification
 )
 
@@ -45,7 +43,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_by', 'created_at', 'updated_at')
+    list_display = ('title', 'created_by', 'created_at','updated_at')
     list_filter = ('created_at', 'updated_at')
     search_fields = ('title', 'description')
 
@@ -90,18 +88,6 @@ class EmployeeGroupAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('name', 'it_owner__email')
     filter_horizontal = ('employees',)
-
-@admin.register(TrainingModule)
-class TrainingModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
-    list_filter = ('title',)
-    search_fields = ('title', 'description')
-
-@admin.register(ModuleCompletion)
-class ModuleCompletionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'module', 'score', 'completed_at')
-    list_filter = ('completed_at', 'score')
-    search_fields = ('user__email',)
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

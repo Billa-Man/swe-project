@@ -201,6 +201,29 @@ jobs:
     #       cp /path/to/production/.env .env
     #       docker-compose down
     #       docker-compose up -d --build
+
+    name: PhishLearn CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to EC2 and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd swe-project/phishlearn
+            git pull origin main
+            docker-compose down
+            docker-compose up -d --build
     
     - name: Placeholder for deployment
       run: echo "Select and configure one of the deployment options based on your hosting preferences"

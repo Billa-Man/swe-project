@@ -146,6 +146,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd swe-project/phishlearn
+            git config --global url."git@github.com:".insteadOf "https://github.com/"
             git pull origin main
             echo "${{ secrets.PROD_ENV_FILE }}" > .env
             docker-compose down

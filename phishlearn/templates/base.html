@@ -11,7 +11,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  {% block extra_css %}{% endblock extra_css %}
+  {% block extra_css %}{% endblock %}
 
   <style>
     :root {
@@ -398,46 +398,46 @@
             <ul class="nav flex-column">
               {% if user.is_authenticated %}
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'dashboard' %}">
+                  <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'courses_list' %}">
+                  <a class="nav-link {% if 'courses' in request.path %}active{% endif %}" href="{% url 'courses_list' %}">
                     <i class="fas fa-graduation-cap"></i> Training Courses
                   </a>
                 </li>
                 {% if user.userprofile.user_type == 'it_owner' or user.userprofile.user_type == 'site_admin' %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login_dashboard' %}">
+                    <a class="nav-link {% if 'login_dashboard' in request.path %}active{% endif %}" href="{% url 'login_dashboard' %}">
                       <i class="fas fa-sign-in-alt"></i> Login Dashboard
                     </a>
                   </li>
                 {% endif %}
                 {% if user.userprofile.user_type == 'it_owner' %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'manage_employees' %}">
+                    <a class="nav-link {% if 'manage_employees' in request.path %}active{% endif %}" href="{% url 'manage_employees' %}">
                       <i class="fas fa-users"></i> Manage Employees
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'group_list' %}">
+                    <a class="nav-link {% if 'group_list' in request.path %}active{% endif %}" href="{% url 'group_list' %}">
                       <i class="fas fa-layer-group"></i> Manage Groups
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'sending_profiles' %}">
+                    <a class="nav-link {% if 'sending_profiles' in request.path %}active{% endif %}" href="{% url 'sending_profiles' %}">
                       <i class="fas fa-paper-plane"></i> Sending Profiles
                     </a>
                   </li>
                 {% elif user.userprofile.user_type == 'site_admin' %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'manage_courses' %}">
+                    <a class="nav-link {% if 'manage_courses' in request.path %}active{% endif %}" href="{% url 'manage_courses' %}">
                       <i class="fas fa-book"></i> Manage Courses
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'manage_templates' %}">
+                    <a class="nav-link {% if 'manage_templates' in request.path %}active{% endif %}" href="{% url 'manage_templates' %}">
                       <i class="fas fa-file-alt"></i> Manage Templates
                     </a>
                   </li>
@@ -449,12 +449,12 @@
                 </li>
               {% else %}
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'account_login' %}">
+                  <a class="nav-link {% if 'login' in request.path %}active{% endif %}" href="{% url 'account_login' %}">
                     <i class="fas fa-sign-in-alt"></i> Login
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'account_signup' %}">
+                  <a class="nav-link {% if 'signup' in request.path %}active{% endif %}" href="{% url 'account_signup' %}">
                     <i class="fas fa-user-plus"></i> Register
                   </a>
                 </li>
@@ -463,34 +463,41 @@
           </div>
         </nav>
       </div>
+            <!-- Main Content -->
+            <main class="col-md-9 col-lg-10 px-md-4 content">
+                <!-- Flash Messages -->
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                      <div class="d-flex align-items-center">
+                        <i class="fas 
+                          {% if message.tags == 'success' %}fa-check-circle
+                          {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                          {% elif message.tags == 'error' %}fa-times-circle
+                          {% else %}fa-info-circle{% endif %} 
+                          me-2"></i>
+                        <div>{{ message }}</div>
+                      </div>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+        
+                <!-- Sample content for testing -->
+                <div class="page-header">
+                  <h1 class="page-title">Welcome to PhishLearn</h1>
+                  <p class="page-description">Your security awareness training platform</p>
+                </div>
+        
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+              </main>
+            </div>
+          </div>
       
       <!-- Mobile sidebar backdrop -->
       <div class="sidebar-backdrop"></div>
 
-      <!-- Main Content -->
-       
-        <!-- Page Content -->
-         
-    {% block content %}{% endblock %}
-      <main class="col-md-9 col-lg-10 px-md-4 content">
-        <!-- Flash Messages -->
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-              <div class="d-flex align-items-center">
-                <i class="fas 
-                  {% if message.tags == 'success' %}fa-check-circle
-                  {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                  {% elif message.tags == 'error' %}fa-times-circle
-                  {% else %}fa-info-circle{% endif %} 
-                  me-2"></i>
-                <div>{{ message }}</div>
-              </div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          {% endfor %}
-        {% endif %}
-      </main>
     </div>
   </div>
 
@@ -513,34 +520,33 @@
 
   <!-- Updated Sidebar Toggle Script -->
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Notification dropdown handling
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-        
-        if(notificationBell && notificationDropdown) {
-            notificationBell.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                notificationDropdown.classList.toggle('show');
-            });
-            
-            // Prevent clicks inside dropdown from closing it
-            notificationDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            // Close dropdown when clicking elsewhere on the page
-            document.addEventListener('click', function(e) {
-                if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
-                    if (notificationDropdown.classList.contains('show')) {
-                        notificationDropdown.classList.remove('show');
-                    }
-                }
-            });
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebarMenu = document.getElementById('sidebarMenu');
+      const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+      
+      // Toggle sidebar on button click
+      sidebarToggle?.addEventListener('click', function () {
+        sidebarMenu.classList.toggle('show');
+        sidebarBackdrop.classList.toggle('show');
+      });
+      
+      // Close sidebar when clicking on backdrop
+      sidebarBackdrop?.addEventListener('click', function() {
+        sidebarMenu.classList.remove('show');
+        sidebarBackdrop.classList.remove('show');
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+          sidebarBackdrop.classList.remove('show');
         }
+      });
     });
+  </script>
   
   {% block extra_js %}{% endblock %}
 </body>
 </html>
+

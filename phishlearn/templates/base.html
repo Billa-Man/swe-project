@@ -430,6 +430,11 @@
                       <i class="fas fa-paper-plane"></i> Sending Profiles
                     </a>
                   </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'landing_pages' in request.path %}active{% endif %}" href="{% url 'landing_pages' %}">
+                      <i class="fas fa-paper-plane"></i> Landing Pages
+                    </a>
+                  </li>
                 {% elif user.userprofile.user_type == 'site_admin' %}
                   <li class="nav-item">
                     <a class="nav-link {% if 'manage_courses' in request.path %}active{% endif %}" href="{% url 'manage_courses' %}">

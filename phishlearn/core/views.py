@@ -678,3 +678,44 @@ class SendingProfilesView(View):
             messages.success(request, 'Profile created successfully!')
             return JsonResponse({'status': 'success', 'profile': result})
         return JsonResponse({'status': 'error'}, status=400)
+    
+    # views.py for landing pages
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.generic import View
+from django.contrib import messages
+from datetime import datetime
+import random
+
+from .gophish_utils.landing_pages import create_landing_page, get_landing_page_with_id, modify_landing_page, delete_landing_page
+
+class LandingPagesView(View):
+    template_name = 'it_owner/landing_pages.html'
+    
+    def get(self, request):
+        pages = get_landing_pages() or []
+        return render(request, self.template_name, {
+            'pages': pages,
+            'form_fields': [
+                {'name': 'name', 'label': 'Page Name', 'type': 'text'},
+                {'name': 'html', 'label': 'HTML Content', 'type': 'textarea'},
+                {'name': 'redirect_url', 'label': 'Redirect URL', 'type': 'url'},
+            ]
+        })
+
+    def post(self, request):
+        data = {
+            'id': random.randint(1, 1000000),
+            'name': request.POST.get('name'),
+            'html': request.POST.get('html'),
+            'redirect_url': request.POST.get('redirect_url', ''),
+            'capture_credentials': request.POST.get('capture_credentials') == 'on',
+            'capture_passwords': request.POST.get('capture_passwords') == 'on',
+            'modified_date': datetime.now().isoformat()
+        }
+        
+        result = create_landing_page(**data)
+        if result:
+            messages.success(request, 'Landing page created successfully!')
+            return JsonResponse({'status': 'success', 'page': result})
+        return JsonResponse({'status': 'error'}, status=400)

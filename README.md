@@ -131,7 +131,7 @@ Admin Credentials:
 - Username: `faculty`
 - Password: `faculty`
 
-### (Optional) Verify API Connection
+### (Optional) verify API Connection
 
 To ensure proper connectivity, visit:
 

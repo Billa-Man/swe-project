@@ -148,6 +148,6 @@ jobs:
             cd swe-project/phishlearn
             git config --global --add safe.directory /github/workspace
             git pull https://swethaganeshbabu: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@github.com/Billa-Man/swe-project.git main
-            echo "${{ secrets.PROD_ENV_FILE }}" | sed 's/\r$//' > .env
+            echo "${{ secrets.PROD_ENV_FILE_B64 }}" | base64 -d > .env            
             docker-compose down
             docker-compose up -d --build

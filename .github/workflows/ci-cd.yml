@@ -114,9 +114,47 @@ jobs:
             print('Admin user already exists')
         "
     
+    - name: Set up .env.test file for Docker Compose
+      working-directory: ./phishlearn
+      run: |
+        mkdir -p phishlearn
+        cat << EOF > .env.test
+        # Django config
+        DJANGO_SECRET_KEY=testing-key
+        DEBUG=True
+        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+
+        # PostgreSQL config (for local test DB)
+        POSTGRES_USER=testuser
+        POSTGRES_PASSWORD=secure123
+        POSTGRES_DB=phishlearn_test
+        DATABASE_HOST=127.0.0.1
+        DATABASE_PORT=5432
+
+        # Supabase test (if needed, can leave empty or fake)
+        SUPABASE_URL=https://fake.supabase.co
+        SUPABASE_KEY=fake-key
+
+        # Email settings (no actual send during test)
+        EMAIL_HOST=smtp.test.com
+        EMAIL_PORT=587
+        EMAIL_USE_TLS=True
+        EMAIL_HOST_USER=test@test.com
+        EMAIL_HOST_PASSWORD=testpassword
+
+        # Gophish test dummy
+        GOPHISH_API_URL=http://localhost:3333
+        GOPHISH_API_KEY=dummykey
+        EOF
+    
+        echo "Created.env.test for Docker Compose"
+        echo "----------------------------------------------"
+        cat .env
+        echo "----------------------------------------------"
+
     - name: Run tests
       working-directory: ./phishlearn
-      run: docker-compose exec -T phishlearn python manage.py test
+      run: docker-compose exec -T phishlearn pytest
     
     - name: Check API endpoint
       working-directory: ./phishlearn

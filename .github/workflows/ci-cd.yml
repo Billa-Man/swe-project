@@ -15,6 +15,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
+    - name: Set up environment variables
+      run: |
+        cat << EOF > .env
+        DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+        DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+        EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}
+        EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+        DEBUG=True
+        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+        GOPHISH_API_URL=http://localhost:3333
+        GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
+        EOF
+
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
@@ -28,6 +50,7 @@ jobs:
         echo "Working directory: $(pwd)"
         echo "Subdirectories:"
         ls -la
+       
     
     - name: Build Docker images
       working-directory: ./phishlearn
@@ -91,47 +114,9 @@ jobs:
             print('Admin user already exists')
         "
     
-    - name: Set up .env.test file for Docker Compose
-      working-directory: ./phishlearn
-      run: |
-        mkdir -p phishlearn
-        cat << EOF > .env.test
-        # Django config
-        DJANGO_SECRET_KEY=testing-key
-        DEBUG=True
-        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-
-        # PostgreSQL config (for local test DB)
-        POSTGRES_USER=testuser
-        POSTGRES_PASSWORD=secure123
-        POSTGRES_DB=phishlearn_test
-        DATABASE_HOST=127.0.0.1
-        DATABASE_PORT=5432
-
-        # Supabase test (if needed, can leave empty or fake)
-        SUPABASE_URL=https://fake.supabase.co
-        SUPABASE_KEY=fake-key
-
-        # Email settings (no actual send during test)
-        EMAIL_HOST=smtp.test.com
-        EMAIL_PORT=587
-        EMAIL_USE_TLS=True
-        EMAIL_HOST_USER=test@test.com
-        EMAIL_HOST_PASSWORD=testpassword
-
-        # Gophish test dummy
-        GOPHISH_API_URL=http://localhost:3333
-        GOPHISH_API_KEY=dummykey
-        EOF
-    
-        echo "Created.env.test for Docker Compose"
-        echo "----------------------------------------------"
-        cat .env
-        echo "----------------------------------------------"
-
     - name: Run tests
       working-directory: ./phishlearn
-      run: docker-compose exec -T phishlearn pytest
+      run: docker-compose exec -T phishlearn python manage.py test
     
     - name: Check API endpoint
       working-directory: ./phishlearn
@@ -151,18 +136,71 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
+    
     steps:
-      - name: Connect to EC2 and deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd swe-project/phishlearn
-            git config --global --add safe.directory /github/workspace
-            git pull https://swethaganeshbabu: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@github.com/Billa-Man/swe-project.git main
-            echo "${{ secrets.PROD_ENV_FILE_B64 }}" | base64 -d > .env            
-            docker-compose down
-            docker-compose up -d --build
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up environment variables for production
+      run: |
+        cat << EOF > .env
+        DJANGO_SECRET_KEY=${{ secrets.PROD_DJANGO_SECRET_KEY }}
+        POSTGRES_USER=${{ secrets.PROD_POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.PROD_POSTGRES_DB }}
+        DATABASE_HOST=${{ secrets.PROD_DATABASE_HOST }}
+        DATABASE_PORT=${{ secrets.PROD_DATABASE_PORT }}
+        SUPABASE_URL=${{ secrets.PROD_SUPABASE_URL }}
+        SUPABASE_KEY=${{ secrets.PROD_SUPABASE_KEY }}
+        EMAIL_HOST=${{ secrets.PROD_EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.PROD_EMAIL_PORT }}
+        EMAIL_USE_TLS=${{ secrets.PROD_EMAIL_USE_TLS }}
+        EMAIL_HOST_USER=${{ secrets.PROD_EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.PROD_EMAIL_HOST_PASSWORD }}
+        DEBUG=False
+        DJANGO_ALLOWED_HOSTS=${{ secrets.PROD_ALLOWED_HOSTS }}
+        GOPHISH_API_URL=${{ secrets.PROD_GOPHISH_API_URL }}
+        GOPHISH_API_KEY=${{ secrets.PROD_GOPHISH_API_KEY }}
+        EOF
+    
+    # Uncomment one of the following deployment options based on your hosting choice:
+    
+    # Option 1: Deploy to AWS Elastic Beanstalk
+    # - name: Deploy to AWS Elastic Beanstalk
+    #   uses: einaregilsson/beanstalk-deploy@v21
+    #   with:
+    #     aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     application_name: ${{ secrets.EB_APPLICATION_NAME }}
+    #     environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
+    #     version_label: phishlearn-${{ github.sha }}
+    #     region: ${{ secrets.AWS_REGION }}
+    #     deployment_package: deploy.zip
+    
+    # Option 2: Deploy to Digital Ocean App Platform
+    # - name: Install doctl
+    #   uses: digitalocean/action-doctl@v2
+    #   with:
+    #     token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+    # - name: Build and push to DO Container Registry
+    #   run: |
+    #     doctl registry login
+    #     docker build -t registry.digitalocean.com/${{ secrets.DO_REGISTRY }}/phishlearn:${GITHUB_SHA::7} .
+    #     docker push registry.digitalocean.com/${{ secrets.DO_REGISTRY }}/phishlearn:${GITHUB_SHA::7}
+    
+    # Option 3: Deploy to VPS via SSH
+    # - name: Deploy to VPS
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ${{ secrets.SSH_HOST }}
+    #     username: ${{ secrets.SSH_USERNAME }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     script: |
+    #       cd /path/to/project
+    #       git pull origin main
+    #       cp /path/to/production/.env .env
+    #       docker-compose down
+    #       docker-compose up -d --build
+    
+    - name: Placeholder for deployment
+      run: echo "Select and configure one of the deployment options based on your hosting preferences"

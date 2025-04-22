@@ -15,28 +15,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Set up environment variables
-      run: |
-        cat << EOF > .env
-        DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
-        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-        DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-        DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-        SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
-        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
-        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
-        EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}
-        EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
-        EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
-        DEBUG=True
-        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-        GOPHISH_API_URL=http://localhost:3333
-        GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
-        EOF
-
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
@@ -50,7 +28,6 @@ jobs:
         echo "Working directory: $(pwd)"
         echo "Subdirectories:"
         ls -la
-       
     
     - name: Build Docker images
       working-directory: ./phishlearn

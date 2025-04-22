@@ -172,7 +172,7 @@ def test_manage_templates_unauthorized(client):
     client.force_login(user)
     response = client.get(reverse("manage_templates"))
 
-    # 应该被重定向
+    # should be redirected
     assert response.status_code == 302
     assert response.url == reverse("dashboard")
 
@@ -273,19 +273,19 @@ def test_login_dashboard_supabase_error(mock_get, client):
 
 @pytest.mark.django_db
 def test_assign_quiz_to_users(client):
-    # 设置 IT Owner 用户
+    # setup it_owner user and login
     it_owner = UserFactory()
     UserProfileFactory(user=it_owner, user_type="it_owner")
     client.force_login(it_owner)
 
-    # 创建 Quiz 和两个员工用户
+    # create quiz and 2 employees
     quiz = QuizFactory()
     employee1 = UserFactory()
     UserProfileFactory(user=employee1, user_type="employee")
     employee2 = UserFactory()
     UserProfileFactory(user=employee2, user_type="employee")
 
-    # 模拟表单提交
+    # mock form submission
     url = reverse("assign_quiz_to_users")
     due_date = (timezone.now() + timedelta(days=10)).strftime("%Y-%m-%d")
     response = client.post(url, {
@@ -294,43 +294,43 @@ def test_assign_quiz_to_users(client):
         "due_date": due_date
     }, follow=True)
 
-    # 检查状态码
+    # assert response status code
     assert response.status_code == 200
 
-    # 检查 QuizAssignment 是否创建成功
+    # check if quiz assignment was created
     assignments = QuizAssignment.objects.filter(quiz=quiz)
     assert assignments.count() == 2
 
-    # 检查 Notification 是否发送
+    # check if notifications were sent
     assert Notification.objects.filter(user=employee1).exists()
     assert Notification.objects.filter(user=employee2).exists()
 
-    # 检查提示信息
+    # check if the correct message is in the response
     assert "Quiz successfully assigned to 2 users" in response.content.decode()
 
 @pytest.mark.django_db
 def test_mark_all_read(client):
-    # 创建用户并登录
+    # create user and login
     user = UserFactory()
     UserProfileFactory(user=user, user_type='employee')
     client.force_login(user)
 
-    # 创建未读通知
+    # cerate 5 notifications: 3 unread and 2 read
     NotificationFactory.create_batch(3, user=user, is_read=False)
     NotificationFactory.create_batch(2, user=user, is_read=True)  # 已读通知不应受影响
 
-    # 确保有 3 个未读通知
+    # make sure there are 3 unread notifications
     assert Notification.objects.filter(user=user, is_read=False).count() == 3
 
-    # 调用视图
+    # call view
     url = reverse("mark_all_read")
     response = client.get(url, follow=True)
 
-    # 检查重定向成功
+    # check if the redirected to the dashboard
     assert response.status_code == 200
     assert response.redirect_chain[-1][0].endswith(reverse("dashboard"))
 
-    # 所有通知应已被标记为已读
+    # all notifications should be marked as read
     assert Notification.objects.filter(user=user, is_read=False).count() == 0
     assert Notification.objects.filter(user=user, is_read=True).count() == 5
 

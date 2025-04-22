@@ -15,7 +15,18 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Check if we're running tests
+TESTING = 'test' in os.sys.argv
+
+# Load appropriate .env file
+if TESTING:
+    load_dotenv(dotenv_path=BASE_DIR / ".env.test")
+else:
+    load_dotenv(dotenv_path=BASE_DIR / ".env")
+
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

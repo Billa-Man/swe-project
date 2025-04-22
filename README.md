@@ -111,7 +111,7 @@ Admin Credentials:
 - Username: `faculty`
 - Password: `faculty` 
 
-### 6. Docker Setup (Optional)
+### 6. Docker Setup
 If you prefer using Docker, ensure that Docker is installed on your system, then proceed with the following steps:
 
 ```
@@ -136,3 +136,14 @@ Admin Credentials:
 To ensure proper connectivity, visit:
 
 [http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)
+
+### GoPhish API key
+
+To get the API keys for GoPhish, 
+- Run docker compose up --build, 
+- Check the terminal logs for a line which states the username and password.
+- Go to [http://127.0.0.1:3333/](http://127.0.0.1:3333/) and login with those credentials.
+- Reset the password
+- Go to user settings and find your API Key
+- Use this API Key to replace the key in the .env file
+

@@ -719,3 +719,11 @@ class LandingPagesView(View):
             messages.success(request, 'Landing page created successfully!')
             return JsonResponse({'status': 'success', 'page': result})
         return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def gophish_analytics(request):    
+    # You can add any initial data here if needed
+    context = {
+        'page_title': 'Gophish Campaign Analytics',
+    }
+    return render(request, 'core/gophish_analytics.html', context)

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views import LandingPagesView
+from .api_views import api_campaigns, api_campaign_detail, api_campaign_summary
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -24,4 +25,10 @@ urlpatterns = [
     path('courses/<int:course_id>/', views.course_view, name='course_view'),
     path('sending-profiles/', views.SendingProfilesView.as_view(), name='sending_profiles'),
     path('landing_pages/', views.LandingPagesView.as_view(), name='landing_pages'),
+    path('gophish-analytics/', views.gophish_analytics, name='gophish_analytics'),
+    
+    # API endpoints for Gophish campaigns
+    path('api/gophish/campaigns/', api_campaigns, name='api_campaigns'),
+    path('api/gophish/campaigns/<int:campaign_id>/', api_campaign_detail, name='api_campaign_detail'),
+    path('api/gophish/campaigns/<int:campaign_id>/summary/', api_campaign_summary, name='api_campaign_summary'),
 ] 

@@ -432,7 +432,14 @@
                   </li>
                   <li class="nav-item">
                     <a class="nav-link {% if 'landing_pages' in request.path %}active{% endif %}" href="{% url 'landing_pages' %}">
-                      <i class="fas fa-paper-plane"></i> Landing Pages
+                      <i class="fas fa-file-alt"></i>
+                      <span>Landing Pages</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'gophish_analytics' %}">
+                      <i class="fas fa-chart-line"></i>
+                      <span>Gophish Analytics</span>
                     </a>
                   </li>
                 {% elif user.userprofile.user_type == 'site_admin' %}

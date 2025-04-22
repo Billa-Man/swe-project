@@ -4,9 +4,8 @@ from core.models import (
     Course, PhishingTemplate, 
     UserProfile, Quiz, Question, 
     Choice, QuizAttempt, PhishingTest, 
-    EmployeeGroup, TrainingModule, 
-    ModuleCompletion, Notification,
-    QuizAssignment
+    EmployeeGroup,
+    Notification, QuizAssignment
 )
 import json
 from django.core.serializers import serialize
@@ -26,8 +25,6 @@ class Command(BaseCommand):
             'quiz_attempts': json.loads(serialize('json', QuizAttempt.objects.all())),
             'phishing_tests': json.loads(serialize('json', PhishingTest.objects.all())),
             'employee_groups': json.loads(serialize('json', EmployeeGroup.objects.all())),
-            'training_modules': json.loads(serialize('json', TrainingModule.objects.all())),
-            'module_completions': json.loads(serialize('json', ModuleCompletion.objects.all())),
             'notifications': json.loads(serialize('json', Notification.objects.all())),
             'quiz_assignments': json.loads(serialize('json', QuizAssignment.objects.all())),
         }

@@ -1,0 +1,153 @@
+name: PhishLearn CI/CD
+
+on:
+  push:
+    branches: [ main, dev, leileBranch ]
+  pull_request:
+    branches: [ main, dev, leileBranch ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up environment variables
+      run: |
+        cat << EOF > .env
+        DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+        DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+        EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}
+        EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+        DEBUG=True
+        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+        GOPHISH_API_URL=http://localhost:3333
+        GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
+        EOF
+
+    - name: Install Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+          -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version
+    
+    - name: Check if docker-compose.yml exists
+      working-directory: ./phishlearn
+      run: |
+        echo "Working directory: $(pwd)"
+        echo "Subdirectories:"
+        ls -la
+       
+    
+    - name: Build Docker images
+      working-directory: ./phishlearn
+      run: docker compose build
+
+    - name: Set up environment variables for Docker Compose
+      working-directory: ./phishlearn
+      run: |
+        mkdir -p phishlearn
+        cat << EOF > .env
+        DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+        DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+        EMAIL_HOST=${{ secrets.EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.EMAIL_PORT }}
+        EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}
+        EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+        DEBUG=True
+        DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+        GOPHISH_API_URL=http://localhost:3333
+        GOPHISH_API_KEY=${{ secrets.GOPHISH_API_KEY }}
+        EOF
+    
+        echo "Created.env for Docker Compose"
+         echo "----------------------------------------------"
+         cat .env
+         echo "----------------------------------------------"
+    
+    - name: Start Docker containers
+      working-directory: ./phishlearn
+      run: docker compose up -d
+    
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for services to initialize..."
+        sleep 15
+    
+    - name: Run migrations
+      working-directory: ./phishlearn
+      run: docker-compose exec -T phishlearn python manage.py migrate
+    
+    - name: Create admin user
+      working-directory: ./phishlearn
+      run: |
+        docker-compose exec -T phishlearn python -c "
+        import os
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'phishlearn.settings')
+        import django
+        django.setup()
+        from django.contrib.auth.models import User
+        if not User.objects.filter(username='faculty').exists():
+            User.objects.create_superuser('faculty', 'admin@example.com', 'faculty')
+            print('Admin user created')
+        else:
+            print('Admin user already exists')
+        "
+    
+    - name: Run tests
+      working-directory: ./phishlearn
+      run: docker-compose exec -T phishlearn python manage.py test
+    
+    - name: Check API endpoint
+      working-directory: ./phishlearn
+      run: |
+        echo "Checking API connection endpoint..."
+        curl --retry 5 --retry-delay 3 -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/connection/ | grep 200 || echo "API endpoint not available"
+    
+    - name: Collect static files
+      working-directory: ./phishlearn
+      run: docker-compose exec -T phishlearn python manage.py collectstatic --noinput
+    
+    - name: Stop Docker containers
+      working-directory: ./phishlearn
+      run: docker-compose down
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Connect to EC2 and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd swe-project/phishlearn
+            git config --global --add safe.directory /github/workspace
+            git pull https://swethaganeshbabu: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@github.com/Billa-Man/swe-project.git main
+            echo "${{ secrets.PROD_ENV_FILE_B64 }}" | base64 -d > .env            
+            docker-compose down
+            docker-compose up -d --build

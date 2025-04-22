@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import LandingPagesView, LandingPageDetailView
+from .views import LandingPagesView
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -24,6 +24,4 @@ urlpatterns = [
     path('courses/<int:course_id>/', views.course_view, name='course_view'),
     path('sending-profiles/', views.SendingProfilesView.as_view(), name='sending_profiles'),
     path('landing_pages/', views.LandingPagesView.as_view(), name='landing_pages'),
-    path('api/pages/<int:page_id>/', LandingPageDetailView.as_view(), name='landing_page_detail'),
-    
 ] 

@@ -687,7 +687,7 @@ from django.contrib import messages
 from datetime import datetime
 import random
 
-from .gophish_utils.landing_pages import create_landing_page, get_landing_page_with_id, modify_landing_page, delete_landing_page
+from .gophish_utils.landing_pages import create_landing_page, get_landing_pages
 
 class LandingPagesView(View):
     template_name = 'it_owner/landing_pages.html'

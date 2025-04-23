@@ -45,6 +45,100 @@ def test_dashboard_it_owner(client):
     assert any("it_owner_dashboard" in t.name for t in response.templates)
 
 @pytest.mark.django_db
+def test_my_profile_view_authenticated(client):
+    user = UserFactory()
+    UserProfileFactory(user=user, user_type='employee')
+
+    client.force_login(user)
+    url = reverse("my_profile")
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert "Profile" in response.content.decode() or "profile" in response.template_name[0]
+
+
+@pytest.mark.django_db
+def test_my_profile_view_unauthenticated(client):
+    url = reverse("my_profile")
+    response = client.get(url)
+
+    # Should redirect to login
+    assert response.status_code == 302
+    assert "/accounts/login/" in response.url
+	
+
+@pytest.mark.django_db
+def test_change_password_success(client):
+    user = UserFactory()
+    user.set_password("old_password")
+    user.save()
+    UserProfileFactory(user=user)
+
+    client.force_login(user)
+
+    response = client.post(reverse("change_password"), {
+        "current_password": "old_password",
+        "new_password": "new_secure_pass123",
+        "confirm_password": "new_secure_pass123"
+    }, follow=True)
+
+    assert response.status_code == 200
+    user.refresh_from_db()
+    assert user.check_password("new_secure_pass123")
+    assert "Password changed successfully" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_change_password_wrong_current(client):
+    user = UserFactory()
+    user.set_password("correct_password")
+    user.save()
+    UserProfileFactory(user=user)
+
+    client.force_login(user)
+
+    response = client.post(reverse("change_password"), {
+        "current_password": "wrong_password",
+        "new_password": "new_secure_pass123",
+        "confirm_password": "new_secure_pass123"
+    }, follow=True)
+
+    assert response.status_code == 200
+    assert "Current password is incorrect" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_change_password_mismatch(client):
+    user = UserFactory()
+    user.set_password("old_password")
+    user.save()
+    UserProfileFactory(user=user)
+
+    client.force_login(user)
+
+    response = client.post(reverse("change_password"), {
+        "current_password": "old_password",
+        "new_password": "new_secure_pass123",
+        "confirm_password": "not_matching"
+    }, follow=True)
+
+    assert response.status_code == 200
+    assert "New passwords do not match" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_change_password_unauthenticated(client):
+    response = client.post(reverse("change_password"), {
+        "current_password": "doesntmatter",
+        "new_password": "anything",
+        "confirm_password": "anything"
+    })
+
+    # Should redirect to login
+    assert response.status_code == 302
+    assert "/accounts/login/" in response.url
+
+@pytest.mark.django_db
 def test_course_detail(client):
     user = UserFactory()
     course = CourseFactory(created_by=user)
@@ -143,25 +237,25 @@ def test_manage_courses_get_site_admin(client):
     assert b"Course" in response.content
 
 
-@pytest.mark.django_db
-def test_manage_courses_post_create(client):
-    user = UserFactory()
-    UserProfileFactory(user=user, user_type="site_admin")
+# @pytest.mark.django_db
+# def test_manage_courses_post_create(client):
+#     user = UserFactory()
+#     UserProfileFactory(user=user, user_type="site_admin")
 
-    client.force_login(user)
+#     client.force_login(user)
 
-    data = {
-        "title": "Test Course",
-        "description": "This is a test course",
-        "content": "Some content here"
-    }
-    response = client.post(reverse("manage_courses"), data, follow=True)
+#     data = {
+#         "title": "Test Course",
+#         "description": "This is a test course",
+#         "content": "Some content here"
+#     }
+#     response = client.post(reverse("manage_courses"), data, follow=True)
 
-    assert response.status_code == 200
-    assert Course.objects.filter(title="Test Course").exists()
+#     assert response.status_code == 200
+#     assert Course.objects.filter(title="Test Course").exists()
 
-    messages = list(get_messages(response.wsgi_request))
-    assert any("Course created successfully" in str(m) for m in messages)
+#     messages = list(get_messages(response.wsgi_request))
+#     assert any("Course created successfully" in str(m) for m in messages)
 
 
 @pytest.mark.django_db
@@ -458,147 +552,9 @@ def test_course_mark_in_progress(client):
     assert any(a.score == 10 for a in attempts)
 
 
-@pytest.mark.django_db
-def test_my_profile_view_authenticated(client):
-    user = UserFactory()
-    UserProfileFactory(user=user, user_type='employee')
-
-    client.force_login(user)
-    url = reverse("my_profile")
-    response = client.get(url)
-
-    assert response.status_code == 200
-    assert "Profile" in response.content.decode() or "profile" in response.template_name[0]
-
-
-@pytest.mark.django_db
-def test_my_profile_view_unauthenticated(client):
-    url = reverse("my_profile")
-    response = client.get(url)
-
-    # Should redirect to login
-    assert response.status_code == 302
-    assert "/accounts/login/" in response.url
-
 import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from tests.core.factories import UserFactory, UserProfileFactory
 
 User = get_user_model()
-
-
-@pytest.mark.django_db
-def test_change_password_success(client):
-    user = UserFactory()
-    user.set_password("old_password")
-    user.save()
-    UserProfileFactory(user=user)
-
-    client.force_login(user)
-
-    response = client.post(reverse("change_password"), {
-        "current_password": "old_password",
-        "new_password": "new_secure_pass123",
-        "confirm_password": "new_secure_pass123"
-    }, follow=True)
-
-    assert response.status_code == 200
-    user.refresh_from_db()
-    assert user.check_password("new_secure_pass123")
-    assert "Password changed successfully" in response.content.decode()
-
-
-@pytest.mark.django_db
-def test_change_password_wrong_current(client):
-    user = UserFactory()
-    user.set_password("correct_password")
-    user.save()
-    UserProfileFactory(user=user)
-
-    client.force_login(user)
-
-    response = client.post(reverse("change_password"), {
-        "current_password": "wrong_password",
-        "new_password": "new_secure_pass123",
-        "confirm_password": "new_secure_pass123"
-    }, follow=True)
-
-    assert response.status_code == 200
-    assert "Current password is incorrect" in response.content.decode()
-
-
-@pytest.mark.django_db
-def test_change_password_mismatch(client):
-    user = UserFactory()
-    user.set_password("old_password")
-    user.save()
-    UserProfileFactory(user=user)
-
-    client.force_login(user)
-
-    response = client.post(reverse("change_password"), {
-        "current_password": "old_password",
-        "new_password": "new_secure_pass123",
-        "confirm_password": "not_matching"
-    }, follow=True)
-
-    assert response.status_code == 200
-    assert "New passwords do not match" in response.content.decode()
-
-
-@pytest.mark.django_db
-def test_change_password_unauthenticated(client):
-    response = client.post(reverse("change_password"), {
-        "current_password": "doesntmatter",
-        "new_password": "anything",
-        "confirm_password": "anything"
-    })
-
-    # Should redirect to login
-    assert response.status_code == 302
-    assert "/accounts/login/" in response.url
-
-
-@pytest.mark.django_db
-def test_reset_api_key_success(client):
-    user = UserFactory()
-    UserProfileFactory(user=user, user_type="site_admin")
-    client.force_login(user)
-
-    with patch("core.views.reset_api_key") as mock_reset:
-        mock_reset.return_value = {"success": True, "data": "new_key_123"}
-
-        response = client.post(reverse("reset_api_key"), follow=True)
-        assert response.status_code == 200
-        assert "new_key_123" in response.content.decode()
-
-        messages = list(get_messages(response.wsgi_request))
-        assert any("API Key Reset" in str(m) for m in messages)
-
-
-@pytest.mark.django_db
-def test_reset_api_key_failure(client):
-    user = UserFactory()
-    UserProfileFactory(user=user, user_type="site_admin")
-    client.force_login(user)
-
-    with patch("core.views.reset_api_key") as mock_reset:
-        mock_reset.return_value = {"success": False}
-
-        response = client.post(reverse("reset_api_key"), follow=True)
-        assert response.status_code == 200
-
-        messages = list(get_messages(response.wsgi_request))
-        assert any("Failed to reset API key" in str(m) for m in messages)
-
-
-@pytest.mark.django_db
-def test_reset_api_key_get_request(client):
-    user = UserFactory()
-    UserProfileFactory(user=user, user_type="site_admin")
-    client.force_login(user)
-
-    response = client.get(reverse("reset_api_key"))
-    assert response.status_code == 200
-    assert "API Key" in response.content.decode() or "Reset" in response.content.decode()

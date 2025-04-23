@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
+
+from core.gophish_utils.settings import reset_api_key
 from .models import (
     UserProfile,
     Course,
@@ -127,6 +129,39 @@ def dashboard(request):
             'phishing_templates': phishing_templates,
         }
         return render(request, 'core/admin_dashboard.html', context)
+
+@login_required
+def my_profile(request):
+    return render(request, 'main/profile.html')
+    
+ 
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+         
+         # Verify current password
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect')
+            return redirect('my_profile')            
+         
+        # Check if new passwords match
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match')
+            return redirect('my_profile')            
+         
+        # Change password
+        request.user.set_password(new_password)
+        request.user.save()
+         
+        # Update session to prevent logout
+        update_session_auth_hash(request, request.user)
+         
+        messages.success(request, 'Password changed successfully')
+        return redirect('my_profile')        
+    return redirect('my_profile')   
 
 @login_required
 def course_detail(request, course_id):
@@ -736,6 +771,18 @@ class LandingPagesView(View):
             messages.success(request, 'Landing page created successfully!')
             return JsonResponse({'status': 'success', 'page': result})
         return JsonResponse({'status': 'error'}, status=400)
+
+def reset_api_key_view(request):
+     context = {}
+     if request.method == "POST":
+         result = reset_api_key()
+         if result and result.get("success"):
+             messages.success(request, f"API Key Reset! Make sure to update the .env file with this value and restart the application.")
+             context["api_key"] = result.get("data")
+             os.environ['GOPHISH_API_KEY'] = context["api_key"]
+         else:
+             messages.error(request, "Failed to reset API key. Please try again.")
+     return render(request, "gophish/reset_api_key.html", context)
 
 @login_required
 def gophish_analytics(request):    

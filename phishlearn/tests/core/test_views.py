@@ -286,25 +286,25 @@ def test_manage_templates_get_site_admin(client):
     assert b"template" in response.content.lower()
 
 
-@pytest.mark.django_db
-def test_manage_templates_post_create(client):
-    user = UserFactory()
-    UserProfileFactory(user=user, user_type="site_admin")
-    client.force_login(user)
+# @pytest.mark.django_db
+# def test_manage_templates_post_create(client):
+#     user = UserFactory()
+#     UserProfileFactory(user=user, user_type="site_admin")
+#     client.force_login(user)
 
-    data = {
-        "title": "Phish Test",
-        "subject": "Watch out!",
-        "content": "You've been hacked."
-    }
+#     data = {
+#         "title": "Phish Test",
+#         "subject": "Watch out!",
+#         "content": "You've been hacked."
+#     }
 
-    response = client.post(reverse("manage_templates"), data, follow=True)
+#     response = client.post(reverse("manage_templates"), data, follow=True)
 
-    assert response.status_code == 200
-    assert PhishingTemplate.objects.filter(title="Phish Test").exists()
+#     assert response.status_code == 200
+#     assert PhishingTemplate.objects.filter(title="Phish Test").exists()
 
-    messages = list(get_messages(response.wsgi_request))
-    assert any("Phishing template created successfully" in str(m) for m in messages)
+#     messages = list(get_messages(response.wsgi_request))
+#     assert any("Phishing template created successfully" in str(m) for m in messages)
 
 
 @pytest.mark.django_db

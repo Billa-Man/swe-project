@@ -52,7 +52,7 @@ def get_landing_pages():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/pages/",
+            f"{GOPHISH_API_URL}/pages/",
             headers=headers,
             verify=False
         )
@@ -87,7 +87,7 @@ def get_landing_page_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/pages/{id}",
+            f"{GOPHISH_API_URL}/pages/{id}",
             headers=headers,
             verify=False
         )
@@ -134,7 +134,7 @@ def create_landing_page(id, name, html, capture_credentials,
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/pages/",
+            f"{GOPHISH_API_URL}/pages/",
             data=data,
             headers=headers,
             verify=False
@@ -183,7 +183,7 @@ def modify_landing_page(id, name, html, capture_credentials,
 
     try:
         response = requests.put(
-            f"{GOPHISH_API_URL}/api/pages/{id}",
+            f"{GOPHISH_API_URL}/pages/{id}",
             data=data,
             headers=headers,
             verify=False
@@ -213,7 +213,7 @@ def delete_landing_page(id):
 
     try:
         response = requests.delete(
-            f"{GOPHISH_API_URL}/api/pages/{id}",
+            f"{GOPHISH_API_URL}/pages/{id}",
             headers=headers,
             verify=False
         )
@@ -247,7 +247,7 @@ def import_site(include_resources, url):
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/import/site",
+            f"{GOPHISH_API_URL}/import/site",
             headers=headers,
             data=data,
             verify=False

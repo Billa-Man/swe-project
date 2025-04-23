@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Reset API Key</h2>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Reset API Key</button>
+  </form>
+  {% if api_key %}
+    <div class="mt-3">
+      <strong>New API Key:</strong>
+      <code>{{ api_key }}</code>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -94,7 +94,9 @@ nano .env
 - Keep your API keys and passwords secure
 - Make sure .env is included in your .gitignore file
 
-### 5. Run the Django application
+# You have two options to run PhishLearn:
+
+### Option 1: Run the Django application on local host
 Start the development server using Django:
 ```
 python manage.py runserver
@@ -111,11 +113,12 @@ Admin Credentials:
 - Username: `faculty`
 - Password: `faculty` 
 
-### 6. Docker Setup
+### Option 2: Run the Django application on Docker
 If you prefer using Docker, ensure that Docker is installed on your system, then proceed with the following steps:
 
 ```
 # Navigate to the phishlearn directory
+docker stop $(docker ps -q)
 docker build -t django-docker .
 docker compose up --build
 ```
@@ -136,14 +139,3 @@ Admin Credentials:
 To ensure proper connectivity, visit:
 
 [http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)
-
-### GoPhish API key
-
-To get the API keys for GoPhish, 
-- Run docker compose up --build, 
-- Check the terminal logs for a line which states the username and password.
-- Go to [http://127.0.0.1:3333/](http://127.0.0.1:3333/) and login with those credentials.
-- Reset the password
-- Go to user settings and find your API Key
-- Use this API Key to replace the key in the .env file
-

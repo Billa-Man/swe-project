@@ -56,7 +56,7 @@ def get_templates():
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/templates",
+            f"{GOPHISH_API_URL}/templates",
             headers=headers,
             verify=False
         )
@@ -90,7 +90,7 @@ def get_template_with_id(id):
 
     try:
         response = requests.get(
-            f"{GOPHISH_API_URL}/api/templates/{id}",
+            f"{GOPHISH_API_URL}/templates/{id}",
             headers=headers,
             verify=False
         )
@@ -136,7 +136,7 @@ def create_template(id, name, subject, text, html, modified_date, attachments):
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/templates/",
+            f"{GOPHISH_API_URL}/templates/",
             data=data,
             headers=headers,
             verify=False
@@ -184,7 +184,7 @@ def modify_template(id, name, subject, text, html, modified_date, attachments):
 
     try:
         response = requests.put(
-            f"{GOPHISH_API_URL}/api/templates/{id}",
+            f"{GOPHISH_API_URL}/templates/{id}",
             data=data,
             headers=headers,
             verify=False
@@ -213,7 +213,7 @@ def delete_template(id):
 
     try:
         response = requests.delete(
-            f"{GOPHISH_API_URL}/api/templates/{id}",
+            f"{GOPHISH_API_URL}/templates/{id}",
             headers=headers,
             verify=False
         )
@@ -249,7 +249,7 @@ def import_email(convert_links, content):
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/api/import/email",
+            f"{GOPHISH_API_URL}/import/email",
             headers=headers,
             data=data,
             verify=False

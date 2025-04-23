@@ -15,3 +15,7 @@
 
 # vscode
 /.vscode
+
+# tests
+.env.test
+*.coverage

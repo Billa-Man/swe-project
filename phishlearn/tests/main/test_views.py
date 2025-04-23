@@ -42,11 +42,11 @@ def test_login_view_failure(client):
 
 @pytest.mark.django_db
 def test_login_redirect_for_admin(client):
-    admin = User.objects.create_superuser(username='admin', email='admin@example.com', password='adminpass')
+    admin = User.objects.create_superuser(username='admin1', email='admin1@example.com', password='abcDEF123!@#')
 
     response = client.post(reverse('login_view'), data={
-        'username': 'admin',
-        'password': 'adminpass'
+        'username': 'admin1',
+        'password': 'abcDEF123!@#'
     }, follow=True)
 
     assert response.status_code == 200

@@ -72,8 +72,6 @@ def login_view(request):
             user = None
             success = False
 
-
-
         # Record the login attempt regardless of success
         LoginAttempt.objects.create(
             user=user,
@@ -85,9 +83,6 @@ def login_view(request):
 
         # If successful, log the user in and redirect; otherwise, show an error
         if success:
-            if user.is_superuser:
-                messages.error(request, "Admins must login via /admin/")
-                return render(request, 'account/login.html', {'form': form})
             login(request, user)
             return redirect('dashboard')
         else:

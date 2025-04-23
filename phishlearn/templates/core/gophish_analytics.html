@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}Gophish Campaign Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .navbar {
+        background-color: #1e293b;
+        padding: 1rem 2rem;
+    }
+
+    .navbar-brand {
+        color: white !important;
+        font-size: 1.25rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .navbar-brand i {
+        font-size: 1.25rem;
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .profile-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dashboard {
+        padding: 2rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 64px);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-value {
+        font-size: 1.875rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .open-rate { color: #3b82f6; }
+    .click-rate { color: #10b981; }
+    .bounce-rate { color: #ef4444; }
+
+    .table-responsive {
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        color: #1e293b;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        border-radius: 0.25rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .btn-outline-primary {
+        color: #3b82f6;
+        border-color: #3b82f6;
+        background-color: transparent;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        border-radius: 0.25rem;
+        transition: all 0.2s;
+    }
+
+    .btn-outline-primary:hover {
+        color: white;
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .filter-section {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-shield-alt"></i>
+            PhishLearn Admin
+        </a>
+        <div class="nav-right">
+            <i class="fas fa-bell text-white"></i>
+            <div class="profile-circle">
+                <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}" alt="Profile" class="w-100 h-100 rounded-circle">
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="section-title">Gophish Campaign Analytics</div>
+        
+        <!-- Campaign Selector and Stats -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="campaign-selector mb-3">
+                    <select id="campaignSelect" class="form-select">
+                        <option value="">Select a campaign</option>
+                    </select>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value open-rate">-</div>
+                        <div class="stat-label">Open Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value click-rate">-</div>
+                        <div class="stat-label">Click Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value bounce-rate">-</div>
+                        <div class="stat-label">Bounce Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">Date Range</label>
+                        <select id="dateRangeSelect" class="form-select">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="365">Last year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">Campaign Status</label>
+                        <select id="statusSelect" class="form-select">
+                            <option value="all">All Statuses</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campaign Table and Details -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Campaign Name</th>
+                                <th>Status</th>
+                                <th>Sent</th>
+                                <th>Opened</th>
+                                <th>Clicked</th>
+                                <th>Reported</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaignTableBody">
+                            <!-- Campaign data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Campaign Details</h5>
+                    </div>
+                    <div class="card-body" id="campaignDetails">
+                        <p class="text-muted">Select a campaign to view details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Function to load campaigns
+    function loadCampaigns() {
+        fetch('/api/gophish/campaigns/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(campaigns => {
+                const select = document.getElementById('campaignSelect');
+                select.innerHTML = '<option value="">Select a campaign</option>';
+                
+                campaigns.forEach(campaign => {
+                    const option = document.createElement('option');
+                    option.value = campaign.id;
+                    option.textContent = campaign.name;
+                    select.appendChild(option);
+                });
+
+                // Populate campaign table
+                const tableBody = document.getElementById('campaignTableBody');
+                tableBody.innerHTML = '';
+                
+                campaigns.forEach(campaign => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${campaign.name}</td>
+                        <td><span class="badge bg-${campaign.status === 'In Progress' ? 'primary' : 'success'}">${campaign.status}</span></td>
+                        <td>${campaign.results ? campaign.results.length : 0}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary view-details" data-id="${campaign.id}">
+                                View Details
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading campaigns:', error);
+                document.getElementById('campaignTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-danger">
+                            Error loading campaigns. Please try again later.
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+
+    // Function to update statistics
+    function updateStatistics(campaignId) {
+        if (!campaignId) {
+            document.querySelector('.open-rate').textContent = '-';
+            document.querySelector('.click-rate').textContent = '-';
+            document.querySelector('.bounce-rate').textContent = '-';
+            return;
+        }
+
+        fetch(`/api/gophish/campaigns/${campaignId}/summary/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data || !data.stats) {
+                    throw new Error('Invalid data format');
+                }
+                
+                const stats = data.stats;
+                const total = stats.total || 0;
+                
+                if (total > 0) {
+                    const openRate = ((stats.opened / total) * 100).toFixed(1);
+                    const clickRate = ((stats.clicked / total) * 100).toFixed(1);
+                    const bounceRate = ((stats.error / total) * 100).toFixed(1);
+                    
+                    document.querySelector('.open-rate').textContent = `${openRate}%`;
+                    document.querySelector('.click-rate').textContent = `${clickRate}%`;
+                    document.querySelector('.bounce-rate').textContent = `${bounceRate}%`;
+                } else {
+                    document.querySelector('.open-rate').textContent = '0%';
+                    document.querySelector('.click-rate').textContent = '0%';
+                    document.querySelector('.bounce-rate').textContent = '0%';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading campaign statistics:', error);
+                document.querySelector('.open-rate').textContent = '-';
+                document.querySelector('.click-rate').textContent = '-';
+                document.querySelector('.bounce-rate').textContent = '-';
+            });
+    }
+
+    // Function to load campaign details
+    function loadCampaignDetails(campaignId) {
+        fetch(`/api/gophish/campaigns/${campaignId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(campaign => {
+                if (!campaign) {
+                    throw new Error('Campaign not found');
+                }
+                
+                const detailsContainer = document.getElementById('campaignDetails');
+                detailsContainer.innerHTML = `
+                    <div class="mb-3">
+                        <h6 class="text-muted">Campaign Information</h6>
+                        <p><strong>Created:</strong> ${new Date(campaign.created_date).toLocaleString()}</p>
+                        <p><strong>Launch Date:</strong> ${new Date(campaign.launch_date).toLocaleString()}</p>
+                        <p><strong>Status:</strong> ${campaign.status}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Template</h6>
+                        <p><strong>Name:</strong> ${campaign.template ? campaign.template.name : 'N/A'}</p>
+                        <p><strong>Subject:</strong> ${campaign.template ? campaign.template.subject : 'N/A'}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Landing Page</h6>
+                        <p><strong>Name:</strong> ${campaign.page ? campaign.page.name : 'N/A'}</p>
+                        <p><strong>Capture Credentials:</strong> ${campaign.page && campaign.page.capture_credentials ? 'Yes' : 'No'}</p>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading campaign details:', error);
+                document.getElementById('campaignDetails').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error loading campaign details. Please try again later.
+                    </div>
+                `;
+            });
+    }
+
+    // Event listeners
+    document.getElementById('campaignSelect').addEventListener('change', function() {
+        updateStatistics(this.value);
+    });
+
+    document.getElementById('dateRangeSelect').addEventListener('change', function() {
+        // Implement date range filtering
+        loadCampaigns();
+    });
+
+    document.getElementById('statusSelect').addEventListener('change', function() {
+        // Implement status filtering
+        loadCampaigns();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-details')) {
+            const campaignId = e.target.getAttribute('data-id');
+            loadCampaignDetails(campaignId);
+        }
+    });
+
+    // Load campaigns when the page loads
+    document.addEventListener('DOMContentLoaded', loadCampaigns);
+</script>
+{% endblock %}
+{% endblock %} 

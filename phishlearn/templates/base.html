@@ -1,314 +1,558 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishLearn - {% block title %}{% endblock %}</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishLearn - {% block title %}{% endblock %}</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    {% block extra_css %}{% endblock %}
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
 
-    <style>
-        :root {
-            --primary-color: #5047e5;
-            --primary-hover: #4338ca;
-            --bg-color: #edf2fe;
-        }
-        .auth-page {
-            background-color: var(--bg-color);
-            min-height: 100vh;
-            padding: 2rem 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .auth-page .navbar {
-            background-color: var(--bg-color) !important;
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-        }
-        .auth-page .navbar-brand {
-            color: var(--primary-color) !important;
-            font-weight: 600;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .auth-page .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        .auth-page .btn-primary:hover {
-            background-color: var(--primary-hover);
-            border-color: var(--primary-hover);
-        }
-        .auth-page .text-primary {
-            color: var(--primary-color) !important;
-        }
-        .auth-page a {
-            color: var(--primary-color);
-        }
-        .auth-page a:hover {
-            color: var(--primary-hover);
-        }
-        .auth-page .card {
-            border-radius: 1rem;
-            border: none;
-            margin-top: 1rem;
-        }
-        .auth-page .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(80, 71, 229, 0.25);
-        }
-        .auth-page .container {
-            margin-top: auto;
-            margin-bottom: auto;
-        }
-        .auth-page .card-body {
-            padding: 2rem;
-        }
-        .bg-primary {
-            background-color: var(--primary-color) !important;
-        }
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            border-color: var(--primary-hover);
-        }
-        .text-primary {
-            color: var(--primary-color) !important;
-        }
-        .navbar-dark.bg-primary {
-            background-color: var(--primary-color) !important;
-        }
-        .nav-icon {
-            position: relative;
-            display: inline-block;
-            margin-right: 1rem;
-            cursor: pointer;
-        }
-        .nav-icon i {
-            font-size: 1.25rem;
-            color: white;
-            padding: 8px;
-            transition: transform 0.2s;
-        }
-        .nav-icon i:hover {
-            transform: scale(1.1);
-        }
-        .notification-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            width: 300px;
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: none;
-            z-index: 1000;
-            margin-top: 0.5rem;
-        }
-        .notification-dropdown.show {
-            display: block;
-        }
-        .notification-header {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .notification-body {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .notification-item {
-            display: block;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e2e8f0;
-            color: #1e293b;
-            text-decoration: none;
-            transition: background-color 0.2s;
-        }
-        .notification-item:hover {
-            background-color: #f8fafc;
-        }
-        .notification-content {
-            font-size: 0.875rem;
-        }
-        .notification-time {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-top: 0.25rem;
-        }
-        .notification-footer {
-            padding: 0.75rem 1rem;
-            text-align: center;
-            border-top: 1px solid #e2e8f0;
-        }
-        .notification-footer a {
-            color: #5047e5;
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-    </style>
+  <style>
+    :root {
+      --primary-color: #5047e5;
+      --primary-light: #e0dffe;
+      --secondary-color: #6c757d;
+      --success-color: #166534;
+      --warning-color: #856404;
+      --danger-color: #dc3545;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+      background-color: #f8fafc;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    .navbar {
+      background-color: var(--primary-color) !important;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    #sidebarMenu {
+      background-color: white;
+      min-height: calc(100vh - 56px);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+    
+    /* Make sure the sidebar is visible on desktop */
+    @media (min-width: 768px) {
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+      }
+    }
+    
+    /* Mobile sidebar styling */
+    @media (max-width: 767.98px) {
+      #sidebarMenu {
+        position: fixed;
+        z-index: 1000;
+        height: 100vh;
+        width: 280px;
+        left: 0;
+        top: 56px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      #sidebarMenu.show {
+        transform: translateX(0);
+      }
+      
+      .sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+      }
+      
+      .sidebar-backdrop.show {
+        display: block;
+      }
+    }
+
+    .navbar-brand {
+      color: white !important;
+      font-size: 1.25rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .navbar-brand i {
+      font-size: 1.5rem;
+      color: white !important;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .dashboard {
+      background-color: #f8fafc;
+      min-height: calc(100vh - 56px);
+      padding: 2.5rem 0;
+    }
+    
+    .page-header {
+      margin-bottom: 2.5rem;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    
+    .page-description {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 800px;
+      margin-bottom: 2rem;
+    }
+    
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .course-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all var(--transition-speed) ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border: 1px solid var(--border-color);
+    }
+    
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-light);
+    }
+    
+    .course-content {
+      padding: 1.75rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .course-title {
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    
+    .course-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+    
+    .course-footer {
+      padding: 1.25rem;
+      background-color: #f8fafc;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .status-tag {
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    
+    .status-completed {
+      background-color: #dcfce7;
+      color: var(--success-color);
+    }
+    
+    .status-in-progress {
+      background-color: #fff3cd;
+      color: var(--warning-color);
+    }
+    
+    .status-not-started {
+      background-color: #f1f5f9;
+      color: var(--text-secondary);
+    }
+    
+    .course-action {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color var(--transition-speed) ease;
+    }
+    
+    .course-action:hover {
+      color: #3a36b3;
+      text-decoration: none;
+    }
+    
+    .course-action i {
+      font-size: 0.8rem;
+      transition: transform var(--transition-speed) ease;
+    }
+    
+    .course-action:hover i {
+      transform: translateX(3px);
+    }
+    
+    .completion-date {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+    }
+    
+    /* Navigation styles */
+    .nav-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .nav-link {
+      color: var(--text-secondary) !important;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem !important;
+      border-radius: 8px;
+      transition: all var(--transition-speed) ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary-color) !important;
+      background-color: var(--primary-light);
+      transform: translateX(3px);
+    }
+    
+    .nav-link i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    
+    /* Alert styles */
+    .alert {
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: none;
+    }
+    
+    /* Footer styles */
+    .footer {
+      background-color: white;
+      padding: 1.5rem 0;
+      border-top: 1px solid var(--border-color);
+      margin-top: 3rem;
+    }
+    
+    .footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 767.98px) {
+      .page-title {
+        font-size: 1.75rem;
+      }
+      
+      .course-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .dashboard {
+        padding: 1.5rem 0;
+      }
+      
+      .main-content {
+        width: 100%;
+      }
+    }
+    
+    /* Animation for content */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .content {
+      animation: fadeIn 0.4s ease;
+    }
+    
+    /* Custom button styles */
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    
+    .btn-primary:hover {
+      background-color: #3a36b3;
+      border-color: #3a36b3;
+    }
+    
+    /* Custom form controls */
+    .form-control, .form-select {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    /* Utility classes */
+    .rounded-lg {
+      border-radius: 12px;
+    }
+    
+    .shadow-sm {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    /* Make sure content is visible */
+    .content {
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+  </style>
 </head>
-<body class="{% block body_class %}{% endblock %}">
-{% if request.path == '/accounts/login/' or request.path == '/accounts/signup/' %}
-    <nav class="navbar">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-shield-alt"></i>
-                PhishLearn
-            </a>
-        </div>
-    </nav>
-{% else %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">PhishLearn</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'courses_list' %}">Training Courses</a>
-                        </li>
-                        {% if user.userprofile.user_type == 'it_owner' or user.userprofile.user_type == 'site_admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login_dashboard' %}">Login Dashboard</a>
-                            </li>
-                        {% endif %}
-                        {% if user.userprofile.user_type == 'it_owner' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'manage_employees' %}">Manage Employees</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'group_list' %}">Manage Groups</a>
-                            </li>
-                        {% elif user.userprofile.user_type == 'site_admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'manage_courses' %}">Manage Courses</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'manage_templates' %}">Manage Templates</a>
-                            </li>
-                        {% endif %}
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <div class="nav-icon position-relative">
-                                <i class="fas fa-bell" id="notificationBell" style="color: white; font-size: 1.25rem;"></i>
-                                {% if notification_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.35em 0.5em;">
-                                    {{ notification_count }}
-                                </span>
-                                {% endif %}
-                                <div class="notification-dropdown" id="notificationDropdown">
-                                    <div class="notification-header">
-                                        <h6 class="mb-0">Notifications</h6>
-                                    </div>
-                                    <div class="notification-body">
-                                        {% for notification in notifications %}
-                                        <a href="{{ notification.link }}" class="notification-item">
-                                            <div class="notification-content">
-                                                {{ notification.message }}
-                                            </div>
-                                            <div class="notification-time">
-                                                {{ notification.created_at|timesince }} ago
-                                            </div>
-                                        </a>
-                                        {% empty %}
-                                        <div class="text-center p-3">No new notifications</div>
-                                        {% endfor %}
-                                    </div>
-                                    {% if notifications %}
-                                    <div class="notification-footer">
-                                        <a href="{% url 'mark_all_read' %}">Mark all as read</a>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'my_profile' %}">My Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-{% endif %}
-
-<div class="container mt-4">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-    {% block content %}{% endblock %}
-</div>
-
-{% if request.path != '/accounts/login/' and request.path != '/accounts/signup/' %}
-<footer class="footer mt-5 py-3 bg-light">
-    <div class="container text-center">
-        <span class="text-muted">© 2024 PhishLearn. All rights reserved.</span>
+<body>
+  <!-- Header -->
+  <nav class="navbar navbar-expand-md navbar-dark">
+    <div class="container-fluid">
+      <button class="btn btn-light d-md-none" type="button" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <a class="navbar-brand ms-md-3" href="/">
+        <i class="fas fa-shield-alt"></i> PhishLearn
+      </a>
+      
+      {% if user.is_authenticated %}
+      <div class="nav-right ms-auto d-flex align-items-center">
+        <span class="text-white me-3 d-none d-md-block">Welcome, {{ user.first_name|default:user.username }}</span>
+        <a href="{% url 'my_profile' %}" class="btn btn-outline-light btn-sm rounded-pill">
+          <i class="fas fa-user-circle me-1"></i> Profile
+        </a>
+      </div>
+      {% endif %}
     </div>
-</footer>
-{% endif %}
+  </nav>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Notification dropdown handling
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationDropdown = document.getElementById('notificationDropdown');
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 p-0">
+        <nav id="sidebarMenu" class="sidebar">
+          <div class="position-sticky">
+            <ul class="nav flex-column">
+              {% if user.is_authenticated %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if 'courses' in request.path %}active{% endif %}" href="{% url 'courses_list' %}">
+                    <i class="fas fa-graduation-cap"></i> Training Courses
+                  </a>
+                </li>
+                {% if user.userprofile.user_type == 'it_owner' or user.userprofile.user_type == 'site_admin' %}
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'login_dashboard' in request.path %}active{% endif %}" href="{% url 'login_dashboard' %}">
+                      <i class="fas fa-sign-in-alt"></i> Login Dashboard
+                    </a>
+                  </li>
+                {% endif %}
+                {% if user.userprofile.user_type == 'it_owner' %}
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'manage_employees' in request.path %}active{% endif %}" href="{% url 'manage_employees' %}">
+                      <i class="fas fa-users"></i> Manage Employees
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'group_list' in request.path %}active{% endif %}" href="{% url 'group_list' %}">
+                      <i class="fas fa-layer-group"></i> Manage Groups
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'sending_profiles' in request.path %}active{% endif %}" href="{% url 'sending_profiles' %}">
+                      <i class="fas fa-paper-plane"></i> Sending Profiles
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'landing_pages' in request.path %}active{% endif %}" href="{% url 'landing_pages' %}">
+                      <i class="fas fa-file-alt"></i>
+                      <span>Landing Pages</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'gophish_analytics' %}">
+                      <i class="fas fa-chart-line"></i>
+                      <span>Gophish Analytics</span>
+                    </a>
+                  </li>
+                {% elif user.userprofile.user_type == 'site_admin' %}
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'manage_courses' in request.path %}active{% endif %}" href="{% url 'manage_courses' %}">
+                      <i class="fas fa-book"></i> Manage Courses
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link {% if 'manage_templates' in request.path %}active{% endif %}" href="{% url 'manage_templates' %}">
+                      <i class="fas fa-file-alt"></i> Manage Templates
+                    </a>
+                  </li>
+                {% endif %}
+                <li class="nav-item mt-4">
+                  <a class="nav-link text-danger" href="{% url 'account_logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                  </a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link {% if 'login' in request.path %}active{% endif %}" href="{% url 'account_login' %}">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if 'signup' in request.path %}active{% endif %}" href="{% url 'account_signup' %}">
+                    <i class="fas fa-user-plus"></i> Register
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+      </div>
+            <!-- Main Content -->
+            <main class="col-md-9 col-lg-10 px-md-4 content">
+                <!-- Flash Messages -->
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                      <div class="d-flex align-items-center">
+                        <i class="fas 
+                          {% if message.tags == 'success' %}fa-check-circle
+                          {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                          {% elif message.tags == 'error' %}fa-times-circle
+                          {% else %}fa-info-circle{% endif %} 
+                          me-2"></i>
+                        <div>{{ message }}</div>
+                      </div>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
         
-        if(notificationBell && notificationDropdown) {
-            notificationBell.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                notificationDropdown.classList.toggle('show');
-            });
-            
-            // Prevent clicks inside dropdown from closing it
-            notificationDropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            // Close dropdown when clicking elsewhere on the page
-            document.addEventListener('click', function(e) {
-                if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
-                    if (notificationDropdown.classList.contains('show')) {
-                        notificationDropdown.classList.remove('show');
-                    }
-                }
-            });
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+              </main>
+            </div>
+          </div>
+      
+      <!-- Mobile sidebar backdrop -->
+      <div class="sidebar-backdrop"></div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <span class="text-muted">© 2025 PhishLearn. All rights reserved.</span>
+      <div class="text-muted">
+        <small>
+          <a href="#" class="text-decoration-none me-3">Privacy Policy</a>
+          <a href="#" class="text-decoration-none me-3">Terms of Service</a>
+          <a href="#" class="text-decoration-none">Contact Us</a>
+        </small>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Updated Sidebar Toggle Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebarMenu = document.getElementById('sidebarMenu');
+      const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+      
+      // Toggle sidebar on button click
+      sidebarToggle?.addEventListener('click', function () {
+        sidebarMenu.classList.toggle('show');
+        sidebarBackdrop.classList.toggle('show');
+      });
+      
+      // Close sidebar when clicking on backdrop
+      sidebarBackdrop?.addEventListener('click', function() {
+        sidebarMenu.classList.remove('show');
+        sidebarBackdrop.classList.remove('show');
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+          sidebarBackdrop.classList.remove('show');
         }
+      });
     });
-</script>
-{% block extra_js %}{% endblock %}
+  </script>
+  
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
+

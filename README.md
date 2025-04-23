@@ -71,7 +71,7 @@ python3.12 -m venv swe_project_env
 source swe_project_env/bin/activate
 
 # For Windows:
-swe_project_env\Scripts\activate
+# swe_project_env\Scripts\activate
 ```
 
 ### 3. Install Project Dependencies

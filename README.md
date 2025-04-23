@@ -139,3 +139,7 @@ Admin Credentials:
 To ensure proper connectivity, visit:
 
 [http://127.0.0.1:8000/api/connection/](http://127.0.0.1:8000/api/connection/)
+
+### AWS Link
+AWS link: http://52.87.217.250:8000/
+        http://52.87.217.250:8000/admin

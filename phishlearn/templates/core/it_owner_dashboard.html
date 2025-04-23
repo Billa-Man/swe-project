@@ -320,22 +320,24 @@
 
             <div class="col-md-6">
                 <div class="section-title">Email Statistics</div>
+                <div class="campaign-selector mb-3">
+                    <select id="campaignSelect" class="form-select">
+                        <option value="">Select a campaign</option>
+                    </select>
+                </div>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <div class="stat-value open-rate">24%</div>
+                        <div class="stat-value open-rate">-</div>
                         <div class="stat-label">Open Rate</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value click-rate">12%</div>
+                        <div class="stat-value click-rate">-</div>
                         <div class="stat-label">Click Rate</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value bounce-rate">2%</div>
+                        <div class="stat-value bounce-rate">-</div>
                         <div class="stat-label">Bounce Rate</div>
                     </div>
-                </div>
-                <div class="campaign-date">
-                    Last Campaign Performance • March 1-7, 2025
                 </div>
             </div>
         </div>
@@ -686,4 +688,70 @@
         });
       </script>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to load campaigns
+    function loadCampaigns() {
+        fetch('/api/gophish/campaigns/')
+            .then(response => response.json())
+            .then(campaigns => {
+                const select = document.getElementById('campaignSelect');
+                select.innerHTML = '<option value="">Select a campaign</option>';
+                
+                campaigns.forEach(campaign => {
+                    const option = document.createElement('option');
+                    option.value = campaign.id;
+                    option.textContent = campaign.name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading campaigns:', error);
+            });
+    }
+
+    // Function to update statistics
+    function updateStatistics(campaignId) {
+        if (!campaignId) {
+            document.querySelector('.open-rate').textContent = '-';
+            document.querySelector('.click-rate').textContent = '-';
+            document.querySelector('.bounce-rate').textContent = '-';
+            return;
+        }
+
+        fetch(`/api/gophish/campaigns/${campaignId}/summary`)
+            .then(response => response.json())
+            .then(data => {
+                const stats = data.stats;
+                const total = stats.total;
+                
+                if (total > 0) {
+                    const openRate = ((stats.opened / total) * 100).toFixed(1);
+                    const clickRate = ((stats.clicked / total) * 100).toFixed(1);
+                    const bounceRate = ((stats.error / total) * 100).toFixed(1);
+                    
+                    document.querySelector('.open-rate').textContent = `${openRate}%`;
+                    document.querySelector('.click-rate').textContent = `${clickRate}%`;
+                    document.querySelector('.bounce-rate').textContent = `${bounceRate}%`;
+                } else {
+                    document.querySelector('.open-rate').textContent = '0%';
+                    document.querySelector('.click-rate').textContent = '0%';
+                    document.querySelector('.bounce-rate').textContent = '0%';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading campaign statistics:', error);
+            });
+    }
+
+    // Event listener for campaign selection
+    document.getElementById('campaignSelect').addEventListener('change', function() {
+        updateStatistics(this.value);
+    });
+
+    // Load campaigns when the page loads
+    document.addEventListener('DOMContentLoaded', loadCampaigns);
+</script>
 {% endblock %} 

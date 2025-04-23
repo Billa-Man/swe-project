@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+
+{% block title %}Landing Pages{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Landing Pages</h1>
+    
+    <!-- Create Form Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Create New Landing Page</h5>
+        </div>
+        <div class="card-body">
+            <form id="createForm" method="POST" action="{% url 'landing_pages' %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">HTML Content</label>
+                        <textarea name="html" class="form-control" rows="10" required></textarea>
+                        <small class="form-text text-muted">Use {{.URL}} as placeholder for the phishing URL</small>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Redirect URL</label>
+                        <input type="url" name="redirect_url" class="form-control">
+                        <small class="form-text text-muted">Where to redirect after data submission</small>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="capture_credentials" id="captureCredentials">
+                            <label class="form-check-label" for="captureCredentials">
+                                Capture Credentials
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="capture_passwords" id="capturePasswords">
+                            <label class="form-check-label" for="capturePasswords">
+                                Capture Passwords
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Create Landing Page</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Existing Landing Pages List -->
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if pages %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Capture Credentials</th>
+                        <th>Capture Passwords</th>
+                        <th>Redirect URL</th>
+                        <th>Modified Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for page in pages %}
+                    <tr>
+                        <td>{{ page.name }}</td>
+                        <td>{% if page.capture_credentials %}Yes{% else %}No{% endif %}</td>
+                        <td>{% if page.capture_passwords %}Yes{% else %}No{% endif %}</td>
+                        <td>{{ page.redirect_url }}</td>
+                        <td>{{ page.modified_date }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-info view-page" data-id="{{ page.id }}">View</button>
+                                <button type="button" class="btn btn-sm btn-warning edit-page" data-id="{{ page.id }}">Edit</button>
+                                <button type="button" class="btn btn-sm btn-danger delete-page" data-id="{{ page.id }}">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">No landing pages found.</div>
+    {% endif %}
+</div>
+
+<!-- View Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View Landing Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 id="viewPageName"></h4>
+                <div class="mb-3">
+                    <label class="form-label">HTML Preview:</label>
+                    <div id="htmlPreview" class="border p-3 bg-light"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Capture Credentials:</strong> <span id="viewCaptureCredentials"></span></p>
+                        <p><strong>Capture Passwords:</strong> <span id="viewCapturePasswords"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Redirect URL:</strong> <span id="viewRedirectUrl"></span></p>
+                        <p><strong>Modified Date:</strong> <span id="viewModifiedDate"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Landing Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editPageId" name="id">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="editName" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">HTML Content</label>
+                        <textarea id="editHtml" name="html" class="form-control" rows="10" required></textarea>
+                        <small class="form-text text-muted">Use {{.URL}} as placeholder for the phishing URL</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Redirect URL</label>
+                        <input type="url" id="editRedirectUrl" name="redirect_url" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editCaptureCredentials" name="capture_credentials">
+                            <label class="form-check-label" for="editCaptureCredentials">
+                                Capture Credentials
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editCapturePasswords" name="capture_passwords">
+                            <label class="form-check-label" for="editCapturePasswords">
+                                Capture Passwords
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Create form submission
+document.getElementById('createForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload(); // Refresh to show new page
+        } else {
+            alert('Error creating landing page: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+// View page details
+document.querySelectorAll('.view-page').forEach(button => {
+    button.addEventListener('click', function() {
+        const pageId = this.getAttribute('data-id');
+        
+        fetch(`/api/pages/${pageId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(page => {
+            document.getElementById('viewPageName').textContent = page.name;
+            document.getElementById('htmlPreview').textContent = page.html;
+            document.getElementById('viewCaptureCredentials').textContent = page.capture_credentials ? 'Yes' : 'No';
+            document.getElementById('viewCapturePasswords').textContent = page.capture_passwords ? 'Yes' : 'No';
+            document.getElementById('viewRedirectUrl').textContent = page.redirect_url || 'None';
+            document.getElementById('viewModifiedDate').textContent = page.modified_date || 'N/A';
+            
+            const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+            viewModal.show();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+
+// Edit page
+document.querySelectorAll('.edit-page').forEach(button => {
+    button.addEventListener('click', function() {
+        const pageId = this.getAttribute('data-id');
+        
+        fetch(`/api/pages/${pageId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(page => {
+            document.getElementById('editPageId').value = page.id;
+            document.getElementById('editName').value = page.name;
+            document.getElementById('editHtml').value = page.html;
+            document.getElementById('editRedirectUrl').value = page.redirect_url || '';
+            document.getElementById('editCaptureCredentials').checked = page.capture_credentials;
+            document.getElementById('editCapturePasswords').checked = page.capture_passwords;
+            
+            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            editModal.show();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+
+// Save edited page
+document.getElementById('saveEdit').addEventListener('click', function() {
+    const form = document.getElementById('editForm');
+    const formData = new FormData(form);
+    const pageId = formData.get('id');
+    
+    // Convert form data to JSON
+    const jsonData = {
+        id: parseInt(pageId),
+        name: formData.get('name'),
+        html: formData.get('html'),
+        redirect_url: formData.get('redirect_url'),
+        capture_credentials: formData.has('capture_credentials'),
+        capture_passwords: formData.has('capture_passwords')
+    };
+    
+    fetch(`/api/pages/${pageId}`, {
+        method: 'PUT',
+        body: JSON.stringify(jsonData),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload(); // Refresh to show updated page
+        } else {
+            alert('Error updating landing page: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+// Delete page
+document.querySelectorAll('.delete-page').forEach(button => {
+    button.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this landing page?')) {
+            const pageId = this.getAttribute('data-id');
+            
+            fetch(`/api/pages/${pageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    location.reload(); // Refresh to show deletion
+                } else {
+                    alert('Error deleting landing page: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -115,7 +115,7 @@ def get_sending_profile_with_id(id):
         return None
     
 def create_sending_profile(id, name, host, interface_type, from_address, modified_date
-                           , ignore_cert_errors=True, username="", password="", profile_headers=None):
+                           ,ignore_cert_errors, username, password, profile_headers):
     
     """
     Creates a sending profile.

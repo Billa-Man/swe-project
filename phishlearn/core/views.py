@@ -652,51 +652,95 @@ def course_view(request, course_id):
     }
     return render(request, 'core/course_view.html', context)
 
-@login_required
-def my_profile(request):
-    return render(request, 'main/profile.html')
+# views.py (updated)
+from django.views.generic import View
+from django.http import JsonResponse
+from .gophish_utils.sending_profiles import create_sending_profile, get_sending_profiles
+from datetime import datetime
+import random
 
-@login_required
-def change_password(request):
-    if request.method == 'POST':
-        current_password = request.POST.get('current_password')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        
-        # Verify current password
-        if not request.user.check_password(current_password):
-            messages.error(request, 'Current password is incorrect')
-            return redirect('my_profile')
-        
-        # Check if new passwords match
-        if new_password != confirm_password:
-            messages.error(request, 'New passwords do not match')
-            return redirect('my_profile')
-        
-        # Change password
-        request.user.set_password(new_password)
-        request.user.save()
-        
-        # Update session to prevent logout
-        update_session_auth_hash(request, request.user)
-        
-        messages.success(request, 'Password changed successfully')
-        return redirect('my_profile')
+class SendingProfilesView(View):
+    template_name = 'it_owner/sending_profiles.html'
     
-    return redirect('my_profile')
+    def get(self, request):
+        profiles = get_sending_profiles() or []
+        return render(request, self.template_name, {
+            'profiles': profiles,
+            'form_fields': [
+                {'name': 'name', 'label': 'Profile Name', 'type': 'text'},
+                {'name': 'host', 'label': 'SMTP Host', 'type': 'text'},
+                {'name': 'interface_type', 'label': 'Protocol', 'type': 'select', 'options': ['SMTP', 'AWS']},
+                {'name': 'from_address', 'label': 'From Email', 'type': 'email'},
+                {'name': 'username', 'label': 'Username', 'type': 'text'},
+                {'name': 'password', 'label': 'Password', 'type': 'password'},
+            ]
+        })
 
-##### GOPHISH #####
+    def post(self, request):
+        data = {
+            'id': random.randint(1, 1000000),
+            'name': request.POST.get('name'),
+            'host': request.POST.get('host'),
+            'interface_type': request.POST.get('interface_type'),
+            'from_address': request.POST.get('from_address'),
+            'username': request.POST.get('username'),
+            'password': request.POST.get('password'),
+            'ignore_cert_errors': request.POST.get('ignore_cert_errors', False),
+            'modified_date': datetime.now().isoformat(),
+            'profile_headers': []
+        }
+        
+        result = create_sending_profile(**data)
+        if result:
+            messages.success(request, 'Profile created successfully!')
+            return JsonResponse({'status': 'success', 'profile': result})
+        return JsonResponse({'status': 'error'}, status=400)
+    
+    # views.py for landing pages
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.generic import View
+from django.contrib import messages
+from datetime import datetime
+import random
 
-from .gophish_utils.settings import reset_api_key
+from .gophish_utils.landing_pages import create_landing_page, get_landing_pages
 
-def reset_api_key_view(request):
-    context = {}
-    if request.method == "POST":
-        result = reset_api_key()
-        if result and result.get("success"):
-            messages.success(request, f"API Key Reset! Make sure to update the .env file with this value and restart the application.")
-            context["api_key"] = result.get("data")
-            os.environ['GOPHISH_API_KEY'] = context["api_key"]
-        else:
-            messages.error(request, "Failed to reset API key. Please try again.")
-    return render(request, "gophish/reset_api_key.html", context)
+class LandingPagesView(View):
+    template_name = 'it_owner/landing_pages.html'
+    
+    def get(self, request):
+        pages = get_landing_pages() or []
+        return render(request, self.template_name, {
+            'pages': pages,
+            'form_fields': [
+                {'name': 'name', 'label': 'Page Name', 'type': 'text'},
+                {'name': 'html', 'label': 'HTML Content', 'type': 'textarea'},
+                {'name': 'redirect_url', 'label': 'Redirect URL', 'type': 'url'},
+            ]
+        })
+
+    def post(self, request):
+        data = {
+            'id': random.randint(1, 1000000),
+            'name': request.POST.get('name'),
+            'html': request.POST.get('html'),
+            'redirect_url': request.POST.get('redirect_url', ''),
+            'capture_credentials': request.POST.get('capture_credentials') == 'on',
+            'capture_passwords': request.POST.get('capture_passwords') == 'on',
+            'modified_date': datetime.now().isoformat()
+        }
+        
+        result = create_landing_page(**data)
+        if result:
+            messages.success(request, 'Landing page created successfully!')
+            return JsonResponse({'status': 'success', 'page': result})
+        return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def gophish_analytics(request):    
+    # You can add any initial data here if needed
+    context = {
+        'page_title': 'Gophish Campaign Analytics',
+    }
+    return render(request, 'core/gophish_analytics.html', context)

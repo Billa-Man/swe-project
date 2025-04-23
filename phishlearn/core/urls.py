@@ -23,6 +23,8 @@ urlpatterns = [
     path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
     path('courses/', views.courses_list, name='courses_list'),
     path('courses/<int:course_id>/', views.course_view, name='course_view'),
+    path('my-profile/', views.my_profile, name='my_profile'),
+    path('change-password/', views.change_password, name='change_password'),
     path('sending-profiles/', views.SendingProfilesView.as_view(), name='sending_profiles'),
     path('landing_pages/', views.LandingPagesView.as_view(), name='landing_pages'),
     path('gophish-analytics/', views.gophish_analytics, name='gophish_analytics'),
@@ -31,4 +33,5 @@ urlpatterns = [
     path('api/gophish/campaigns/', api_campaigns, name='api_campaigns'),
     path('api/gophish/campaigns/<int:campaign_id>/', api_campaign_detail, name='api_campaign_detail'),
     path('api/gophish/campaigns/<int:campaign_id>/summary/', api_campaign_summary, name='api_campaign_summary'),
-] 
+    path("reset-api-key/", views.reset_api_key_view, name="reset_api_key"),  
+]

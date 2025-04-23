@@ -2,6 +2,7 @@
 *__pycache__/
 *.py[cod]
 .env
+.env.test
 .venv/
 .DS_Store
 

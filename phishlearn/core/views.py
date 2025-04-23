@@ -291,14 +291,25 @@ def create_group(request):
             group.it_owner = request.user
             group.save()
 
+            # email_list = form.cleaned_data['employee_emails'].split(',')
+            # for email in email_list:
+            #     email = email.strip()
+            #     users = User.objects.filter(email=email)
+            #     try:
+            #         user = User.objects.get(email=email)
+            #         group.employees.add(user)
+            #     except User.DoesNotExist:
+            #         messages.warning(request, f'User with email {email} not found')
             email_list = form.cleaned_data['employee_emails'].split(',')
             for email in email_list:
                 email = email.strip()
-                try:
-                    user = User.objects.get(email=email)
-                    group.employees.add(user)
-                except User.DoesNotExist:
-                    messages.warning(request, f'User with email {email} not found')
+                users = User.objects.filter(email=email)
+                if users.count() == 1:
+                    group.employees.add(users.first())
+                elif users.count() > 1:
+                    messages.warning(request, f"Multiple users found with email {email}. Skipped.")
+                else:
+                    messages.warning(request, f"User with email {email} not found")
 
             messages.success(request, 'Group created successfully.')
             return redirect('group_list')

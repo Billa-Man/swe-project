@@ -31,4 +31,3 @@ urlpatterns = [
     path('api/gophish/campaigns/', api_campaigns, name='api_campaigns'),
     path('api/gophish/campaigns/<int:campaign_id>/', api_campaign_detail, name='api_campaign_detail'),
     path('api/gophish/campaigns/<int:campaign_id>/summary/', api_campaign_summary, name='api_campaign_summary'),
-] 

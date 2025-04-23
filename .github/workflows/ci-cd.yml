@@ -136,17 +136,71 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
+    
     steps:
-      - name: Connect to EC2 and deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd swe-project/phishlearn
-            git pull origin main
-            echo "${{ secrets.PROD_ENV_FILE }}" > .env
-            docker-compose down
-            docker-compose up -d --build
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up environment variables for production
+      run: |
+        cat << EOF > .env
+        DJANGO_SECRET_KEY=${{ secrets.PROD_DJANGO_SECRET_KEY }}
+        POSTGRES_USER=${{ secrets.PROD_POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}
+        POSTGRES_DB=${{ secrets.PROD_POSTGRES_DB }}
+        DATABASE_HOST=${{ secrets.PROD_DATABASE_HOST }}
+        DATABASE_PORT=${{ secrets.PROD_DATABASE_PORT }}
+        SUPABASE_URL=${{ secrets.PROD_SUPABASE_URL }}
+        SUPABASE_KEY=${{ secrets.PROD_SUPABASE_KEY }}
+        EMAIL_HOST=${{ secrets.PROD_EMAIL_HOST }}
+        EMAIL_PORT=${{ secrets.PROD_EMAIL_PORT }}
+        EMAIL_USE_TLS=${{ secrets.PROD_EMAIL_USE_TLS }}
+        EMAIL_HOST_USER=${{ secrets.PROD_EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD=${{ secrets.PROD_EMAIL_HOST_PASSWORD }}
+        DEBUG=False
+        DJANGO_ALLOWED_HOSTS=${{ secrets.PROD_ALLOWED_HOSTS }}
+        GOPHISH_API_URL=${{ secrets.PROD_GOPHISH_API_URL }}
+        GOPHISH_API_KEY=${{ secrets.PROD_GOPHISH_API_KEY }}
+        EOF
+    
+    # Uncomment one of the following deployment options based on your hosting choice:
+    
+    # Option 1: Deploy to AWS Elastic Beanstalk
+    # - name: Deploy to AWS Elastic Beanstalk
+    #   uses: einaregilsson/beanstalk-deploy@v21
+    #   with:
+    #     aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     application_name: ${{ secrets.EB_APPLICATION_NAME }}
+    #     environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
+    #     version_label: phishlearn-${{ github.sha }}
+    #     region: ${{ secrets.AWS_REGION }}
+    #     deployment_package: deploy.zip
+    
+    # Option 2: Deploy to Digital Ocean App Platform
+    # - name: Install doctl
+    #   uses: digitalocean/action-doctl@v2
+    #   with:
+    #     token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+    # - name: Build and push to DO Container Registry
+    #   run: |
+    #     doctl registry login
+    #     docker build -t registry.digitalocean.com/${{ secrets.DO_REGISTRY }}/phishlearn:${GITHUB_SHA::7} .
+    #     docker push registry.digitalocean.com/${{ secrets.DO_REGISTRY }}/phishlearn:${GITHUB_SHA::7}
+    
+    # Option 3: Deploy to VPS via SSH
+    # - name: Deploy to VPS
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ${{ secrets.SSH_HOST }}
+    #     username: ${{ secrets.SSH_USERNAME }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     script: |
+    #       cd /path/to/project
+    #       git pull origin main
+    #       cp /path/to/production/.env .env
+    #       docker-compose down
+    #       docker-compose up -d --build
+    
+    - name: Placeholder for deployment
+      run: echo "Select and configure one of the deployment options based on your hosting preferences"

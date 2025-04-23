@@ -27,6 +27,12 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 import logging
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+
+import os
+
 logger = logging.getLogger(__name__)
 
 def home(request):

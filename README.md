@@ -94,27 +94,9 @@ nano .env
 - Keep your API keys and passwords secure
 - Make sure .env is included in your .gitignore file
 
-# You have two options to run PhishLearn:
 
-### Option 1: Run the Django application on local host
-Start the development server using Django:
-```
-python manage.py runserver
-```
-
-Access the application at:
-
-[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-
-[http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
-
-Admin Credentials:
-
-- Username: `faculty`
-- Password: `faculty` 
-
-### Option 2: Run the Django application on Docker
-If you prefer using Docker, ensure that Docker is installed on your system, then proceed with the following steps:
+### 5. Run the Django application on Docker
+Ensure that Docker is installed on your system, then proceed with the following steps:
 
 ```
 # Navigate to the phishlearn directory

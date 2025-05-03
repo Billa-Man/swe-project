@@ -57,6 +57,7 @@ def get_sending_profiles():
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",
     }
 
     try:
@@ -67,9 +68,14 @@ def get_sending_profiles():
         )
 
         response.raise_for_status()
+        logger.info(f"Response status: {response.status_code}")
+        logger.info(f"Response content: {response.text}")
         return response.json()
     except requests.exceptions.RequestException as e:
         logger.error(f"Error getting sending profiles: {e}")
+        if hasattr(e, 'response') and e.response:
+            logger.error(f"Response status: {e.response.status_code}")
+            logger.error(f"Response content: {e.response.text}")
         return None
 
 def get_sending_profile_with_id(id):
@@ -99,6 +105,7 @@ def get_sending_profile_with_id(id):
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",
     }
 
     try:
@@ -112,10 +119,24 @@ def get_sending_profile_with_id(id):
         return response.json()
     except requests.exceptions.HTTPError as e:
         logger.error(f"Sending profile with ID {id} not found")
+
         return None
+
+def add_smtp():
+    smpt_auth = {'Authorization': 'api_key_here'}
+    smtp_api_url = f'{GOPHISH_API_URL}/smtp'
+    smtp_profile = {
+        'name': 'Profile Name',
+        'from_address': 'Name <noreply@domain.com>',
+        'host': 'smtp.mailserver.org:587', 'username': 'postmaster@mailserver.org',
+        'password': 'smtp_password',
+        'interface_type': 'SMTP'
+    }
+    r = requests.post(smtp_api_url, headers=smpt_auth, json=smtp_profile, verify=False)
+
     
-def create_sending_profile(id, name, host, interface_type, from_address, modified_date
-                           ,ignore_cert_errors, username, password, profile_headers):
+def create_sending_profile(name, host, interface_type, from_address, modified_date
+                           , ignore_cert_errors, username, password, profile_headers=[]):
     
     """
     Creates a sending profile.
@@ -159,30 +180,46 @@ def create_sending_profile(id, name, host, interface_type, from_address, modifie
     }
 
     data = {
-            "id" : id,
             "name": name,
             "interface_type": interface_type,
             "from_address": from_address,
             "host": host,
             "username": username,
             "password": password,
-            "ignore_cert_errors": ignore_cert_errors,
-            "modified_date": modified_date,
-            "headers": profile_headers,
         }
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/smtp",
-            data=data,
+            f"{GOPHISH_API_URL}/smtp/",  # No trailing slash
+            json=data,
             headers=headers,
-            verify=False
+            verify=False,
         )
-
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
+        
+        # Log the raw response before attempting to parse JSON
+        logger.info("RESULTS")
+        logger.info(f"Create profile response status: {response.status_code}")
+        logger.info(f"Create profile response headers: {response.headers}")
+        logger.info(f"DATA")
+        logger.info(f"Create profile raw response: {response.text}")
+        
+        # Only try to parse JSON if the content type is application/json
+        if 'application/json' in response.headers.get('Content-Type', ''):
+            result = response.json()
+            return result
+        else:
+            logger.error(f"Server returned non-JSON response: {response.text}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
         logger.error(f"Unable to create a sending profile: {e}")
+        if hasattr(e, 'response') and e.response:
+            logger.error(f"Response status: {e.response.status_code}")
+            logger.error(f"Response content: {e.response.text}")
+        return None
+    except ValueError as e:  # This catches JSON parsing errors
+        logger.error(f"JSON parsing error: {e}")
+        logger.error(f"Response content that failed to parse: {response.text}")
         return None
     
 def modify_sending_profile(id, name, host, interface_type, from_address, modified_date
@@ -226,6 +263,7 @@ def modify_sending_profile(id, name, host, interface_type, from_address, modifie
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",
     }
 
     data = {
@@ -244,7 +282,7 @@ def modify_sending_profile(id, name, host, interface_type, from_address, modifie
     try:
         response = requests.put(
             f"{GOPHISH_API_URL}/smtp/{id}",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )

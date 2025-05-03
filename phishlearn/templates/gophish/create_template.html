@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Template{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Create New Phishing Template</h1>
+    <p class="page-description">Create a new email template for your phishing campaigns.</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      {% if error %}
+        <div class="alert alert-danger mb-4">
+          <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+        </div>
+      {% endif %}
+      
+      <form method="POST" action="{% url 'create_template' %}">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label for="name" class="form-label">Template Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+          <div class="form-text">A descriptive name for this template.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="subject" class="form-label">Email Subject</label>
+          <input type="text" class="form-control" id="subject" name="subject" required>
+          <div class="form-text">The subject line that will appear in the email.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="text" class="form-label">Plain Text Content</label>
+          <textarea class="form-control" id="text" name="text" rows="5" required></textarea>
+          <div class="form-text">Plain text version of the email for clients that don't support HTML.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="html" class="form-label">HTML Content</label>
+          <textarea class="form-control" id="html" name="html" rows="10" required></textarea>
+          <div class="form-text">HTML version of the email. You can use HTML tags to format the email.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="attachments" class="form-label">Attachments (JSON)</label>
+          <textarea class="form-control" id="attachments" name="attachments" rows="3">{"attachments": []}</textarea>
+          <div class="form-text">Attachments in JSON format. Advanced usage only.</div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'get_templates' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Templates
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Create Template
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Simple validation for the JSON field
+  document.getElementById('attachments').addEventListener('change', function(e) {
+    try {
+      JSON.parse(e.target.value);
+      e.target.classList.remove('is-invalid');
+    } catch (error) {
+      e.target.classList.add('is-invalid');
+      alert('Invalid JSON format in attachments field');
+    }
+  });
+</script>
+{% endblock %}

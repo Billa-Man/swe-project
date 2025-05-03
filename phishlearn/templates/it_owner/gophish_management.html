@@ -15,7 +15,7 @@
       <div class="card shadow-sm h-100">
         <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
           <h2 class="h4 mb-0">Phishing Templates</h2>
-          <a href="{% url 'create_template' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'create_template_form' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
@@ -27,15 +27,15 @@
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ template.name }}</h5>
                     <div class="btn-group" role="group">
-                      <a href="{% url 'get_template_by_id' template.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                      <a href="{% url 'template_detail' template.id %}" class="btn btn-sm btn-outline-primary" title="View">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="{% url 'modify_template' template.id %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-template" title="Edit" data-id="{{ template.id }}">
                         <i class="fas fa-edit"></i>
                       </a>
-                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" 
-                              data-bs-toggle="modal" data-bs-target="#deleteTemplateModal" 
-                              data-id="{{ template.id }}" data-name="{{ template.name }}">
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteTemplateModal"
+                        data-id="{{ template.id }}" data-name="{{ template.name }}">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
@@ -59,7 +59,7 @@
       <div class="card shadow-sm h-100">
         <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
           <h2 class="h4 mb-0">GoPhish Users</h2>
-          <a href="{% url 'create_user' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'create_user_form' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
@@ -71,10 +71,10 @@
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ user.username }}</h5>
                     <div class="btn-group" role="group">
-                      <a href="{% url 'get_user_by_id' user.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                      <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="View">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="{% url 'modify_user' user.id %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-user" title="Edit" data-id="{{ user.id }}">
                         <i class="fas fa-edit"></i>
                       </a>
                       <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" 
@@ -102,7 +102,7 @@
       <div class="card shadow-sm h-100">
         <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
           <h2 class="h4 mb-0">Target Groups</h2>
-          <a href="{% url 'create_group' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'create_group_form' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
@@ -114,10 +114,10 @@
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ group.name }}</h5>
                     <div class="btn-group" role="group">
-                      <a href="{% url 'get_group_by_id' group.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                      <a href="{% url 'group_detail' group.id %}" class="btn btn-sm btn-outline-primary" title="View">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="{% url 'modify_group' group.id %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-group" title="Edit" data-id="{{ group.id }}">
                         <i class="fas fa-edit"></i>
                       </a>
                       <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" 
@@ -157,10 +157,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form id="deleteTemplateForm" method="POST" action="">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
+        <button type="button" class="btn btn-danger" id="confirmDeleteTemplate">Delete</button>
       </div>
     </div>
   </div>
@@ -180,10 +177,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form id="deleteUserForm" method="POST" action="">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
+        <button type="button" class="btn btn-danger" id="confirmDeleteUser">Delete</button>
       </div>
     </div>
   </div>
@@ -203,10 +197,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form id="deleteGroupForm" method="POST" action="">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
+        <button type="button" class="btn btn-danger" id="confirmDeleteGroup">Delete</button>
       </div>
     </div>
   </div>
@@ -216,44 +207,245 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Template modal setup
+    // Template functionality
+    setupTemplateHandlers();
+    
+    // User functionality
+    setupUserHandlers();
+    
+    // Group functionality
+    setupGroupHandlers();
+    
+    // Simple validation for the JSON fields
+    setupValidation();
+  });
+  
+  // TEMPLATE HANDLERS
+  function setupTemplateHandlers() {
+    // Edit template functionality
+    document.querySelectorAll('.edit-template').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const templateId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_template_form' %}?edit=${templateId}`;
+      });
+    });
+
+    // Delete template functionality
     const deleteTemplateModal = document.getElementById('deleteTemplateModal');
     if (deleteTemplateModal) {
+      let templateIdToDelete;
+      
       deleteTemplateModal.addEventListener('show.bs.modal', function(event) {
         const button = event.relatedTarget;
-        const id = button.getAttribute('data-id');
-        const name = button.getAttribute('data-name');
+        templateIdToDelete = button.getAttribute('data-id');
+        const templateName = button.getAttribute('data-name');
         
-        deleteTemplateModal.querySelector('#templateName').textContent = name;
-        document.getElementById('deleteTemplateForm').action = `/templates/${id}/delete/`;
+        // Update modal content
+        deleteTemplateModal.querySelector('#templateName').textContent = templateName;
       });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteTemplate');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!templateIdToDelete) return;
+          
+          fetch(`/templates/${templateIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteTemplateModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Template deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting template:', error);
+            alert('Error deleting template. Please try again.');
+          });
+        });
+      }
     }
-    
-    // User modal setup
+  }
+  
+  // USER HANDLERS
+  function setupUserHandlers() {
+    // Edit user functionality
+    document.querySelectorAll('.edit-user').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const userId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_user_form' %}?edit=${userId}`;
+      });
+    });
+
+    // Delete user functionality
     const deleteUserModal = document.getElementById('deleteUserModal');
     if (deleteUserModal) {
+      let userIdToDelete;
+      
       deleteUserModal.addEventListener('show.bs.modal', function(event) {
         const button = event.relatedTarget;
-        const id = button.getAttribute('data-id');
-        const name = button.getAttribute('data-name');
+        userIdToDelete = button.getAttribute('data-id');
+        const userName = button.getAttribute('data-name');
         
-        deleteUserModal.querySelector('#userName').textContent = name;
-        document.getElementById('deleteUserForm').action = `/users/${id}/delete/`;
+        // Update modal content
+        deleteUserModal.querySelector('#userName').textContent = userName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteUser');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!userIdToDelete) return;
+          
+          fetch(`/users/${userIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteUserModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('User deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting user:', error);
+            alert('Error deleting user. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // GROUP HANDLERS
+  function setupGroupHandlers() {
+    // Edit group functionality
+    document.querySelectorAll('.edit-group').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const groupId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_group_form' %}?edit=${groupId}`;
+      });
+    });
+
+    // Delete group functionality
+    const deleteGroupModal = document.getElementById('deleteGroupModal');
+    if (deleteGroupModal) {
+      let groupIdToDelete;
+      
+      deleteGroupModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        groupIdToDelete = button.getAttribute('data-id');
+        const groupName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteGroupModal.querySelector('#groupName').textContent = groupName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteGroup');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!groupIdToDelete) return;
+          
+          fetch(`/groups/${groupIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteGroupModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Group deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting group:', error);
+            alert('Error deleting group. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // Validation functionality
+  function setupValidation() {
+    // For template attachments
+    const attachmentsField = document.getElementById('attachments');
+    if (attachmentsField) {
+      attachmentsField.addEventListener('change', function(e) {
+        try {
+          JSON.parse(e.target.value);
+          e.target.classList.remove('is-invalid');
+        } catch (error) {
+          e.target.classList.add('is-invalid');
+          alert('Invalid JSON format in attachments field');
+        }
       });
     }
     
-    // Group modal setup
-    const deleteGroupModal = document.getElementById('deleteGroupModal');
-    if (deleteGroupModal) {
-      deleteGroupModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const id = button.getAttribute('data-id');
-        const name = button.getAttribute('data-name');
-        
-        deleteGroupModal.querySelector('#groupName').textContent = name;
-        document.getElementById('deleteGroupForm').action = `/groups/${id}/delete/`;
+    // For group targets
+    const targetsField = document.getElementById('targets');
+    if (targetsField) {
+      targetsField.addEventListener('change', function(e) {
+        try {
+          JSON.parse(e.target.value);
+          e.target.classList.remove('is-invalid');
+        } catch (error) {
+          e.target.classList.add('is-invalid');
+          alert('Invalid JSON format in targets field');
+        }
       });
     }
-  });
+    
+    // For user role
+    const roleField = document.getElementById('role');
+    if (roleField) {
+      roleField.addEventListener('change', function(e) {
+        try {
+          JSON.parse(e.target.value);
+          e.target.classList.remove('is-invalid');
+        } catch (error) {
+          e.target.classList.add('is-invalid');
+          alert('Invalid JSON format in role field');
+        }
+      });
+    }
+  }
 </script>
 {% endblock %}

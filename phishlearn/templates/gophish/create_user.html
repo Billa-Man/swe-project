@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Create GoPhish User{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-white py-3">
+          <h1 class="page-title h3 mb-0">Create GoPhish User</h1>
+        </div>
+        <div class="card-body">
+          {% if error %}
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+            </div>
+          {% endif %}
+
+          <form method="POST" action="{% url 'user_list' %}">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+              <div class="form-text">The username for this GoPhish user account.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+              <div class="form-text">Password must be at least 8 characters long.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="role" class="form-label">Role</label>
+              <select class="form-select" id="role" name="role">
+                <option value='{"id": 0, "slug": "user", "name": "User"}'>User</option>
+                <option value='{"id": 1, "slug": "admin", "name": "Admin"}'>Admin</option>
+              </select>
+              <div class="form-text">Select the appropriate permission level for this user.</div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'gophish_management' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Create User
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    
+    if (editId) {
+      // We're in edit mode - fetch the user data
+      fetch(`/users/${editId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Fill the form with user data
+        document.getElementById('username').value = data.username || '';
+        
+        // Select the correct role
+        const roleSelect = document.getElementById('role');
+        if (data.role) {
+          const roleJson = JSON.stringify(data.role);
+          
+          for (let i = 0; i < roleSelect.options.length; i++) {
+            const option = roleSelect.options[i];
+            const optionValue = JSON.parse(option.value);
+            
+            if (optionValue.id === data.role.id) {
+              option.selected = true;
+              break;
+            }
+          }
+        }
+        
+        // Change form title
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle) pageTitle.textContent = 'Edit GoPhish User';
+        
+        // Change button text
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update User';
+        }
+        
+        // Override form submission for PUT request
+        const form = document.querySelector('form');
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+              username: document.getElementById('username').value,
+              role: JSON.parse(document.getElementById('role').value),
+              password: document.getElementById('password').value
+            };
+            
+            fetch(`/users/${editId}/`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+              },
+              body: JSON.stringify(formData)
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              alert('User updated successfully!');
+              window.location.href = "{% url 'gophish_management' %}";
+            })
+            .catch(error => {
+              console.error('Error updating user:', error);
+              alert('Error updating user. Please try again.');
+            });
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching user:', error);
+        alert('Error loading user data. Please try again.');
+      });
+    }
+  });
+</script>
+{% endblock %}

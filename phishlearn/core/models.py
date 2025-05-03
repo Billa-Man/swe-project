@@ -136,32 +136,3 @@ class QuizAssignment(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.quiz.title}"
-    
-##### GOPHISH MODELS #####
-
-class GoPhishTemplate(models.Model):
-    name = models.CharField(max_length=200)
-    subject = models.CharField(max_length=200)
-    text = models.TextField()
-    html = models.TextField()
-    modified_date = models.DateTimeField(auto_now=True)
-    attachments = models.JSONField(null=True, blank=True)
-    
-    def __str__(self):
-        return self.name
-    
-class GoPhishUsers(models.Model):
-    username = models.CharField(max_length=200)
-    role = models.JSONField()
-    password = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.username
-
-class GoPhishGroups(models.Model):
-    name = models.CharField(max_length=200)
-    modified_date = models.DateTimeField(auto_now=True)
-    targets = models.JSONField(null=True, blank=True)
-    
-    def __str__(self):
-        return self.name

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Create Target Group{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-white py-3">
+          <h1 class="page-title h3 mb-0">Create Target Group</h1>
+        </div>
+        <div class="card-body">
+          {% if error %}
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+            </div>
+          {% endif %}
+
+          <form method="POST" action="{% url 'group_list' %}">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="name" class="form-label">Group Name</label>
+              <input type="text" class="form-control" id="name" name="name" required>
+              <div class="form-text">Enter a descriptive name for this target group.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="targets" class="form-label">Targets</label>
+              <textarea class="form-control" id="targets" name="targets" rows="8" required>[
+  {
+    "first_name": "Example",
+    "last_name": "User",
+    "email": "example@domain.com",
+    "position": "IT Staff"
+  }
+]</textarea>
+              <div class="form-text">
+                Enter the target recipients in JSON format. Each target should include first_name, last_name, email, and optionally position.
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'gophish_management' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Create Group
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Validate JSON in targets field
+    const targetsField = document.getElementById('targets');
+    if (targetsField) {
+      targetsField.addEventListener('change', function(e) {
+        try {
+          JSON.parse(e.target.value);
+          e.target.classList.remove('is-invalid');
+        } catch (error) {
+          e.target.classList.add('is-invalid');
+          alert('Invalid JSON format in targets field. Please correct the format.');
+        }
+      });
+    }
+    
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    
+    if (editId) {
+      // We're in edit mode - fetch the group data
+      fetch(`/groups/${editId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Fill the form with group data
+        document.getElementById('name').value = data.name || '';
+        document.getElementById('targets').value = JSON.stringify(data.targets || [], null, 2);
+        
+        // Change form title
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle) pageTitle.textContent = 'Edit Target Group';
+        
+        // Change button text
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update Group';
+        }
+        
+        // Override form submission for PUT request
+        const form = document.querySelector('form');
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const targetsField = document.getElementById('targets');
+            let targets;
+            
+            try {
+              targets = JSON.parse(targetsField.value);
+            } catch (error) {
+              alert('Invalid JSON format in targets field. Please correct the format.');
+              return;
+            }
+            
+            const formData = {
+              name: document.getElementById('name').value,
+              targets: targets
+            };
+            
+            fetch(`/groups/${editId}/`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+              },
+              body: JSON.stringify(formData)
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              alert('Group updated successfully!');
+              window.location.href = "{% url 'gophish_management' %}";
+            })
+            .catch(error => {
+              console.error('Error updating group:', error);
+              alert('Error updating group. Please try again.');
+            });
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching group:', error);
+        alert('Error loading group data. Please try again.');
+      });
+    }
+  });
+</script>
+{% endblock %}

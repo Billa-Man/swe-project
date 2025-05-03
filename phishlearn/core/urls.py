@@ -61,6 +61,9 @@ urlpatterns = [
     path('groups/<int:group_id>/update/', views.modify_group, name='modify_group'),
     path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
 
+    # Campaign URLs
+    path('campaigns/', views.fetchCampaigns, name='campaigns'),
+
     path('gophish/management/', views.gophish_management, name='gophish_management'),
 
 ]

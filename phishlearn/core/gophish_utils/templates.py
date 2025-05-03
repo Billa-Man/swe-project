@@ -137,7 +137,7 @@ def create_template(id, name, subject, text, html, modified_date, attachments):
     try:
         response = requests.post(
             f"{GOPHISH_API_URL}/templates/",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
@@ -185,7 +185,7 @@ def modify_template(id, name, subject, text, html, modified_date, attachments):
     try:
         response = requests.put(
             f"{GOPHISH_API_URL}/templates/{id}",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
@@ -251,7 +251,7 @@ def import_email(convert_links, content):
         response = requests.post(
             f"{GOPHISH_API_URL}/import/email",
             headers=headers,
-            data=data,
+            json=data,
             verify=False
         )
 

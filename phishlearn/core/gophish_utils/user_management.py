@@ -140,7 +140,7 @@ def create_user(role, password, username):
     try:
         response = requests.post(
             f"{GOPHISH_API_URL}/users/",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
@@ -184,7 +184,7 @@ def modify_user(role, password, username):
     try:
         response = requests.put(
             f"{GOPHISH_API_URL}/users/{id}",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )

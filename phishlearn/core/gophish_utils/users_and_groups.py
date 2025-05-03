@@ -228,7 +228,7 @@ def create_group(id, name, modified_date, targets):
     try:
         response = requests.post(
             f"{GOPHISH_API_URL}/groups/",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
@@ -279,7 +279,7 @@ def modify_group(id, name, modified_date, targets):
     try:
         response = requests.put(
             f"{GOPHISH_API_URL}/groups/{id}",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
@@ -352,7 +352,7 @@ def import_group(file):
         response = requests.post(
             f"{GOPHISH_API_URL}/import/group",
             headers=headers,
-            data=data,
+            json=data,
             verify=False
         )
 

@@ -914,8 +914,11 @@ import random
 
 from .gophish_utils.landing_pages import create_landing_page, get_landing_pages
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LandingPagesView(View):
+    http_method_names = ['get', 'post']
     template_name = 'it_owner/landing_pages.html'
+
     
     def get(self, request):
         pages = get_landing_pages() or []
@@ -930,7 +933,6 @@ class LandingPagesView(View):
 
     def post(self, request):
         data = {
-            'id': random.randint(1, 1000000),
             'name': request.POST.get('name'),
             'html': request.POST.get('html'),
             'redirect_url': request.POST.get('redirect_url', ''),
@@ -1210,3 +1212,22 @@ def gophish_management(request):
     }
     
     return render(request, 'it_owner/gophish_management.html', context)
+
+# views.py
+import requests
+from django.conf import settings
+from django.shortcuts import render
+
+def fetchCampaigns(request):
+    headers = {
+        'Authorization': settings.GOPHISH_API_KEY,
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(settings.GOPHISH_API_URL, headers=headers, verify=False)
+
+    if response.status_code == 200:
+        campaigns = response.json()
+    else:
+        campaigns = []
+
+    return render(request, 'gophish/campaigns.html', {'campaigns': campaigns})

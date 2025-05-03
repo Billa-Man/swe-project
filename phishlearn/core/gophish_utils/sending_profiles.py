@@ -119,21 +119,7 @@ def get_sending_profile_with_id(id):
         return response.json()
     except requests.exceptions.HTTPError as e:
         logger.error(f"Sending profile with ID {id} not found")
-
         return None
-
-def add_smtp():
-    smpt_auth = {'Authorization': 'api_key_here'}
-    smtp_api_url = f'{GOPHISH_API_URL}/smtp'
-    smtp_profile = {
-        'name': 'Profile Name',
-        'from_address': 'Name <noreply@domain.com>',
-        'host': 'smtp.mailserver.org:587', 'username': 'postmaster@mailserver.org',
-        'password': 'smtp_password',
-        'interface_type': 'SMTP'
-    }
-    r = requests.post(smtp_api_url, headers=smpt_auth, json=smtp_profile, verify=False)
-
     
 def create_sending_profile(name, host, interface_type, from_address, modified_date
                            , ignore_cert_errors, username, password, profile_headers=[]):
@@ -190,7 +176,7 @@ def create_sending_profile(name, host, interface_type, from_address, modified_da
 
     try:
         response = requests.post(
-            f"{GOPHISH_API_URL}/smtp/",  # No trailing slash
+            f"{GOPHISH_API_URL}/smtp/",
             json=data,
             headers=headers,
             verify=False,

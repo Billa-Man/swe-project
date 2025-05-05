@@ -30,9 +30,13 @@
     }
 
     .dashboard {
-        background-color: #f8fafc;
+        background-color: var(--light-color);
         min-height: calc(100vh - 56px);
         padding: 2rem 0;
+    }
+    
+    [data-bs-theme="dark"] .dashboard {
+        background-color: #000;
     }
     
     .page-header {
@@ -42,12 +46,12 @@
     .page-title {
         font-size: 1.875rem;
         font-weight: 600;
-        color: #1e293b;
+        color: var(--text-primary);
         margin-bottom: 0.5rem;
     }
     
     .page-description {
-        color: #64748b;
+        color: var(--text-secondary);
         font-size: 1rem;
         margin-bottom: 2rem;
     }
@@ -60,11 +64,12 @@
     }
     
     .course-card {
-        background: white;
+        background: var(--card-bg);
         border-radius: 0.75rem;
         overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        border: 1px solid var(--card-border);
+        transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -83,14 +88,19 @@
     }
     
     .course-title {
-        font-weight: 600;
-        font-size: 1.25rem;
-        color: #1e293b;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--text-primary);
         margin-bottom: 0.75rem;
+        transition: color 0.3s;
+    }
+    
+    [data-bs-theme="dark"] .course-title {
+        color: #111;
     }
     
     .course-description {
-        color: #64748b;
+        color: var(--text-secondary);
         font-size: 0.875rem;
         margin-bottom: 1.5rem;
         flex-grow: 1;
@@ -98,8 +108,8 @@
     
     .course-footer {
         padding: 1rem 1.5rem;
-        background-color: #f8fafc;
-        border-top: 1px solid #e2e8f0;
+        background-color: var(--card-bg);
+        border-top: 1px solid var(--card-border);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -113,22 +123,22 @@
     }
     
     .status-completed {
-        background-color: #dcfce7;
-        color: #166534;
+        background-color: #38d39f;
+        color: #1e293b;
     }
     
     .status-in-progress {
-        background-color: #fff3cd;
-        color: #856404;
+        background-color: #facc15;
+        color: #1e293b;
     }
     
     .status-not-started {
-        background-color: #f1f5f9;
-        color: #64748b;
+        background-color: #334155;
+        color: var(--text-secondary);
     }
     
     .course-action {
-        color: #5047e5;
+        color: var(--primary-color);
         text-decoration: none;
         font-weight: 500;
         font-size: 0.875rem;
@@ -140,7 +150,7 @@
     
     .completion-date {
         font-size: 0.75rem;
-        color: #64748b;
+        color: var(--text-secondary);
         margin-top: 0.5rem;
     }
 </style>
@@ -166,7 +176,7 @@
                         Completed on: {{ course.completion_date|date:"M d, Y" }}
                     </div>
                     {% elif course.completion_status == 'in_progress' %}
-                    <div class="completion-date" style="color: #856404;">
+                    <div class="completion-date">
                         Started on: {{ course.completion_date|date:"M d, Y" }}
                     </div>
                     {% endif %}

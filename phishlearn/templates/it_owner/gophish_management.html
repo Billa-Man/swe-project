@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header mb-4">
+    <h1 class="page-title">User Management </h1>
+    <p class="page-description">Manage your users and groups from this dashboard.</p>
+  </div>
+
+  <div class="row">
+    <!-- Templates Section - First Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Users</h2>
+          <a href="{% url 'create_user_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if users %}
+            <div class="list-group list-group-flush">
+              {% for user in users %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ user.username }}</h5>
+                    <div class="btn-group" role="group">
+                      <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-user" title="Edit" data-id="{{ user.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                        data-id="{{ user.id }}" data-name="{{ user.username }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Role: {{ user.role }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No users found. Create your first user to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Group Section - Second Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Groups</h2>
+          <a href="{% url 'create_group_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if groups %}
+            <div class="list-group list-group-flush">
+              {% for group in groups %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ group.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <a href="{% url 'group_detail' group.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-page" title="Edit" data-id="{{ group.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteGroupModal"
+                        data-id="{{ group.id }}" data-name="{{ group.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No groups found. Create your first group to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete user "<span id="userName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteUser">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Group Modal -->
+<div class="modal fade" id="deleteGroupModal" tabindex="-1" aria-labelledby="deleteGroupModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteGroupModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete group "<span id="groupName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteGroup">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // User functionality
+    setupUserHandlers();
+    
+    // Group functionality
+    setupGroupHandlers();
+  });
+  
+  // USER HANDLERS
+  function setupUserHandlers() {
+    // Edit user functionality
+    document.querySelectorAll('.edit-user').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const userId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_user_form' %}?edit=${userId}`;
+      });
+    });
+
+    // Delete user functionality
+    const deleteUserModal = document.getElementById('deleteUserModal');
+    if (deleteUserModal) {
+      let userIdToDelete;
+      
+      deleteUserModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        userIdToDelete = button.getAttribute('data-id');
+        const userName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteUserModal.querySelector('#userName').textContent = userName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteUser');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!userIdToDelete) return;
+          
+          fetch(`/users/${userIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteUserModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('User deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting user:', error);
+            alert('Error deleting user. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // GROUP HANDLERS
+  function setupGroupHandlers() {
+    // Edit group functionality
+    document.querySelectorAll('.edit-page').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const groupId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_group_form' %}?edit=${groupId}`;
+      });
+    });
+
+    // Delete group functionality
+    const deleteGroupModal = document.getElementById('deleteGroupModal');
+    if (deleteGroupModal) {
+      let groupIdToDelete;
+      
+      deleteGroupModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        groupIdToDelete = button.getAttribute('data-id');
+        const groupName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteGroupModal.querySelector('#groupName').textContent = groupName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteGroup');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!groupIdToDelete) return;
+          
+          fetch(`/groups/${groupIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteGroupModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Group deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting group:', error);
+            alert('Error deleting group. Please try again.');
+          }); 
+        });
+      }
+    }
+  }
+</script>
+{% endblock %}

@@ -144,6 +144,13 @@ def create_user(role, password, username):
             verify=False
         )
 
+        # Log the raw response before attempting to parse JSON
+        logger.info("RESULTS")
+        logger.info(f"Create profile response status: {response.status_code}")
+        logger.info(f"Create profile response headers: {response.headers}")
+        logger.info(f"DATA")
+        logger.info(f"Create profile raw response: {response.text}")
+
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
@@ -174,7 +181,6 @@ def modify_user(id, role, password, username):
     }
 
     data = {
-            "id" : id,
             "role": role,
             "password": password,
             "username": username,

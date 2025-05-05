@@ -310,7 +310,7 @@ def create_employee(request):
 
 
 @login_required
-def delete_emplpoyee(request, employee_id):
+def delete_employee(request, employee_id):
     if not request.user.userprofile.user_type == 'it_owner':
         messages.error(request, 'Unauthorized access')
         return redirect('manage_employees') 

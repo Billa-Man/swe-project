@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 
+from loguru import logger
+
 from .gophish_utils.templates import (
     get_templates, 
     get_template_with_id, 
@@ -105,9 +107,12 @@ class UserView(View):
             role = json.loads(request.POST.get("role"))
             password = request.POST.get("password")
             username = request.POST.get("username")
-            
+
+            role_slug = role['slug']
+            logger.info(f"Creating user with role: {role}, username: {username}")
+
             user = create_user(
-                role=role,
+                role=role_slug,
                 password=password,
                 username=username,
             )
@@ -127,10 +132,14 @@ class UserView(View):
             existing = get_user_with_id(user_id)
             if not existing:
                 return JsonResponse({"error": f"User with ID {user_id} not found"}, status=404)
+        
+            role = data.get("role", existing.get("role"))
+            if isinstance(role, dict):
+                role = role.get("slug", existing.get("role").get("slug"))
             
             result = modify_user(
                 id=user_id,
-                role=data.get("role", existing.get("role")),
+                role=role,
                 password=data.get("password", existing.get("password")),
                 username=data.get("username", existing.get("username")),
             )
@@ -455,7 +464,7 @@ class LandingPageView(View):
             capture_credentials = request.POST.get("capture_credentials")
             capture_passwords = request.POST.get("capture_passwords")
             redirect_url = request.POST.get("redirect_url")
-            
+   
             profile = create_landing_page(
                 name=name,
                 html=html,

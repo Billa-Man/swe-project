@@ -195,9 +195,10 @@ class GroupView(View):
     def post(self, request):
         """Create a new group"""
         try:
-            targets = json.loads(request.POST.get("targets"))
-            name = request.POST.get("name")
-            
+            data = json.loads(request.body)
+            name = data.get("name")
+            targets = data.get("targets")
+  
             group = create_group(
                 name=name,
                 targets=targets,
@@ -461,8 +462,8 @@ class LandingPageView(View):
         try:
             name = request.POST.get("name")
             html = request.POST.get("html")
-            capture_credentials = request.POST.get("capture_credentials")
-            capture_passwords = request.POST.get("capture_passwords")
+            capture_credentials = request.POST.get("capture_credentials") == 'on' or request.POST.get("capture_credentials") == 'true'
+            capture_passwords = request.POST.get("capture_passwords") == 'on' or request.POST.get("capture_passwords") == 'true'
             redirect_url = request.POST.get("redirect_url")
    
             profile = create_landing_page(
@@ -497,6 +498,12 @@ class LandingPageView(View):
                 capture_passwords=data.get("capture_passwords", existing.get("capture_passwords")),
                 redirect_url=data.get("redirect_url", existing.get("redirect_url")),
             )
+
+            # Convert to boolean properly
+            if "capture_credentials" in data:
+                data["capture_credentials"] = bool(data["capture_credentials"])
+            if "capture_passwords" in data:
+                data["capture_passwords"] = bool(data["capture_passwords"])
             
             if not result:
                 return JsonResponse({"error": "Failed to update landing page"}, status=500)

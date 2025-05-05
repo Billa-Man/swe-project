@@ -137,6 +137,7 @@ def get_groups_summary():
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",
     }
 
     try:
@@ -168,6 +169,7 @@ def get_group_summary_with_id(id):
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",
     }
 
     try:
@@ -183,7 +185,7 @@ def get_group_summary_with_id(id):
         return None
     
     
-def create_group(name, modified_date, targets):                 
+def create_group(name, targets):                 
     """
     Creates a sending profile.
     When creating a new group, you must specify a unique name, as well as a list of targets.
@@ -220,7 +222,6 @@ def create_group(name, modified_date, targets):
 
     data = {
             "name": name,
-            "modified_date": modified_date,
             "targets": targets,
         }
 
@@ -232,13 +233,20 @@ def create_group(name, modified_date, targets):
             verify=False
         )
 
+        # Log the raw response before attempting to parse JSON
+        logger.info("RESULTS")
+        logger.info(f"Create profile response status: {response.status_code}")
+        logger.info(f"Create profile response headers: {response.headers}")
+        logger.info(f"DATA")
+        logger.info(f"Create profile raw response: {response.text}")
+
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
         logger.error(f"Unable to create group: {e}")
         return None
     
-def modify_group(id, name, modified_date, targets):
+def modify_group(id, name, targets):
     """
     Modifies an existing group.
     The request must include the complete group JSON, not just the fields you're wanting to update. 
@@ -271,7 +279,6 @@ def modify_group(id, name, modified_date, targets):
     data = {
             "id" : id,
             "name": name,
-            "modified_date": modified_date,
             "targets": targets,
         }
 

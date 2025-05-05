@@ -106,7 +106,7 @@ def get_landing_page_with_id(id):
     
 
 def create_landing_page(name, html, capture_credentials, 
-                        capture_passwords, redirect_url, modified_date):                 
+                        capture_passwords, redirect_url):                 
     """
     Creates a landing page.
 
@@ -175,7 +175,7 @@ def create_landing_page(name, html, capture_credentials,
     
 
 def modify_landing_page(id, name, html, capture_credentials, 
-                        capture_passwords, redirect_url, modified_date):  
+                        capture_passwords, redirect_url):  
     """
     Modifies an existing landing page.
 

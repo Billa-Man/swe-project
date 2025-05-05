@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% csrf_token %}
 {% block title %}Create New Template{% endblock %}
 
 {% block content %}
@@ -17,7 +17,9 @@
         </div>
       {% endif %}
       
-      <form method="POST" action="{% url 'template_list' %}">
+      <div id="alert-container"></div>
+      
+      <form method="POST" action="{% url 'template_list' %}" id="templateForm">
         {% csrf_token %}
         
         <div class="mb-3">
@@ -46,12 +48,12 @@
         
         <div class="mb-3">
           <label for="attachments" class="form-label">Attachments (JSON)</label>
-          <textarea class="form-control" id="attachments" name="attachments" rows="3">{"attachments": []}</textarea>
+          <textarea class="form-control" id="attachments" name="attachments" rows="3">[]</textarea>
           <div class="form-text">Attachments in JSON format. Advanced usage only.</div>
         </div>
         
         <div class="d-flex justify-content-between">
-          <a href="{% url 'gophish_management' %}" class="btn btn-outline-secondary">
+          <a href="{% url 'control_center' %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Back
           </a>
           <button type="submit" class="btn btn-primary">
@@ -66,15 +68,79 @@
 
 {% block extra_js %}
 <script>
-  // Simple validation for the JSON field
-  document.getElementById('attachments').addEventListener('change', function(e) {
-    try {
-      JSON.parse(e.target.value);
-      e.target.classList.remove('is-invalid');
-    } catch (error) {
-      e.target.classList.add('is-invalid');
-      alert('Invalid JSON format in attachments field');
-    }
+  document.addEventListener('DOMContentLoaded', function() {
+    // Simple validation for the JSON field
+    document.getElementById('attachments').addEventListener('change', function(e) {
+      try {
+        JSON.parse(e.target.value);
+        e.target.classList.remove('is-invalid');
+      } catch (error) {
+        e.target.classList.add('is-invalid');
+        alert('Invalid JSON format in attachments field');
+      }
+    });
+    
+    // Handle form submission
+    const form = document.getElementById('templateForm');
+    
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const alertContainer = document.getElementById('alert-container');
+      
+      // Clear any existing alerts
+      alertContainer.innerHTML = '';
+      
+      // Show loading state
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.innerHTML;
+      submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+      submitButton.disabled = true;
+      
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success message
+          alertContainer.innerHTML = `
+            <div class="alert alert-success mb-4">
+              <i class="fas fa-check-circle me-2"></i> ${data.message}
+            </div>
+          `;
+          
+          // Redirect after a short delay
+          setTimeout(function() {
+            window.location.href = "{% url 'control_center' %}";
+          }, 1000);
+        } else {
+          // Show error message
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> ${data.error}
+            </div>
+          `;
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alertContainer.innerHTML = `
+          <div class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-circle me-2"></i> An error occurred. Please try again.
+          </div>
+        `;
+        submitButton.innerHTML = originalButtonText;
+        submitButton.disabled = false;
+      });
+    });
   });
 </script>
 {% endblock %}

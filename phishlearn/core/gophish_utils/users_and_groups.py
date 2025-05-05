@@ -183,7 +183,7 @@ def get_group_summary_with_id(id):
         return None
     
     
-def create_group(id, name, modified_date, targets):                 
+def create_group(name, modified_date, targets):                 
     """
     Creates a sending profile.
     When creating a new group, you must specify a unique name, as well as a list of targets.
@@ -219,7 +219,6 @@ def create_group(id, name, modified_date, targets):
     }
 
     data = {
-            "id" : id,
             "name": name,
             "modified_date": modified_date,
             "targets": targets,

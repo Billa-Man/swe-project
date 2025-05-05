@@ -26,10 +26,6 @@ urlpatterns = [
     path('my-profile/', views.my_profile, name='my_profile'),
     path('change-password/', views.change_password, name='change_password'),
 
-    path('sending-profiles/', views.SendingProfilesView.as_view(), name='sending_profiles'),
-    path('sending-profiles/modify/', views.ModifySendingProfileView.as_view(), name='modify_sending_profile'),
-    path('sending-profiles/delete/', views.DeleteSendingProfileView.as_view(), name='delete_sending_profile'),
-
     path('landing_pages/', views.LandingPagesView.as_view(), name='landing_pages'),
     path('gophish-analytics/', views.gophish_analytics, name='gophish_analytics'),
     
@@ -39,11 +35,6 @@ urlpatterns = [
     path('api/gophish/campaigns/<int:campaign_id>/summary/', api_campaign_summary, name='api_campaign_summary'),
     path("reset-api-key/", views.reset_api_key_view, name="reset_api_key"),  
 
-    # Template URLs
-    path('templates/', gophish_views.TemplateView.as_view(), name='template_list'),
-    path('templates/<int:template_id>/', gophish_views.TemplateView.as_view(), name='template_detail'),
-    path('templates/create/', gophish_views.CreateTemplateFormView.as_view(), name='create_template_form'),
-
     # Group URLs
     path('groups/', gophish_views.GroupView.as_view(), name='group_list'),
     path('groups/<int:group_id>/', gophish_views.GroupView.as_view(), name='group_detail'),
@@ -51,10 +42,25 @@ urlpatterns = [
 
     # User URLs
     path('users/', gophish_views.UserView.as_view(), name='user_list'),
-    path('users/<int:users_id>/', gophish_views.UserView.as_view(), name='user_detail'),
+    path('users/<int:user_id>/', gophish_views.UserView.as_view(), name='user_detail'),
     path('users/create/', gophish_views.CreateUserFormView.as_view(), name='create_user_form'),
+
+    # Template URLs
+    path('templates/', gophish_views.TemplateView.as_view(), name='template_list'),
+    path('templates/<int:template_id>/', gophish_views.TemplateView.as_view(), name='template_detail'),
+    path('templates/create/', gophish_views.CreateTemplateFormView.as_view(), name='create_template_form'),
+
+    # Sending Profile URLs
+    path('profiles/', gophish_views.SendingProfileView.as_view(), name='profile_list'),
+    path('profiles/<int:profile_id>/', gophish_views.SendingProfileView.as_view(), name='profile_detail'),
+    path('profiles/create/', gophish_views.CreateSendingProfileFormView.as_view(), name='create_profile_form'),
+
+    # Landing Page URLs
+    path('pages/', gophish_views.LandingPageView.as_view(), name='page_list'),
+    path('pages/<int:page_id>/', gophish_views.LandingPageView.as_view(), name='page_detail'),
+    path('pages/create/', gophish_views.CreateLandingPageFormView.as_view(), name='create_page_form'),
 
     # Campaign URLs
     path('campaigns/', views.fetchCampaigns, name='campaigns'),
-    path('gophish/management/', gophish_views.gophish_management, name='gophish_management'),
+    path('gophish/management/', gophish_views.control_center, name='control_center'),
 ]

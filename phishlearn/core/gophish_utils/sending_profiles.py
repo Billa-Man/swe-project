@@ -121,8 +121,8 @@ def get_sending_profile_with_id(id):
         logger.error(f"Sending profile with ID {id} not found")
         return None
     
-def create_sending_profile(name, host, interface_type, from_address, modified_date
-                           , ignore_cert_errors, username, password, profile_headers=[]):
+def create_sending_profile(name, host, interface_type, from_address,
+                           username, password, profile_headers=[]):
     
     """
     Creates a sending profile.
@@ -208,8 +208,8 @@ def create_sending_profile(name, host, interface_type, from_address, modified_da
         logger.error(f"Response content that failed to parse: {response.text}")
         return None
     
-def modify_sending_profile(id, name, host, interface_type, from_address, modified_date
-                           , ignore_cert_errors=True, username="", password="", profile_headers=None):
+def modify_sending_profile(id, name, host, interface_type, from_address,
+                           ignore_cert_errors=True, username="", password="", profile_headers=None):
     """
     Modifies an existing sending profile.
 
@@ -261,7 +261,6 @@ def modify_sending_profile(id, name, host, interface_type, from_address, modifie
             "username": username,
             "password": password,
             "ignore_cert_errors": ignore_cert_errors,
-            "modified_date": modified_date,
             "headers": profile_headers,
         }
 

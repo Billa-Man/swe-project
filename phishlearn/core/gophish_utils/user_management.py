@@ -131,7 +131,6 @@ def create_user(role, password, username):
     }
 
     data = {
-            "id" : id,
             "role": role,
             "password": password,
             "username": username,
@@ -152,7 +151,7 @@ def create_user(role, password, username):
         return None
     
 
-def modify_user(role, password, username):
+def modify_user(id, role, password, username):
     """
     Modifies an existing user.
 

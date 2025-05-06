@@ -307,13 +307,18 @@ class TemplateView(View):
             if not existing:
                 return JsonResponse({"error": f"Template with ID {template_id} not found"}, status=404)
             
+            # Ensure attachments is properly handled
+            attachments = data.get("attachments", existing.get("attachments", []))
+            if attachments is None:
+                attachments = []
+            
             result = modify_template(
                 id=template_id,
                 name=data.get("name", existing.get("name")),
                 subject=data.get("subject", existing.get("subject")),
                 text=data.get("text", existing.get("text")),
                 html=data.get("html", existing.get("html")),
-                attachments=data.get("attachments", existing.get("attachments"))
+                attachments=attachments
             )
             
             if not result:

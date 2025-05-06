@@ -210,12 +210,26 @@
         form.addEventListener('submit', function(e) {
           e.preventDefault();
           
+          // Make sure attachments is properly parsed from JSON string to object
+          let attachments = [];
+          try {
+            attachments = JSON.parse(document.getElementById('attachments').value || '[]');
+          } catch (error) {
+            console.error('Error parsing attachments JSON:', error);
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> Invalid JSON format in attachments field
+              </div>
+            `;
+            return;
+          }
+          
           const formData = {
             name: document.getElementById('name').value,
             subject: document.getElementById('subject').value,
             text: document.getElementById('text').value,
             html: document.getElementById('html').value,
-            attachments: JSON.parse(document.getElementById('attachments').value || '[]')
+            attachments: attachments
           };
           
           const submitButton = form.querySelector('button[type="submit"]');
@@ -233,7 +247,9 @@
           })
           .then(response => {
             if (!response.ok) {
-              throw new Error('Network response was not ok');
+              return response.text().then(text => {
+                throw new Error(`Server returned ${response.status}: ${text}`);
+              });
             }
             return response.json();
           })
@@ -244,7 +260,7 @@
               </div>
             `;
             setTimeout(function() {
-              window.location.href = "{% url 'template_list' %}";
+              window.location.href = "{% url 'control_center' %}";
             }, 1000);
           })
           .catch(error => {

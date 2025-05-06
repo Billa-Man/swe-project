@@ -199,6 +199,7 @@ def modify_landing_page(id, name, html, capture_credentials,
     }
 
     data = {
+            "id": id,
             "name": name,
             "html": html,
             "capture_credentials": capture_credentials,

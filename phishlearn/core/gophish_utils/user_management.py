@@ -181,6 +181,7 @@ def modify_user(id, role, password, username):
     }
 
     data = {
+            "id": id,
             "role": role,
             "password": password,
             "username": username,

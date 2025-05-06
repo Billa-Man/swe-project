@@ -322,7 +322,7 @@ def get_campaign_with_id(id):
         return None
     
 
-def create_campaign(id, name, created_date, launch_date, send_by_date, 
+def create_campaign(name, created_date, launch_date, send_by_date, 
                     completed_date, template, page, status, results, groups, 
                     timeline, smtp, url):                 
     """
@@ -653,4 +653,3 @@ def complete_campaign(id):
     except requests.exceptions.HTTPError as e:
         logger.error(f"Unable to mark campaign as complete: {e}")
         return None
-

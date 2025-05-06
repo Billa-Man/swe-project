@@ -184,7 +184,7 @@ def modify_user(id, role, password, username):
             "role": role,
             "password": password,
             "username": username,
-        }
+    }
 
     try:
         response = requests.put(

@@ -985,3 +985,11 @@ def fetchCampaigns(request):
         campaigns = []
 
     return render(request, 'gophish/campaigns.html', {'campaigns': campaigns})
+
+@login_required
+def gophish_campaigns(request):
+    """View for the GoPhish campaigns management page"""
+    context = {
+        'page_title': 'GoPhish Campaigns',
+    }
+    return render(request, 'it_owner/gophish_campaigns.html', context)

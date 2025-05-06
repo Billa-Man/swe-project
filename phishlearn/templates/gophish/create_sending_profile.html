@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Sending Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0 page-title">Create Sending Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Add the alert container here -->
+                    <div id="alert-container"></div>
+                    
+                    <form method="post" action="{% url 'profile_list' %}" id="profileForm">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="name">Profile Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <small class="form-text text-muted">A friendly name for this sending profile</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="interface_type">Interface Type</label>
+                            <select class="form-control" id="interface_type" name="interface_type" required>
+                                <option value="SMTP">SMTP</option>
+                                <option value="API">API</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="from_address">From Email Address</label>
+                            <input type="email" class="form-control" id="from_address" name="from_address" required>
+                            <small class="form-text text-muted">The email address that emails will appear to come from</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="host">SMTP Host</label>
+                            <input type="text" class="form-control" id="host" name="host" required>
+                            <small class="form-text text-muted">The SMTP server hostname or IP address</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <small class="form-text text-muted">The username for SMTP authentication</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <small class="form-text text-muted">The password for SMTP authentication</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'control_center' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Create Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    const form = document.getElementById('profileForm');
+    const alertContainer = document.getElementById('alert-container');
+    
+    if (editId) {
+      // Edit mode - fetch profile data
+      fetch(`/profiles/${editId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Fill form with profile data
+        document.getElementById('name').value = data.name || '';
+        document.getElementById('interface_type').value = data.interface_type || 'SMTP';
+        document.getElementById('from_address').value = data.from_address || '';
+        document.getElementById('host').value = data.host || '';
+        document.getElementById('username').value = data.username || '';
+        // Note: For security reasons, password field is typically not pre-filled
+        
+        // Update UI for edit mode
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle) pageTitle.textContent = 'Edit Sending Profile';
+        
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update Profile';
+        }
+        
+        // Change form action for edit mode
+        form.action = `/profiles/${editId}/`;
+        
+        // Handle form submission for edit
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // For edit mode, use a JSON format instead of FormData
+          const formData = {
+            name: document.getElementById('name').value,
+            interface_type: document.getElementById('interface_type').value,
+            from_address: document.getElementById('from_address').value,
+            host: document.getElementById('host').value,
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+          };
+          
+          const submitButton = form.querySelector('button[type="submit"]');
+          const originalButtonText = submitButton.innerHTML;
+          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+          submitButton.disabled = true;
+          
+          fetch(`/profiles/${editId}/`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> Profile updated successfully!
+              </div>
+            `;
+            setTimeout(function() {
+              window.location.href = "{% url 'control_center' %}";
+            }, 1000);
+          })
+          .catch(error => {
+            console.error('Error updating profile:', error);
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> Error updating profile. Please try again.
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          });
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching profile:', error);
+        alertContainer.innerHTML = `
+          <div class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-circle me-2"></i> Error loading profile data. Please try again.
+          </div>
+        `;
+      });
+    } else {
+      // Create mode - handle form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const alertContainer = document.getElementById('alert-container');
+        
+        // Clear any existing alerts
+        alertContainer.innerHTML = '';
+        
+        // Show loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+        submitButton.disabled = true;
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> ${data.message}
+              </div>
+            `;
+            
+            // Redirect after a short delay
+            setTimeout(function() {
+              window.location.href = "{% url 'control_center' %}";
+            }, 1000);
+          } else {
+            // Show error message
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> ${data.error}
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> An error occurred. Please try again.
+            </div>
+          `;
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

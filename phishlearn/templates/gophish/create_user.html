@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% csrf_token %}
+{% block title %}Create GoPhish User{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-white py-3">
+          <h1 class="page-title h3 mb-0">Create GoPhish User</h1>
+        </div>
+        <div class="card-body">
+          <div id="alert-container"></div>
+          {% if error %}
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+            </div>
+          {% endif %}
+
+          <form method="POST" action="{% url 'user_list' %}" id="userForm">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+              <div class="form-text">The username for this GoPhish user account.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+              <div class="form-text">Password must be at least 8 characters long.</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="role" class="form-label">Role</label>
+              <select class="form-select" id="role" name="role">
+                <option value='{"id": 0, "slug": "user", "name": "User"}'>User</option>
+                <option value='{"id": 1, "slug": "admin", "name": "Admin"}'>Admin</option>
+              </select>
+              <div class="form-text">Select the appropriate permission level for this user.</div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'control_center' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Create User
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    const form = document.getElementById('userForm');
+    const alertContainer = document.getElementById('alert-container');
+    
+    if (editId) {
+      // Edit mode - fetch user data
+      fetch(`/users/${editId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Fill form with user data
+        document.getElementById('username').value = data.username || '';
+        
+        // Select correct role
+        const roleSelect = document.getElementById('role');
+        if (data.role) {
+          const roleJson = JSON.stringify(data.role);
+          for (let i = 0; i < roleSelect.options.length; i++) {
+            const option = roleSelect.options[i];
+            const optionValue = JSON.parse(option.value);
+            if (optionValue.id === data.role.id) {
+              option.selected = true;
+              break;
+            }
+          }
+        }
+        
+        // Update UI for edit mode
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle) pageTitle.textContent = 'Edit GoPhish User';
+        
+        const submitButton = document.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update User';
+        }
+        
+        // Handle form submission for edit
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = {
+            username: document.getElementById('username').value,
+            role: JSON.parse(document.getElementById('role').value),
+            password: document.getElementById('password').value
+          };
+          
+          const submitButton = form.querySelector('button[type="submit"]');
+          const originalButtonText = submitButton.innerHTML;
+          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+          submitButton.disabled = true;
+          
+          fetch(`/users/${editId}/`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> User updated successfully!
+              </div>
+            `;
+            setTimeout(function() {
+              window.location.href = "{% url 'gophish_management' %}";
+            }, 1000);
+          })
+          .catch(error => {
+            console.error('Error updating user:', error);
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> Error updating user. Please try again.
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          });
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching user:', error);
+        alertContainer.innerHTML = `
+          <div class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-circle me-2"></i> Error loading user data. Please try again.
+          </div>
+        `;
+      });
+    } else {
+      // Create mode - handle form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+        submitButton.disabled = true;
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> ${data.message}
+              </div>
+            `;
+            setTimeout(function() {
+              window.location.href = "{% url 'gophish_management' %}";
+            }, 1000);
+          } else {
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> ${data.error}
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> An error occurred. Please try again.
+            </div>
+          `;
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

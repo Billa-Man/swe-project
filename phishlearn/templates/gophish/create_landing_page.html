@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% csrf_token %}
+{% block title %}{% if page_id %}Edit{% else %}Create{% endif %} Landing Page{% endblock %}
+
+{% block extra_css %}
+<style>
+  #htmlPreview {
+    width: 100%;
+    height: 400px; /* Fixed height for the iframe */
+    border: none; /* Remove default iframe border */
+    box-sizing: border-box;
+  }
+  #preview-content .card {
+    width: 100%; /* Ensure the card takes full container width */
+    max-width: 100%; /* Prevent the card from exceeding its container */
+  }
+  #htmlTabContent {
+    width: 100%; /* Ensure the tab content stays within bounds */
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-white py-3">
+                    <h1 class="page-title h3 mb-0">{% if page_id %}Edit{% else %}Create{% endif %} Landing Page</h1>
+                </div>
+                <div class="card-body">
+                    <div id="alert-container"></div>
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="{% if page_id %}{% url 'page_detail' page_id %}{% else %}{% url 'page_list' %}{% endif %}" id="pageForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                {% if page %}value="{{ page.name }}"{% endif %}>
+                            <div class="form-text">The name of your landing page.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="redirect_url" class="form-label">Redirect URL</label>
+                            <input type="url" class="form-control" id="redirect_url" name="redirect_url" required
+                                {% if page %}value="{{ page.redirect_url }}"{% endif %}>
+                            <div class="form-text text-muted">Users will be redirected to this URL after landing page interaction</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="html" class="form-label">HTML Content</label>
+                            
+                            <ul class="nav nav-tabs mb-2" id="htmlTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="code-tab" data-bs-toggle="tab" data-bs-target="#code-content" type="button" role="tab" aria-controls="code-content" aria-selected="true">Code</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview-content" type="button" role="tab" aria-controls="preview-content" aria-selected="false">Preview</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content" id="htmlTabContent">
+                                <div class="tab-pane fade show active" id="code-content" role="tabpanel" aria-labelledby="code-tab">
+                                    <textarea class="form-control" id="html" name="html" rows="10" required>{% if page %}{{ page.html }}{% endif %}</textarea>
+                                </div>
+                                <div class="tab-pane fade" id="preview-content" role="tabpanel" aria-labelledby="preview-tab">
+                                    <div class="card">
+                                        <div class="card-body border p-3">
+                                            <iframe id="htmlPreview"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-text text-muted">HTML content for your landing page</div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="capture_credentials" name="capture_credentials"
+                                {% if page and page.capture_credentials %}checked{% endif %}>
+                            <label class="form-check-label" for="capture_credentials">Capture Credentials</label>
+                            <div class="form-text text-muted">Enable to capture user credentials submitted on this page</div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="capture_passwords" name="capture_passwords"
+                                {% if page and page.capture_passwords %}checked{% endif %}>
+                            <label class="form-check-label" for="capture_passwords">Capture Passwords</label>
+                            <div class="form-text text-muted">Enable to capture passwords submitted on this page</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'control_center' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> {% if page_id %}Update{% else %}Create{% endif %} Landing Page
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    {% if page_id %}
+                    <div class="mt-4">
+                        <form id="delete-form" method="post" onsubmit="return confirm('Are you sure you want to delete this landing page?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i> Delete Landing Page
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    const form = document.getElementById('pageForm');
+    const alertContainer = document.getElementById('alert-container');
+    const pageId = '{{ page_id }}' || editId;
+    const htmlInput = document.getElementById('html');
+    const htmlPreview = document.getElementById('htmlPreview');
+    
+    // Setup tab switching functionality
+    const codeTab = document.getElementById('code-tab');
+    const previewTab = document.getElementById('preview-tab');
+    
+    function updateIframePreview() {
+      const content = htmlInput.value || '<div style="text-align: center; color: #6c757d;">Enter HTML content to see preview</div>';
+      const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { 
+              margin: 0; 
+              padding: 10px; 
+              box-sizing: border-box; 
+            }
+            * { max-width: 100%; }
+          </style>
+        </head>
+        <body>
+          ${content}
+        </body>
+        </html>
+      `);
+      doc.close();
+    }
+    
+    previewTab.addEventListener('click', function() {
+      updateIframePreview();
+    });
+    
+    // Update HTML preview when content changes
+    htmlInput.addEventListener('input', function() {
+      if (previewTab.classList.contains('active')) {
+        updateIframePreview();
+      }
+    });
+    
+    if (pageId) {
+      // Edit mode - fetch page data if not already provided by backend
+      if (!document.getElementById('name').value) {
+        fetch(`/pages/${pageId}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Fill form with page data
+          document.getElementById('name').value = data.name || '';
+          document.getElementById('redirect_url').value = data.redirect_url || '';
+          document.getElementById('html').value = data.html || '';
+          document.getElementById('capture_credentials').checked = data.capture_credentials || false;
+          document.getElementById('capture_passwords').checked = data.capture_passwords || false;
+          
+          // Update UI for edit mode
+          const pageTitle = document.querySelector('.page-title');
+          if (pageTitle) pageTitle.textContent = 'Edit Landing Page';
+          
+          const submitButton = document.querySelector('button[type="submit"]');
+          if (submitButton) {
+            submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update Landing Page';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching landing page:', error);
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> Error loading landing page data. Please try again.
+            </div>
+          `;
+        });
+      }
+      
+      // Set up event handler for PUT request on edit
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        // Add JSON fields for checkboxes
+        formData.append('capture_credentials', document.getElementById('capture_credentials').checked);
+        formData.append('capture_passwords', document.getElementById('capture_passwords').checked);
+        
+        // Clear any existing alerts
+        alertContainer.innerHTML = '';
+        
+        // Show loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+        submitButton.disabled = true;
+        
+        fetch(`/pages/${pageId}/`, {
+          method: 'PUT',
+          body: formData,
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> ${data.message || 'Landing page updated successfully!'}
+              </div>
+            `;
+            
+            // Redirect after a short delay
+            setTimeout(function() {
+              window.location.href = "{% url 'control_center' %}";
+            }, 1000);
+          } else {
+            // Show error message
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> ${data.error || 'An error occurred during update.'}
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> An error occurred. Please try again.
+            </div>
+          `;
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+        });
+      });
+      
+      // Handle delete form
+      const deleteForm = document.getElementById('delete-form');
+      if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (confirm('Are you sure you want to delete this landing page?')) {
+            const deleteButton = deleteForm.querySelector('button[type="submit"]');
+            const originalDeleteText = deleteButton.innerHTML;
+            deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Deleting...';
+            deleteButton.disabled = true;
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', `/pages/${pageId}/`, true);
+            xhr.setRequestHeader('X-CSRFToken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                alertContainer.innerHTML = `
+                  <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle me-2"></i> Landing page deleted successfully!
+                  </div>
+                `;
+                setTimeout(function() {
+                  window.location.href = "{% url 'control_center' %}";
+                }, 1000);
+              } else {
+                alertContainer.innerHTML = `
+                  <div class="alert alert-danger mb-4">
+                    <i class="fas fa-exclamation-circle me-2"></i> Error deleting landing page: ${JSON.parse(xhr.responseText).error || 'Unknown error'}
+                  </div>
+                `;
+                deleteButton.innerHTML = originalDeleteText;
+                deleteButton.disabled = false;
+              }
+            };
+            xhr.send();
+          }
+        });
+      }
+    } else {
+      // Create mode - handle form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        // Add JSON fields for checkboxes
+        formData.append('capture_credentials', document.getElementById('capture_credentials').checked);
+        formData.append('capture_passwords', document.getElementById('capture_passwords').checked);
+        
+        // Clear any existing alerts
+        alertContainer.innerHTML = '';
+        
+        // Show loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+        submitButton.disabled = true;
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> ${data.message || 'Landing page created successfully!'}
+              </div>
+            `;
+            
+            // Redirect after a short delay
+            setTimeout(function() {
+              window.location.href = "{% url 'control_center' %}";
+            }, 1000);
+          } else {
+            // Show error message
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> ${data.error || 'An error occurred during creation.'}
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> An error occurred. Please try again.
+            </div>
+          `;
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

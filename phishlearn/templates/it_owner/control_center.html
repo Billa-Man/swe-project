@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}Control Center{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header mb-4">
+    <h1 class="page-title">Control Center </h1>
+    <p class="page-description">Manage your phishing templates, landing pages, and sending profiles from this dashboard.</p>
+  </div>
+
+  <div class="row">
+    <!-- Templates Section - First Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Phishing Templates</h2>
+          <a href="{% url 'create_template_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if templates %}
+            <div class="list-group list-group-flush">
+              {% for template in templates %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ template.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <a href="{% url 'template_detail' template.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-template" title="Edit" data-id="{{ template.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteTemplateModal"
+                        data-id="{{ template.id }}" data-name="{{ template.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Subject: {{ template.subject }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No templates found. Create your first template to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Landing Pages Section - Second Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Landing Pages</h2>
+          <a href="{% url 'create_page_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if pages %}
+            <div class="list-group list-group-flush">
+              {% for page in pages %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ page.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <a href="{% url 'page_detail' page.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-page" title="Edit" data-id="{{ page.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deletePageModal"
+                        data-id="{{ page.id }}" data-name="{{ page.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Redirect: {{ page.redirect_url|truncatechars:25 }}</p>
+                  <div class="d-flex">
+                    {% if page.capture_credentials %}
+                      <span class="badge bg-info me-1">Captures Creds</span>
+                    {% endif %}
+                    {% if page.capture_passwords %}
+                      <span class="badge bg-warning">Captures Passwords</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No landing pages found. Create your first landing page to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sending Profiles Section - Third Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Sending Profiles</h2>
+          <a href="{% url 'create_profile_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if profiles %}
+            <div class="list-group list-group-flush">
+              {% for profile in profiles %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ profile.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <a href="{% url 'profile_detail' profile.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-profile" title="Edit" data-id="{{ profile.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteProfileModal"
+                        data-id="{{ profile.id }}" data-name="{{ profile.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Username: {{ profile.username }}</p>
+                  <p class="mb-1 text-muted small">From: {{ profile.from_address }}</p>
+                  <span class="badge bg-secondary">{{ profile.interface_type }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No sending profiles found. Create your first profile to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Template Modal -->
+<div class="modal fade" id="deleteTemplateModal" tabindex="-1" aria-labelledby="deleteTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteTemplateModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete template "<span id="templateName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteTemplate">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Landing Page Modal -->
+<div class="modal fade" id="deletePageModal" tabindex="-1" aria-labelledby="deletePageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deletePageModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete landing page "<span id="pageName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeletePage">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Profile Modal -->
+<div class="modal fade" id="deleteProfileModal" tabindex="-1" aria-labelledby="deleteProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProfileModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete sending profile "<span id="profileName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteProfile">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Template functionality
+    setupTemplateHandlers();
+    
+    // Landing Page functionality
+    setupPageHandlers();
+    
+    // Sending Profile functionality
+    setupProfileHandlers();
+    
+    // Simple validation for the JSON fields
+    setupValidation();
+  });
+  
+  // TEMPLATE HANDLERS
+  function setupTemplateHandlers() {
+    // Edit template functionality
+    document.querySelectorAll('.edit-template').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const templateId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_template_form' %}?edit=${templateId}`;
+      });
+    });
+
+    // Delete template functionality
+    const deleteTemplateModal = document.getElementById('deleteTemplateModal');
+    if (deleteTemplateModal) {
+      let templateIdToDelete;
+      
+      deleteTemplateModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        templateIdToDelete = button.getAttribute('data-id');
+        const templateName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteTemplateModal.querySelector('#templateName').textContent = templateName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteTemplate');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!templateIdToDelete) return;
+          
+          fetch(`/templates/${templateIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteTemplateModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Template deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting template:', error);
+            alert('Error deleting template. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // LANDING PAGE HANDLERS
+  function setupPageHandlers() {
+    // Edit landing page functionality
+    document.querySelectorAll('.edit-page').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const pageId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_page_form' %}?edit=${pageId}`;
+      });
+    });
+
+    // Delete landing page functionality
+    const deletePageModal = document.getElementById('deletePageModal');
+    if (deletePageModal) {
+      let pageIdToDelete;
+      
+      deletePageModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        pageIdToDelete = button.getAttribute('data-id');
+        const pageName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deletePageModal.querySelector('#pageName').textContent = pageName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeletePage');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!pageIdToDelete) return;
+          
+          fetch(`/pages/${pageIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deletePageModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Landing page deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting landing page:', error);
+            alert('Error deleting landing page. Please try again.');
+          }); 
+        });
+      }
+    }
+  }
+  
+  // SENDING PROFILE HANDLERS
+  function setupProfileHandlers() {
+    // Edit sending profile functionality
+    document.querySelectorAll('.edit-profile').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const profileId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_profile_form' %}?edit=${profileId}`;
+      });
+    });
+
+    // Delete sending profile functionality
+    const deleteProfileModal = document.getElementById('deleteProfileModal');
+    if (deleteProfileModal) {
+      let profileIdToDelete;
+      
+      deleteProfileModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        profileIdToDelete = button.getAttribute('data-id');
+        const profileName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteProfileModal.querySelector('#profileName').textContent = profileName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteProfile');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!profileIdToDelete) return;
+          
+          fetch(`/profiles/${profileIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteProfileModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Sending profile deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting sending profile:', error);
+            alert('Error deleting sending profile. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // Validation functionality
+  function setupValidation() {
+    // For template attachments
+    const attachmentsField = document.getElementById('attachments');
+    if (attachmentsField) {
+      attachmentsField.addEventListener('change', function(e) {
+        try {
+          JSON.parse(e.target.value);
+          e.target.classList.remove('is-invalid');
+        } catch (error) {
+          e.target.classList.add('is-invalid');
+          alert('Invalid JSON format in attachments field');
+        }
+      });
+    }
+  }
+</script>
+{% endblock %}

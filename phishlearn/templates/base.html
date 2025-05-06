@@ -458,25 +458,21 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link {% if 'group_list' in request.path %}active{% endif %}" href="{% url 'group_list' %}">
-                      <i class="fas fa-layer-group"></i> Manage Groups
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link {% if 'sending_profiles' in request.path %}active{% endif %}" href="{% url 'sending_profiles' %}">
-                      <i class="fas fa-paper-plane"></i> Sending Profiles
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link {% if 'landing_pages' in request.path %}active{% endif %}" href="{% url 'landing_pages' %}">
-                      <i class="fas fa-file-alt"></i>
-                      <span>Landing Pages</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'gophish_analytics' %}">
+                    <a class="nav-link" href="{% url 'gophish_management' %}">
                       <i class="fas fa-chart-line"></i>
-                      <span>Gophish Analytics</span>
+                      <span>GoPhish Users</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'control_center' %}">
+                      <i class="fas fa-shield-alt"></i>
+                      <span>Control Center</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'campaigns' %}">
+                      <i class="fas fa-chart-line"></i>
+                      <span>Campaigns</span>
                     </a>
                   </li>
                 {% elif user.userprofile.user_type == 'site_admin' %}

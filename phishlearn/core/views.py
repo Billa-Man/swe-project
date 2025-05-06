@@ -4,6 +4,10 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 
+
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
 from core.gophish_utils.settings import reset_api_key
 from .models import (
     UserProfile,
@@ -306,7 +310,7 @@ def create_employee(request):
 
 
 @login_required
-def delete_emplpoyee(request, employee_id):
+def delete_employee(request, employee_id):
     if not request.user.userprofile.user_type == 'it_owner':
         messages.error(request, 'Unauthorized access')
         return redirect('manage_employees') 
@@ -679,50 +683,228 @@ def course_view(request, course_id):
     return render(request, 'core/course_view.html', context)
 
 # views.py (updated)
-from django.views.generic import View
-from django.http import JsonResponse
-from .gophish_utils.sending_profiles import create_sending_profile, get_sending_profiles
-from datetime import datetime
 import random
+import logging
+from datetime import datetime
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.views.generic import View
+from django.contrib import messages
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import uuid
 
+from .gophish_utils.sending_profiles import (
+    get_sending_profiles,
+    create_sending_profile,
+    modify_sending_profile,
+    get_sending_profile_with_id,
+    delete_sending_profile
+)
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_exempt, name='dispatch')
 class SendingProfilesView(View):
+    http_method_names = ['get', 'post']
     template_name = 'it_owner/sending_profiles.html'
     
-    def get(self, request):
+    def get_form_fields(self):
+        return [
+            {'name': 'name', 'label': 'Profile Name', 'type': 'text'},
+            {'name': 'host', 'label': 'SMTP Host', 'type': 'text'},
+            {'name': 'interface_type', 'label': 'Protocol', 'type': 'select', 'options': ['SMTP', 'AWS']},
+            {'name': 'from_address', 'label': 'From Email', 'type': 'email'},
+            {'name': 'username', 'label': 'Username', 'type': 'text'},
+            {'name': 'password', 'label': 'Password', 'type': 'password'},
+        ]
+    
+    def get(self, request, *args, **kwargs):
         profiles = get_sending_profiles() or []
+        logger.info(f"Retrieved {len(profiles)} sending profiles")
+        
         return render(request, self.template_name, {
             'profiles': profiles,
-            'form_fields': [
-                {'name': 'name', 'label': 'Profile Name', 'type': 'text'},
-                {'name': 'host', 'label': 'SMTP Host', 'type': 'text'},
-                {'name': 'interface_type', 'label': 'Protocol', 'type': 'select', 'options': ['SMTP', 'AWS']},
-                {'name': 'from_address', 'label': 'From Email', 'type': 'email'},
-                {'name': 'username', 'label': 'Username', 'type': 'text'},
-                {'name': 'password', 'label': 'Password', 'type': 'password'},
-            ]
+            'form_fields': self.get_form_fields()
+        })
+    
+    def post(self, request, *args, **kwargs):
+        """Handle creating a new sending profile"""
+        try:
+            # Convert checkbox value to boolean
+            ignore_cert = request.POST.get('ignore_cert_errors') == 'on'
+            
+            # Use UUID for unique ID generation
+            data = {
+                'name': request.POST.get('name'),
+                'host': request.POST.get('host'),
+                'interface_type': request.POST.get('interface_type'),
+                'from_address': request.POST.get('from_address'),
+                'username': request.POST.get('username', ''),
+                'password': request.POST.get('password', ''),
+                'ignore_cert_errors': ignore_cert,
+                'modified_date': datetime.now().isoformat(),
+                'profile_headers': []
+            }
+            
+            # Add basic validation
+            if not data['name'] or not data['host'] or not data['from_address']:
+                raise ValueError("Name, Host and From Email are required fields")
+            
+            logger.info(f"Creating sending profile: {data['name']}")
+            result = create_sending_profile(**data)
+            logger.info(f"Result from create_sending_profile: {result}")
+            
+            if result:
+                logger.info(f"Successfully created sending profile: {data['name']}")
+                messages.success(request, 'Profile created successfully!')
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success', 'profile': result})
+                return redirect('sending_profiles')
+            else:
+                logger.error(f"Failed to create sending profile: {data['name']}")
+                messages.error(request, 'Failed to create profile')
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Unable to create a sending profile: {e}")
+            if hasattr(e, 'response') and e.response:
+                logger.error(f"Response status: {e.response.status_code}")
+                logger.error(f"Response content: {e.response.text}")
+            return None
+        
+        # If we get here, something went wrong
+        return render(request, self.template_name, {
+            'profiles': get_sending_profiles() or [],
+            'form_fields': self.get_form_fields()
         })
 
-    def post(self, request):
-        data = {
-            'id': random.randint(1, 1000000),
-            'name': request.POST.get('name'),
-            'host': request.POST.get('host'),
-            'interface_type': request.POST.get('interface_type'),
-            'from_address': request.POST.get('from_address'),
-            'username': request.POST.get('username'),
-            'password': request.POST.get('password'),
-            'ignore_cert_errors': request.POST.get('ignore_cert_errors', False),
-            'modified_date': datetime.now().isoformat(),
-            'profile_headers': []
-        }
-        
-        result = create_sending_profile(**data)
-        if result:
-            messages.success(request, 'Profile created successfully!')
-            return JsonResponse({'status': 'success', 'profile': result})
-        return JsonResponse({'status': 'error'}, status=400)
+@method_decorator(csrf_exempt, name='dispatch')
+class ModifySendingProfileView(View):
+    """Handle editing an existing sending profile"""
+    http_method_names = ['post']
+    template_name = 'it_owner/sending_profiles.html'
     
-    # views.py for landing pages
+    def post(self, request, *args, **kwargs):
+        try:
+            # Get profile ID from POST data instead of GET parameters
+            profile_id = request.POST.get('id')
+            if not profile_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Profile ID is required'
+                }, status=400)
+            
+            # Convert checkbox value to boolean
+            ignore_cert = request.POST.get('ignore_cert_errors') == 'on'
+            
+            data = {
+                'id': profile_id,
+                'name': request.POST.get('name'),
+                'host': request.POST.get('host'),
+                'interface_type': request.POST.get('interface_type'),
+                'from_address': request.POST.get('from_address'),
+                'username': request.POST.get('username', ''),
+                'password': request.POST.get('password', ''),
+                'ignore_cert_errors': ignore_cert,
+                'modified_date': datetime.now().isoformat(),
+                'profile_headers': []
+            }
+            
+            # Basic validation
+            if not data['name'] or not data['host'] or not data['from_address']:
+                raise ValueError("Name, Host and From Email are required fields")
+            
+            # If password is empty, get existing password
+            if not data['password']:
+                existing_profile = get_sending_profile_with_id(profile_id)
+                if existing_profile:
+                    data['password'] = existing_profile.get('password', '')
+                else:
+                    logger.error(f"Profile with ID {profile_id} not found")
+                    raise ValueError(f"Profile with ID {profile_id} not found")
+            
+            logger.info(f"Modifying sending profile with ID: {profile_id}")
+            result = modify_sending_profile(**data)
+            
+            if result:
+                logger.info(f"Successfully modified sending profile: {data['name']}")
+                messages.success(request, 'Profile updated successfully!')
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success', 'profile': result})
+                return redirect('sending_profiles')
+            else:
+                logger.error(f"Failed to modify sending profile with ID: {profile_id}")
+                messages.error(request, 'Failed to update profile')
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Failed to update profile'
+                    }, status=400)
+        except Exception as e:
+            logger.error(f"Exception in modify profile: {str(e)}")
+            messages.error(request, f"Error: {str(e)}")
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'error',
+                    'message': str(e)
+                }, status=400)
+        
+        # Return to profile list if non-AJAX request
+        return redirect('sending_profiles')
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteSendingProfileView(View):
+    """Handle deleting a sending profile"""
+    http_method_names = ['post', 'delete']
+    
+    def post(self, request, *args, **kwargs):
+        return self.delete_profile(request)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.delete_profile(request)
+    
+    def delete_profile(self, request):
+        try:
+            # Get profile ID from POST data instead of GET parameters
+            profile_id = request.POST.get('id')
+            if not profile_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Profile ID is required'
+                }, status=400)
+            
+            logger.info(f"Deleting sending profile with ID: {profile_id}")
+            result = delete_sending_profile(profile_id)
+            
+            if result and result.get('success'):
+                logger.info(f"Successfully deleted sending profile with ID: {profile_id}")
+                messages.success(request, 'Profile deleted successfully!')
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'success'})
+                return redirect('sending_profiles')
+            else:
+                logger.error(f"Failed to delete sending profile with ID: {profile_id}")
+                messages.error(request, 'Failed to delete profile')
+        except Exception as e:
+            logger.error(f"Exception in delete profile: {str(e)}")
+            messages.error(request, f"Error: {str(e)}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Failed to delete profile'
+            }, status=400)
+        
+        return redirect('sending_profiles')
+
+# core/views.py
+    
+# views.py for landing pages
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.generic import View
@@ -732,8 +914,11 @@ import random
 
 from .gophish_utils.landing_pages import create_landing_page, get_landing_pages
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LandingPagesView(View):
+    http_method_names = ['get', 'post']
     template_name = 'it_owner/landing_pages.html'
+
     
     def get(self, request):
         pages = get_landing_pages() or []
@@ -748,7 +933,6 @@ class LandingPagesView(View):
 
     def post(self, request):
         data = {
-            'id': random.randint(1, 1000000),
             'name': request.POST.get('name'),
             'html': request.POST.get('html'),
             'redirect_url': request.POST.get('redirect_url', ''),
@@ -782,3 +966,22 @@ def gophish_analytics(request):
         'page_title': 'Gophish Campaign Analytics',
     }
     return render(request, 'core/gophish_analytics.html', context)
+
+# views.py
+import requests
+from django.conf import settings
+from django.shortcuts import render
+
+def fetchCampaigns(request):
+    headers = {
+        'Authorization': settings.GOPHISH_API_KEY,
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(settings.GOPHISH_API_URL, headers=headers, verify=False)
+
+    if response.status_code == 200:
+        campaigns = response.json()
+    else:
+        campaigns = []
+
+    return render(request, 'gophish/campaigns.html', {'campaigns': campaigns})

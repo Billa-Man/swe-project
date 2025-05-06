@@ -181,6 +181,7 @@ def get_campaigns():
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json"
     }
 
     try:
@@ -419,7 +420,6 @@ def create_campaign(id, name, created_date, launch_date, send_by_date,
     }
 
     data = {
-            "id" : id,
             "name": name,
             "created_date": created_date,
             "launch_date": launch_date,
@@ -438,7 +438,7 @@ def create_campaign(id, name, created_date, launch_date, send_by_date,
     try:
         response = requests.post(
             f"{GOPHISH_API_URL}/campaigns/",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )

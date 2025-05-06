@@ -52,6 +52,7 @@ def get_templates():
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",
     }
 
     try:
@@ -100,7 +101,7 @@ def get_template_with_id(id):
         logger.error(f"Template with ID {id} not found")
         return None
     
-def create_template(id, name, subject, text, html, modified_date, attachments):                 
+def create_template(name, subject, text, html, attachments=[]):                 
     """
     Creates a sending profile.
 
@@ -125,22 +126,29 @@ def create_template(id, name, subject, text, html, modified_date, attachments):
     }
 
     data = {
-            "id" : id,
             "name": name,
             "subject": subject,
             "text": text,
             "html": html,
-            "modified_date": modified_date,
             "attachments": attachments,
         }
 
     try:
         response = requests.post(
             f"{GOPHISH_API_URL}/templates/",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
+
+        # Log the raw response before attempting to parse JSON
+        logger.info("RESULTS")
+        logger.info(f"Create profile response status: {response.status_code}")
+        logger.info(f"Create profile response headers: {response.headers}")
+        logger.info("RESPONSE")
+        logger.info(f"Create profile response: {response.json()}")
+        logger.info(f"DATA")
+        logger.info(f"Create profile raw response: {response.text}")
 
         response.raise_for_status()
         return response.json()
@@ -148,7 +156,7 @@ def create_template(id, name, subject, text, html, modified_date, attachments):
         logger.error(f"Unable to create template: {e}")
         return None
     
-def modify_template(id, name, subject, text, html, modified_date, attachments):
+def modify_template(id, name, subject, text, html, attachments):
     """
     Modifies an existing sending profile.
 
@@ -173,19 +181,17 @@ def modify_template(id, name, subject, text, html, modified_date, attachments):
     }
 
     data = {
-            "id" : id,
             "name": name,
             "subject": subject,
             "text": text,
             "html": html,
-            "modified_date": modified_date,
             "attachments": attachments,
         }
 
     try:
         response = requests.put(
             f"{GOPHISH_API_URL}/templates/{id}",
-            data=data,
+            json=data,
             headers=headers,
             verify=False
         )
@@ -251,7 +257,7 @@ def import_email(convert_links, content):
         response = requests.post(
             f"{GOPHISH_API_URL}/import/email",
             headers=headers,
-            data=data,
+            json=data,
             verify=False
         )
 
@@ -260,4 +266,3 @@ def import_email(convert_links, content):
     except requests.exceptions.HTTPError as e:
         logger.error(f"Unable to import email: {e}")
         return None
-

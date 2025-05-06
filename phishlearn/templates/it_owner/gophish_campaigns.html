@@ -420,6 +420,12 @@
                 launch_date: document.getElementById('launchDate').value
             };
 
+            // Disable the create button and show loading state
+            const createButton = this;
+            const originalText = createButton.innerHTML;
+            createButton.disabled = true;
+            createButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+
             try {
                 const response = await fetch('/api/gophish/campaigns/create/', {
                     method: 'POST',
@@ -430,18 +436,31 @@
                     body: JSON.stringify(formData)
                 });
 
+                const result = await response.json();
+
                 if (response.ok) {
-                    const result = await response.json();
+                    // Close the modal first
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createCampaignModal'));
+                    modal.hide();
+                    
+                    // Reset the form
+                    form.reset();
+                    
+                    // Show success message
                     alert('Campaign created successfully!');
-                    $('#createCampaignModal').modal('hide');
-                    loadCampaigns();
+                    
+                    // Reload the campaigns list
+                    await loadCampaigns();
                 } else {
-                    const error = await response.json();
-                    alert('Error creating campaign: ' + error.error);
+                    throw new Error(result.error || 'Failed to create campaign');
                 }
             } catch (error) {
                 console.error('Error creating campaign:', error);
-                alert('Error creating campaign. Please try again.');
+                alert(error.message || 'Error creating campaign. Please try again.');
+            } finally {
+                // Re-enable the create button and restore original text
+                createButton.disabled = false;
+                createButton.innerHTML = originalText;
             }
         });
     });

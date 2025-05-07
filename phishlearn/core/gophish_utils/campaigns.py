@@ -614,4 +614,3 @@ def complete_campaign(id):
     except requests.exceptions.HTTPError as e:
         logger.error(f"Unable to mark campaign as complete: {e}")
         return None
-

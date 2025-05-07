@@ -219,11 +219,14 @@
       form.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const formData = new FormData(form);
-        
-        // Add JSON fields for checkboxes
-        formData.append('capture_credentials', document.getElementById('capture_credentials').checked);
-        formData.append('capture_passwords', document.getElementById('capture_passwords').checked);
+        // Create a data object instead of FormData
+        const formData = {
+          name: document.getElementById('name').value,
+          html: document.getElementById('html').value,
+          redirect_url: document.getElementById('redirect_url').value,
+          capture_credentials: document.getElementById('capture_credentials').checked,
+          capture_passwords: document.getElementById('capture_passwords').checked
+        };
         
         // Clear any existing alerts
         alertContainer.innerHTML = '';
@@ -236,9 +239,10 @@
         
         fetch(`/pages/${pageId}/`, {
           method: 'PUT',
-          body: formData,
+          body: JSON.stringify(formData), // Convert to JSON string
           headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json', // Add this header
             'X-Requested-With': 'XMLHttpRequest'
           }
         })

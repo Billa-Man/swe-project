@@ -158,7 +158,7 @@ def create_template(name, subject, text, html, attachments=[]):
     
 def modify_template(id, name, subject, text, html, attachments):
     """
-    Modifies an existing sending profile.
+    Modifies an existing template.
 
     Input:
         Template structure
@@ -178,15 +178,25 @@ def modify_template(id, name, subject, text, html, attachments):
 
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json",  # Ensure content type is set
     }
 
+    # Ensure attachments is a list even if None is passed
+    if attachments is None:
+        attachments = []
+    
+    # Create the data object with proper structure
     data = {
-            "name": name,
-            "subject": subject,
-            "text": text,
-            "html": html,
-            "attachments": attachments,
-        }
+        "id": id,
+        "name": name,
+        "subject": subject,
+        "text": text,
+        "html": html,
+        "attachments": attachments,
+    }
+
+    logger.info(f"Sending PUT request to {GOPHISH_API_URL}/templates/{id}")
+    logger.info(f"Request data: {json.dumps(data)}")
 
     try:
         response = requests.put(
@@ -196,10 +206,16 @@ def modify_template(id, name, subject, text, html, attachments):
             verify=False
         )
 
+        # Log the raw response to debug issues
+        logger.info(f"Response status: {response.status_code}")
+        logger.info(f"Response headers: {response.headers}")
+        logger.info(f"Response body: {response.text}")
+
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
         logger.error(f"Unable to modify template. Check if template with id: {id} exists: {e}")
+        logger.error(f"Response content: {response.text}")
         return None
 
 def delete_template(id):

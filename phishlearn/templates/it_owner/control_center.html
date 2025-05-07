@@ -1,0 +1,933 @@
+{% extends "base.html" %}
+
+{% block title %}Control Center{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header mb-4">
+    <h1 class="page-title">Control Center </h1>
+    <p class="page-description">Manage your phishing templates, landing pages, and sending profiles from this dashboard.</p>
+  </div>
+
+  <div class="row">
+    <!-- Templates Section - First Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Phishing Templates</h2>
+          <a href="{% url 'create_template_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if templates %}
+            <div class="list-group list-group-flush">
+              {% for template in templates %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ template.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-sm btn-outline-primary view-template" title="View" data-id="{{ template.id }}" aria-label="View template {{ template.name }}">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-template" title="Edit" data-id="{{ template.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteTemplateModal"
+                        data-id="{{ template.id }}" data-name="{{ template.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Subject: {{ template.subject }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No templates found. Create your first template to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Landing Pages Section - Second Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Landing Pages</h2>
+          <a href="{% url 'create_page_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if pages %}
+            <div class="list-group list-group-flush">
+              {% for page in pages %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ page.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-sm btn-outline-primary view-page" title="View" data-id="{{ page.id }}" aria-label="View landing page {{ page.name }}">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-page" title="Edit" data-id="{{ page.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deletePageModal"
+                        data-id="{{ page.id }}" data-name="{{ page.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Redirect: {{ page.redirect_url|truncatechars:25 }}</p>
+                  <div class="d-flex">
+                    {% if page.capture_credentials %}
+                      <span class="badge bg-info me-1">Captures Creds</span>
+                    {% endif %}
+                    {% if page.capture_passwords %}
+                      <span class="badge bg-warning">Captures Passwords</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No landing pages found. Create your first landing page to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sending Profiles Section - Third Column -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+          <h2 class="h4 mb-0">Sending Profiles</h2>
+          <a href="{% url 'create_profile_form' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> New
+          </a>
+        </div>
+        <div class="card-body overflow-auto" style="max-height: 600px;">
+          {% if profiles %}
+            <div class="list-group list-group-flush">
+              {% for profile in profiles %}
+                <div class="list-group-item list-group-item-action py-3 px-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ profile.name }}</h5>
+                    <div class="btn-group" role="group">
+                      <button type="button" class="btn btn-sm btn-outline-primary view-profile" title="View" data-id="{{ profile.id }}" aria-label="View sending profile {{ profile.name }}">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <a href="#" class="btn btn-sm btn-outline-secondary edit-profile" title="Edit" data-id="{{ profile.id }}">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteProfileModal"
+                        data-id="{{ profile.id }}" data-name="{{ profile.name }}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="mb-1 text-muted small">Username: {{ profile.username }}</p>
+                  <p class="mb-1 text-muted small">From: {{ profile.from_address }}</p>
+                  <span class="badge bg-secondary">{{ profile.interface_type }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">
+              <i class="fas fa-info-circle me-2"></i> No sending profiles found. Create your first profile to get started.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Template Modal -->
+<div class="modal fade" id="deleteTemplateModal" tabindex="-1" aria-labelledby="deleteTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteTemplateModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete template "<span id="templateName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteTemplate">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Landing Page Modal -->
+<div class="modal fade" id="deletePageModal" tabindex="-1" aria-labelledby="deletePageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deletePageModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete landing page "<span id="pageName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeletePage">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Profile Modal -->
+<div class="modal fade" id="deleteProfileModal" tabindex="-1" aria-labelledby="deleteProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProfileModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <p>Are you sure you want to delete sending profile "<span id="profileName"></span>"?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteProfile">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Template Modal -->
+<div class="modal fade" id="viewTemplateModal" tabindex="-1" aria-labelledby="viewTemplateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewTemplateModalLabel">Template Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3" id="templateLoadingSpinner">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div id="templateDetails" class="d-none">
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Name:</div>
+            <div class="col-md-9" id="viewTemplateName"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Subject:</div>
+            <div class="col-md-9" id="viewTemplateSubject"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Last Modified:</div>
+            <div class="col-md-9" id="viewTemplateModifiedDate"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-12 fw-bold">Email Content:</div>
+            <div class="col-md-12 mt-2">
+              <div class="card">
+                <div class="card-body" id="viewTemplateContent">
+                  <!-- Template content will be displayed here -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3" id="viewTemplateAttachmentsRow">
+            <div class="col-md-12 fw-bold">Attachments:</div>
+            <div class="col-md-12 mt-2">
+              <div class="card">
+                <div class="card-body" id="viewTemplateAttachments">
+                  <!-- Attachments will be listed here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="templateError" class="alert alert-danger d-none">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading template details. Please try again later.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="#" class="btn btn-primary" id="viewTemplateEditBtn">Edit Template</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Landing Page Modal -->
+<div class="modal fade" id="viewPageModal" tabindex="-1" aria-labelledby="viewPageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewPageModalLabel">Landing Page Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3" id="pageLoadingSpinner">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div id="pageDetails" class="d-none">
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Name:</div>
+            <div class="col-md-9" id="viewPageName"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Redirect URL:</div>
+            <div class="col-md-9" id="viewPageRedirectUrl"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Last Modified:</div>
+            <div class="col-md-9" id="viewPageModifiedDate"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Captures:</div>
+            <div class="col-md-9" id="viewPageCaptures">
+              <!-- Capture details will be displayed here -->
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-12 fw-bold">HTML Preview:</div>
+            <div class="col-md-12 mt-2">
+              <div class="card">
+                <div class="card-body">
+                  <div id="viewPageContent" class="landing-page-preview"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="pageError" class="alert alert-danger d-none">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading landing page details. Please try again later.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="#" class="btn btn-primary" id="viewPageEditBtn">Edit Landing Page</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Sending Profile Modal -->
+<div class="modal fade" id="viewProfileModal" tabindex="-1" aria-labelledby="viewProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewProfileModalLabel">Sending Profile Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3" id="profileLoadingSpinner">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div id="profileDetails" class="d-none">
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Name:</div>
+            <div class="col-md-8" id="viewProfileName"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Interface Type:</div>
+            <div class="col-md-8" id="viewProfileInterfaceType"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">From Address:</div>
+            <div class="col-md-8" id="viewProfileFromAddress"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Username:</div>
+            <div class=" sebe col-md-8" id="viewProfileUsername"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Host:</div>
+            <div class="col-md-8" id="viewProfileHost"></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Last Modified:</div>
+            <div class="col-md-8" id="viewProfileModifiedDate"></div>
+          </div>
+        </div>
+        <div id="profileError" class="alert alert-danger d-none">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading sending profile details. Please try again later.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="#" class="btn btn-primary" id="viewProfileEditBtn">Edit Profile</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+  .modal-body {
+    min-height: 200px;
+  }
+
+  .card-body {
+    min-height: 50px;
+  }
+
+  /* Ensure modals maintain size during transitions */
+  .modal-dialog {
+    transition: none !important;
+  }
+  .landing-page-preview {
+    width: 100%;
+    min-height: 400px;
+    overflow: auto;
+  }
+
+  .landing-page-preview iframe {
+    width: 100%;
+    height: 400px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+  }
+
+  /* Make sure modals with iframes display correctly */
+  .modal-lg {
+    max-width: 800px;
+  }
+
+  @media (max-width: 768px) {
+    .landing-page-preview iframe {
+      height: 300px;
+    }
+  }
+</style>
+<!-- Include syntax highlighting library for code display (optional) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Template functionality
+    setupTemplateHandlers();
+    
+    // Landing Page functionality
+    setupPageHandlers();
+    
+    // Sending Profile functionality
+    setupProfileHandlers();
+    
+    // Simple validation for the JSON fields
+    setupValidation();
+  });
+  
+  // TEMPLATE HANDLERS
+  function setupTemplateHandlers() {
+    // View template functionality
+    document.querySelectorAll('.view-template').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const templateId = this.getAttribute('data-id');
+        openTemplateViewModal(templateId);
+      });
+    });
+    
+    // Edit template functionality
+    document.querySelectorAll('.edit-template').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const templateId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_template_form' %}?edit=${templateId}`;
+      });
+    });
+
+    // Delete template functionality
+    const deleteTemplateModal = document.getElementById('deleteTemplateModal');
+    if (deleteTemplateModal) {
+      let templateIdToDelete;
+      
+      deleteTemplateModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        templateIdToDelete = button.getAttribute('data-id');
+        const templateName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteTemplateModal.querySelector('#templateName').textContent = templateName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteTemplate');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!templateIdToDelete) return;
+          
+          fetch(`/templates/${templateIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteTemplateModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Template deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting template:', error);
+            alert('Error deleting template. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // LANDING PAGE HANDLERS
+  function setupPageHandlers() {
+    // View landing page functionality
+    document.querySelectorAll('.view-page').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const pageId = this.getAttribute('data-id');
+        openPageViewModal(pageId);
+      });
+    });
+    
+    // Edit landing page functionality
+    document.querySelectorAll('.edit-page').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const pageId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_page_form' %}?edit=${pageId}`;
+      });
+    });
+
+    // Delete landing page functionality
+    const deletePageModal = document.getElementById('deletePageModal');
+    if (deletePageModal) {
+      let pageIdToDelete;
+      
+      deletePageModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        pageIdToDelete = button.getAttribute('data-id');
+        const pageName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deletePageModal.querySelector('#pageName').textContent = pageName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeletePage');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!pageIdToDelete) return;
+          
+          fetch(`/pages/${pageIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deletePageModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Landing page deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting landing page:', error);
+            alert('Error deleting landing page. Please try again.');
+          }); 
+        });
+      }
+    }
+  }
+  
+  // SENDING PROFILE HANDLERS
+  function setupProfileHandlers() {
+    // View sending profile functionality
+    document.querySelectorAll('.view-profile').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const profileId = this.getAttribute('data-id');
+        openProfileViewModal(profileId);
+      });
+    });
+    
+    // Edit sending profile functionality
+    document.querySelectorAll('.edit-profile').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const profileId = this.getAttribute('data-id');
+        window.location.href = `{% url 'create_profile_form' %}?edit=${profileId}`;
+      });
+    });
+
+    // Delete sending profile functionality
+    const deleteProfileModal = document.getElementById('deleteProfileModal');
+    if (deleteProfileModal) {
+      let profileIdToDelete;
+      
+      deleteProfileModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        profileIdToDelete = button.getAttribute('data-id');
+        const profileName = button.getAttribute('data-name');
+        
+        // Update modal content
+        deleteProfileModal.querySelector('#profileName').textContent = profileName;
+      });
+      
+      // Add click handler to the confirm delete button
+      const confirmDeleteButton = document.getElementById('confirmDeleteProfile');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (!profileIdToDelete) return;
+          
+          fetch(`/profiles/${profileIdToDelete}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(deleteProfileModal);
+            bootstrapModal.hide();
+            
+            // Show success message and reload
+            alert('Sending profile deleted successfully!');
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error deleting sending profile:', error);
+            alert('Error deleting sending profile. Please try again.');
+          });
+        });
+      }
+    }
+  }
+  
+  // Open Template View Modal
+  function openTemplateViewModal(templateId) {
+  // Get modal elements
+  const modal = document.getElementById('viewTemplateModal');
+  const modalInstance = new bootstrap.Modal(modal);
+  
+  // Show loading spinner
+  document.getElementById('templateLoadingSpinner').classList.remove('d-none');
+  document.getElementById('templateDetails').classList.add('d-none');
+  document.getElementById('templateError').classList.add('d-none');
+  
+  // Show modal first - this ensures proper initial sizing
+  modalInstance.show();
+  
+  // Fetch template data
+  fetch(`/templates/${templateId}/`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Populate template data
+      document.getElementById('viewTemplateName').textContent = data.name || 'N/A';
+      document.getElementById('viewTemplateSubject').textContent = data.subject || 'N/A';
+      document.getElementById('viewTemplateModifiedDate').textContent = data.modified_date ? formatDate(data.modified_date) : 'N/A';
+      
+      // Set the HTML content safely
+      const templateContent = document.getElementById('viewTemplateContent');
+      templateContent.innerHTML = '';
+      
+      if (data.html) {
+        const contentWrapper = document.createElement('div');
+        contentWrapper.innerHTML = data.html;
+        templateContent.appendChild(contentWrapper);
+      } else {
+        templateContent.textContent = 'No content available';
+      }
+      
+      // Handle attachments
+      const attachmentsRow = document.getElementById('viewTemplateAttachmentsRow');
+      const attachmentsContainer = document.getElementById('viewTemplateAttachments');
+      
+      if (data.attachments && data.attachments.length > 0) {
+        attachmentsRow.classList.remove('d-none');
+        const attachmentsList = document.createElement('ul');
+        attachmentsList.className = 'list-group';
+        
+        data.attachments.forEach(attachment => {
+          const listItem = document.createElement('li');
+          listItem.className = 'list-group-item';
+          
+          const attachmentName = document.createElement('p');
+          attachmentName.className = 'mb-1 fw-bold';
+          attachmentName.textContent = attachment.name || 'Unnamed Attachment';
+          
+          const attachmentType = document.createElement('p');
+          attachmentType.className = 'mb-1 text-muted small';
+          attachmentType.textContent = `Type: ${attachment.type || 'unknown'}`;
+          
+          listItem.appendChild(attachmentName);
+          listItem.appendChild(attachmentType);
+          attachmentsList.appendChild(listItem);
+        });
+        
+        attachmentsContainer.innerHTML = '';
+        attachmentsContainer.appendChild(attachmentsList);
+      } else {
+        attachmentsRow.classList.add('d-none');
+      }
+      
+      // Set edit button href
+      document.getElementById('viewTemplateEditBtn').setAttribute('href', `{% url 'create_template_form' %}?edit=${templateId}`);
+      
+      // Important: Hide spinner and show data with a small delay to allow DOM to update
+      setTimeout(() => {
+        document.getElementById('templateLoadingSpinner').classList.add('d-none');
+        document.getElementById('templateDetails').classList.remove('d-none');
+        
+        // Force modal to reposition/resize
+        modal.dispatchEvent(new Event('resize'));
+      }, 50);
+    })
+    .catch(error => {
+      console.error('Error fetching template:', error);
+      document.getElementById('templateLoadingSpinner').classList.add('d-none');
+      document.getElementById('templateError').classList.remove('d-none');
+    });
+}
+  
+// Open Landing Page View Modal
+function openPageViewModal(pageId) {
+  // Get modal elements
+  const modal = document.getElementById('viewPageModal');
+  const modalInstance = new bootstrap.Modal(modal);
+  
+  // Show loading spinner
+  document.getElementById('pageLoadingSpinner').classList.remove('d-none');
+  document.getElementById('pageDetails').classList.add('d-none');
+  document.getElementById('pageError').classList.add('d-none');
+  
+  // Show modal first - this ensures proper initial sizing
+  modalInstance.show();
+  
+  // Fetch landing page data
+  fetch(`/pages/${pageId}/`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Populate page data
+      document.getElementById('viewPageName').textContent = data.name || 'N/A';
+      document.getElementById('viewPageRedirectUrl').textContent = data.redirect_url || 'N/A';
+      document.getElementById('viewPageModifiedDate').textContent = data.modified_date ? formatDate(data.modified_date) : 'N/A';
+      
+      // Handle the HTML content - Display the preview in an iframe
+      const contentContainer = document.getElementById('viewPageContent');
+      contentContainer.innerHTML = '';
+      
+      // Create iframe to display HTML preview safely
+      const iframe = document.createElement('iframe');
+      iframe.style.width = '100%';
+      iframe.style.height = '400px';
+      iframe.style.border = '1px solid #dee2e6';
+      iframe.title = "Landing page preview";
+      
+      contentContainer.appendChild(iframe);
+      
+      // Set content to the iframe - Use setTimeout to ensure iframe is in DOM
+      setTimeout(() => {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(data.html || '<p>No content available</p>');
+        iframeDoc.close();
+      }, 100);
+      
+      // Optional: If you want to also show the HTML code
+      if (document.getElementById('viewPageCode')) {
+        const codeElement = document.getElementById('viewPageCode');
+        codeElement.textContent = data.html || 'No content available';
+        
+        // Apply syntax highlighting if available
+        if (typeof hljs !== 'undefined') {
+          hljs.highlightElement(codeElement);
+        }
+      }
+      
+      // Handle capture information
+      const capturesContainer = document.getElementById('viewPageCaptures');
+      capturesContainer.innerHTML = '';
+      
+      if (data.capture_credentials || data.capture_passwords) {
+        const capturesList = document.createElement('div');
+        
+        if (data.capture_credentials) {
+          const credBadge = document.createElement('span');
+          credBadge.className = 'badge bg-info me-2';
+          credBadge.textContent = 'Captures Credentials';
+          capturesList.appendChild(credBadge);
+        }
+        
+        if (data.capture_passwords) {
+          const passBadge = document.createElement('span');
+          passBadge.className = 'badge bg-warning me-2';
+          passBadge.textContent = 'Captures Passwords';
+          capturesList.appendChild(passBadge);
+        }
+        
+        capturesContainer.appendChild(capturesList);
+      } else {
+        capturesContainer.textContent = 'No credentials or passwords captured';
+      }
+      
+      // Set edit button href
+      document.getElementById('viewPageEditBtn').setAttribute('href', `{% url 'create_page_form' %}?edit=${pageId}`);
+      
+      // Hide spinner and show data
+      setTimeout(() => {
+        document.getElementById('pageLoadingSpinner').classList.add('d-none');
+        document.getElementById('pageDetails').classList.remove('d-none');
+        
+        // Force modal to reposition/resize
+        modal.dispatchEvent(new Event('resize'));
+      }, 50);
+    })
+    .catch(error => {
+      console.error('Error fetching landing page:', error);
+      document.getElementById('pageLoadingSpinner').classList.add('d-none');
+      document.getElementById('pageError').classList.remove('d-none');
+    });
+}
+  
+  // Open Sending Profile View Modal
+  function openProfileViewModal(profileId) {
+  // Get modal elements
+  const modal = document.getElementById('viewProfileModal');
+  const modalInstance = new bootstrap.Modal(modal);
+  
+  // Show loading spinner
+  document.getElementById('profileLoadingSpinner').classList.remove('d-none');
+  document.getElementById('profileDetails').classList.add('d-none');
+  document.getElementById('profileError').classList.add('d-none');
+  
+  // Show modal first - this ensures proper initial sizing
+  modalInstance.show();
+  
+  // Fetch profile data
+  fetch(`/profiles/${profileId}/`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Populate profile data
+      document.getElementById('viewProfileName').textContent = data.name || 'N/A';
+      document.getElementById('viewProfileInterfaceType').textContent = data.interface_type || 'N/A';
+      document.getElementById('viewProfileFromAddress').textContent = data.from_address || 'N/A';
+      document.getElementById('viewProfileUsername').textContent = data.username || 'N/A';
+      document.getElementById('viewProfileHost').textContent = data.host || 'N/A';
+      document.getElementById('viewProfileModifiedDate').textContent = data.modified_date ? formatDate(data.modified_date) : 'N/A';
+      
+      // Set edit button href
+      document.getElementById('viewProfileEditBtn').setAttribute('href', `{% url 'create_profile_form' %}?edit=${profileId}`);
+      
+      // Important: Hide spinner and show data with a small delay to allow DOM to update
+      setTimeout(() => {
+        document.getElementById('profileLoadingSpinner').classList.add('d-none');
+        document.getElementById('profileDetails').classList.remove('d-none');
+        
+        // Force modal to reposition/resize
+        modal.dispatchEvent(new Event('resize'));
+      }, 50);
+    })
+    .catch(error => {
+      console.error('Error fetching profile:', error);
+      document.getElementById('profileLoadingSpinner').classList.add('d-none');
+      document.getElementById('profileError').classList.remove('d-none');
+    });
+}
+  
+  // Validation functionality
+  function setupValidation() {
+    // For template attachments
+    const attachmentsField = document.getElementById('attachments');
+    if (attachmentsField) {
+      attachmentsField.addEventListener('change', function(e) {
+        try {
+          JSON.parse(e.target.value);
+          e.target.classList.remove('is-invalid');
+        } catch (error) {
+          e.target.classList.add('is-invalid');
+          alert('Invalid JSON format in attachments field');
+        }
+      });
+    }
+  }
+  
+  // Helper function to format dates
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+</script>
+{% endblock %}

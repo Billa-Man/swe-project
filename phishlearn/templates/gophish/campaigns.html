@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% csrf_token %}
+{% block content %}
+  <h2>Gophish Campaigns</h2>
+  {% for campaign in campaigns %}
+    <div>
+      <h3>{{ campaign.name }}</h3>
+      <p><strong>Status:</strong> {{ campaign.status }}</p>
+      <p><strong>Created:</strong> {{ campaign.created_date }}</p>
+      <p><strong>Launch:</strong> {{ campaign.launch_date }}</p>
+
+      <h4>Results:</h4>
+      <ul>
+        {% for result in campaign.results %}
+          <li>{{ result.email }} - {{ result.status }}</li>
+        {% endfor %}
+      </ul>
+
+      <h4>Timeline:</h4>
+      <ul>
+        {% for event in campaign.timeline %}
+          <li>{{ event.time }} - {{ event.message }} - {{ event.email }}</li>
+        {% endfor %}
+      </ul>
+
+      <hr>
+    </div>
+  {% endfor %}
+{% endblock %}

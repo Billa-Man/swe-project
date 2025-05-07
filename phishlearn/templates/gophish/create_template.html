@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% csrf_token %}
+{% block title %}Create New Template{% endblock %}
+
+{% block extra_css %}
+<style>
+  #htmlPreview {
+    width: 100%;
+    height: 400px; /* Fixed height for the iframe */
+    border: none; /* Remove default iframe border */
+    box-sizing: border-box;
+  }
+  #preview-content .card {
+    width: 100%; /* Ensure the card takes full container width */
+    max-width: 100%; /* Prevent the card from exceeding its container */
+  }
+  #htmlTabContent {
+    width: 100%; /* Ensure the tab content stays within bounds */
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Create New Phishing Template</h1>
+    <p class="page-description">Create a new email template for your phishing campaigns.</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      {% if error %}
+        <div class="alert alert-danger mb-4">
+          <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+        </div>
+      {% endif %}
+      
+      <div id="alert-container"></div>
+      
+      <form method="POST" action="{% url 'template_list' %}" id="templateForm">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label for="name" class="form-label">Template Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+          <div class="form-text">A descriptive name for this template.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="subject" class="form-label">Email Subject</label>
+          <input type="text" class="form-control" id="subject" name="subject" required>
+          <div class="form-text">The subject line that will appear in the email.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="text" class="form-label">Plain Text Content</label>
+          <textarea class="form-control" id="text" name="text" rows="5" required></textarea>
+          <div class="form-text">Plain text version of the email for clients that don't support HTML.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="html" class="form-label">HTML Content</label>
+          
+          <ul class="nav nav-tabs mb-2" id="htmlTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="code-tab" data-bs-toggle="tab" data-bs-target="#code-content" type="button" role="tab" aria-controls="code-content" aria-selected="true">Code</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview-content" type="button" role="tab" aria-controls="preview-content" aria-selected="false">Preview</button>
+            </li>
+          </ul>
+          
+          <div class="tab-content" id="htmlTabContent">
+            <div class="tab-pane fade show active" id="code-content" role="tabpanel" aria-labelledby="code-tab">
+              <textarea class="form-control" id="html" name="html" rows="10" required></textarea>
+            </div>
+            <div class="tab-pane fade" id="preview-content" role="tabpanel" aria-labelledby="preview-tab">
+              <div class="card">
+                <div class="card-body border p-3">
+                  <iframe id="htmlPreview"></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-text">HTML version of the email. You can use HTML tags to format the email.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="attachments" class="form-label">Attachments (JSON)</label>
+          <textarea class="form-control" id="attachments" name="attachments" rows="3">[]</textarea>
+          <div class="form-text">Attachments in JSON format. Advanced usage only.</div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'control_center' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Create Template
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    const form = document.getElementById('templateForm');
+    const alertContainer = document.getElementById('alert-container');
+    const htmlInput = document.getElementById('html');
+    const htmlPreview = document.getElementById('htmlPreview');
+    
+    // Setup tab switching functionality
+    const codeTab = document.getElementById('code-tab');
+    const previewTab = document.getElementById('preview-tab');
+    
+    function updateIframePreview() {
+      const content = htmlInput.value || '<div style="text-align: center; color: #6c757d;">Enter HTML content to see preview</div>';
+      const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { margin: 0; padding: 10px; box-sizing: border-box; }
+            * { max-width: 100%; }
+          </style>
+        </head>
+        <body>
+          ${content}
+        </body>
+        </html>
+      `);
+      doc.close();
+    }
+    
+    previewTab.addEventListener('click', function() {
+      updateIframePreview();
+    });
+    
+    // Update HTML preview when content changes
+    htmlInput.addEventListener('input', function() {
+      if (previewTab.classList.contains('active')) {
+        updateIframePreview();
+      }
+    });
+    
+    // JSON validation for attachments
+    const attachmentsField = document.getElementById('attachments');
+    attachmentsField.addEventListener('change', function(e) {
+      try {
+        JSON.parse(e.target.value);
+        e.target.classList.remove('is-invalid');
+        e.target.classList.add('is-valid');
+      } catch (error) {
+        e.target.classList.remove('is-valid');
+        e.target.classList.add('is-invalid');
+        alertContainer.innerHTML = `
+          <div class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-circle me-2"></i> Invalid JSON format in attachments field: ${error.message}
+          </div>
+        `;
+      }
+    });
+
+    if (editId) {
+      // Edit mode - fetch template data
+      fetch(`/templates/${editId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch template data');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Fill form with template data
+        document.getElementById('name').value = data.name || '';
+        document.getElementById('subject').value = data.subject || '';
+        document.getElementById('text').value = data.text || '';
+        document.getElementById('html').value = data.html || '';
+        document.getElementById('attachments').value = JSON.stringify(data.attachments || []);
+        
+        // Update HTML preview
+        updateIframePreview();
+        
+        // Update UI for edit mode
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle) pageTitle.textContent = 'Edit Phishing Template';
+        
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update Template';
+        }
+
+        // Handle form submission for edit
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Make sure attachments is properly parsed from JSON string to object
+          let attachments = [];
+          try {
+            attachments = JSON.parse(document.getElementById('attachments').value || '[]');
+          } catch (error) {
+            console.error('Error parsing attachments JSON:', error);
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> Invalid JSON format in attachments field
+              </div>
+            `;
+            return;
+          }
+          
+          const formData = {
+            name: document.getElementById('name').value,
+            subject: document.getElementById('subject').value,
+            text: document.getElementById('text').value,
+            html: document.getElementById('html').value,
+            attachments: attachments
+          };
+          
+          const submitButton = form.querySelector('button[type="submit"]');
+          const originalButtonText = submitButton.innerHTML;
+          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
+          submitButton.disabled = true;
+          
+          fetch(`/templates/${editId}/`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.text().then(text => {
+                throw new Error(`Server returned ${response.status}: ${text}`);
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> Template updated successfully!
+              </div>
+            `;
+            setTimeout(function() {
+              window.location.href = "{% url 'control_center' %}";
+            }, 1000);
+          })
+          .catch(error => {
+            console.error('Error updating template:', error);
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> Error updating template: ${error.message}
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          });
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching template:', error);
+        alertContainer.innerHTML = `
+          <div class="alert alert-danger mb-4">
+            <i class="fas fa-exclamation-circle me-2"></i> Error loading template data: ${error.message}
+          </div>
+        `;
+      });
+    } else {
+      // Create mode - handle form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+        submitButton.disabled = true;
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alertContainer.innerHTML = `
+              <div class="alert alert-success mb-4">
+                <i class="fas fa-check-circle me-2"></i> ${data.message}
+              </div>
+            `;
+            setTimeout(function() {
+              window.location.href = "{% url 'control_center' %}";
+            }, 1000);
+          } else {
+            alertContainer.innerHTML = `
+              <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i> ${data.error}
+              </div>
+            `;
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alertContainer.innerHTML = `
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-circle me-2"></i> An error occurred: ${error.message}
+            </div>
+          `;
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

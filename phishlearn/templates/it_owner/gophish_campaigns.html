@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .content-loading {
+        display: none !important;
+    }
+    .loading-spinner {
+        display: none;
+    }
+    .loading .content-loading {
+        display: none !important;
+    }
+    .loading .loading-spinner {
+        display: block !important;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="h3 mb-0">GoPhish Campaigns</h2>
+            <p class="text-muted">Manage and monitor your phishing campaigns</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+                <i class="fas fa-plus"></i> Create New Campaign
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading campaigns...</p>
+    </div>
+
+    <!-- Campaign Statistics -->
+    <div class="row mb-4 content-section">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Campaigns</h6>
+                    <h2 class="card-title mb-0" id="totalCampaigns">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Active Campaigns</h6>
+                    <h2 class="card-title mb-0" id="activeCampaigns">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Recipients</h6>
+                    <h2 class="card-title mb-0" id="totalRecipients">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Average Click Rate</h6>
+                    <h2 class="card-title mb-0" id="avgClickRate">-</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaign List -->
+    <div class="card content-section">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Campaign Name</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Launch Date</th>
+                            <th>Recipients</th>
+                            <th>Click Rate</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campaignTableBody">
+                        <!-- Campaigns will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Campaign Modal -->
+<div class="modal fade" id="createCampaignModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Campaign</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createCampaignForm">
+                    <div class="mb-3">
+                        <label for="campaignName" class="form-label">Campaign Name</label>
+                        <input type="text" class="form-control" id="campaignName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="template" class="form-label">Email Template</label>
+                        <select class="form-select" id="template" required>
+                            <option value="">Select a template</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="landingPage" class="form-label">Landing Page</label>
+                        <select class="form-select" id="landingPage" required>
+                            <option value="">Select a landing page</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sendingProfile" class="form-label">Sending Profile</label>
+                        <select class="form-select" id="sendingProfile" required>
+                            <option value="">Select a sending profile</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="groups" class="form-label">Target Groups</label>
+                        <select class="form-select" id="groups" multiple required>
+                            <option value="">Select target groups</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="launchDate" class="form-label">Launch Date</label>
+                        <input type="datetime-local" class="form-control" id="launchDate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="createCampaignBtn">Create Campaign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Campaign Details Modal -->
+<div class="modal fade" id="campaignDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Campaign Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="campaignDetails">
+                <!-- Campaign details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Function to show/hide loading state
+    function setLoading(isLoading) {
+        document.body.classList.toggle('loading', isLoading);
+    }
+
+    // Load campaigns and update statistics
+    async function loadCampaigns() {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/gophish/campaigns/');
+            const campaigns = await response.json();
+            
+            const tableBody = document.getElementById('campaignTableBody');
+            tableBody.innerHTML = '';
+            
+            let totalRecipients = 0;
+            let activeCampaigns = 0;
+            let totalClickRate = 0;
+            let campaignsWithClicks = 0;
+
+            campaigns.forEach(campaign => {
+                const recipients = campaign.results ? campaign.results.length : 0;
+                totalRecipients += recipients;
+                
+                if (campaign.status === 'In Progress') {
+                    activeCampaigns++;
+                }
+
+                // Calculate click rate
+                let clickRate = 0;
+                if (campaign.results) {
+                    const clicks = campaign.results.filter(r => r.status === 'Clicked Link').length;
+                    clickRate = recipients > 0 ? (clicks / recipients * 100).toFixed(1) : 0;
+                    if (clicks > 0) {
+                        totalClickRate += parseFloat(clickRate);
+                        campaignsWithClicks++;
+                    }
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${campaign.name}</td>
+                    <td><span class="badge bg-${campaign.status === 'In Progress' ? 'primary' : 'success'}">${campaign.status}</span></td>
+                    <td>${new Date(campaign.created_date).toLocaleString()}</td>
+                    <td>${new Date(campaign.launch_date).toLocaleString()}</td>
+                    <td>${recipients}</td>
+                    <td>${clickRate}%</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary view-details" data-id="${campaign.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-campaign" data-id="${campaign.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Update statistics
+            document.getElementById('totalCampaigns').textContent = campaigns.length;
+            document.getElementById('activeCampaigns').textContent = activeCampaigns;
+            document.getElementById('totalRecipients').textContent = totalRecipients;
+            document.getElementById('avgClickRate').textContent = 
+                campaignsWithClicks > 0 ? (totalClickRate / campaignsWithClicks).toFixed(1) + '%' : '0%';
+
+            // Add a small delay before showing the content
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setLoading(false);
+        } catch (error) {
+            console.error('Error loading campaigns:', error);
+            setLoading(false);
+            alert('Error loading campaigns. Please try again.');
+        }
+    }
+
+    // Load campaign details
+    function loadCampaignDetails(campaignId) {
+        fetch(`/api/gophish/campaigns/${campaignId}/`)
+            .then(response => response.json())
+            .then(campaign => {
+                const detailsContainer = document.getElementById('campaignDetails');
+                detailsContainer.innerHTML = `
+                    <div class="mb-3">
+                        <h6 class="text-muted">Campaign Information</h6>
+                        <p><strong>Name:</strong> ${campaign.name}</p>
+                        <p><strong>Created:</strong> ${new Date(campaign.created_date).toLocaleString()}</p>
+                        <p><strong>Launch Date:</strong> ${new Date(campaign.launch_date).toLocaleString()}</p>
+                        <p><strong>Status:</strong> ${campaign.status}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Template</h6>
+                        <p><strong>Name:</strong> ${campaign.template ? campaign.template.name : 'N/A'}</p>
+                        <p><strong>Subject:</strong> ${campaign.template ? campaign.template.subject : 'N/A'}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Landing Page</h6>
+                        <p><strong>Name:</strong> ${campaign.page ? campaign.page.name : 'N/A'}</p>
+                        <p><strong>Capture Credentials:</strong> ${campaign.page && campaign.page.capture_credentials ? 'Yes' : 'No'}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Results</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${campaign.results ? campaign.results.map(result => `
+                                        <tr>
+                                            <td>${result.email}</td>
+                                            <td>${result.status}</td>
+                                            <td>${new Date(result.send_date).toLocaleString()}</td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="3">No results available</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading campaign details:', error);
+            });
+    }
+
+    // Load form options with loading state
+    async function loadFormOptions() {
+        const templateSelect = document.getElementById('template');
+        const pageSelect = document.getElementById('landingPage');
+        const profileSelect = document.getElementById('sendingProfile');
+        const groupSelect = document.getElementById('groups');
+
+        // Show loading state in dropdowns
+        const loadingOption = '<option value="">Loading...</option>';
+        templateSelect.innerHTML = loadingOption;
+        pageSelect.innerHTML = loadingOption;
+        profileSelect.innerHTML = loadingOption;
+        groupSelect.innerHTML = loadingOption;
+
+        try {
+            // Load all options in parallel
+            const [templates, pages, profiles, groups] = await Promise.all([
+                fetch('/api/gophish/templates/').then(r => r.json()),
+                fetch('/api/gophish/pages/').then(r => r.json()),
+                fetch('/api/gophish/profiles/').then(r => r.json()),
+                fetch('/api/gophish/groups/').then(r => r.json())
+            ]);
+
+            // Add a small delay before populating the dropdowns
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Populate dropdowns
+            templateSelect.innerHTML = '<option value="">Select Template</option>' +
+                templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            
+            pageSelect.innerHTML = '<option value="">Select Landing Page</option>' +
+                pages.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            
+            profileSelect.innerHTML = '<option value="">Select Sending Profile</option>' +
+                profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            
+            groupSelect.innerHTML = '<option value="">Select Target Group</option>' +
+                groups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+        } catch (error) {
+            console.error('Error loading form options:', error);
+            alert('Error loading form options. Please try again.');
+            
+            // Reset dropdowns to error state
+            const errorOption = '<option value="">Error loading options</option>';
+            templateSelect.innerHTML = errorOption;
+            pageSelect.innerHTML = errorOption;
+            profileSelect.innerHTML = errorOption;
+            groupSelect.innerHTML = errorOption;
+        }
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load initial data
+        loadCampaigns();
+        loadFormOptions();
+
+        // View campaign details
+        document.getElementById('campaignTableBody').addEventListener('click', (e) => {
+            if (e.target.closest('.view-details')) {
+                const campaignId = e.target.closest('.view-details').dataset.id;
+                loadCampaignDetails(campaignId);
+                new bootstrap.Modal(document.getElementById('campaignDetailsModal')).show();
+            }
+        });
+
+        // Delete campaign
+        document.getElementById('campaignTableBody').addEventListener('click', (e) => {
+            if (e.target.closest('.delete-campaign')) {
+                if (confirm('Are you sure you want to delete this campaign?')) {
+                    const campaignId = e.target.closest('.delete-campaign').dataset.id;
+                    fetch(`/api/gophish/campaigns/${campaignId}/delete/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            loadCampaigns();
+                        } else {
+                            throw new Error('Failed to delete campaign');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting campaign:', error);
+                        alert('Failed to delete campaign');
+                    });
+                }
+            }
+        });
+
+        // Add event listener for create campaign button
+        document.getElementById('createCampaignBtn').addEventListener('click', async function() {
+            const form = document.getElementById('createCampaignForm');
+            const formData = {
+                name: document.getElementById('campaignName').value,
+                template: document.getElementById('template').value,
+                page: document.getElementById('landingPage').value,
+                smtp: document.getElementById('sendingProfile').value,
+                groups: Array.from(document.getElementById('groups').selectedOptions).map(option => option.value),
+                launch_date: document.getElementById('launchDate').value
+            };
+
+            // Disable the create button and show loading state
+            const createButton = this;
+            const originalText = createButton.innerHTML;
+            createButton.disabled = true;
+            createButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+
+            try {
+                const response = await fetch('/api/gophish/campaigns/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Close the modal first
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createCampaignModal'));
+                    modal.hide();
+                    
+                    // Reset the form
+                    form.reset();
+                    
+                    // Show success message
+                    alert('Campaign created successfully!');
+                    
+                    // Reload the campaigns list
+                    await loadCampaigns();
+                } else {
+                    throw new Error(result.error || 'Failed to create campaign');
+                }
+            } catch (error) {
+                console.error('Error creating campaign:', error);
+                alert(error.message || 'Error creating campaign. Please try again.');
+            } finally {
+                // Re-enable the create button and restore original text
+                createButton.disabled = false;
+                createButton.innerHTML = originalText;
+            }
+        });
+    });
+</script>
+{% endblock %}

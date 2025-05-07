@@ -105,6 +105,10 @@ docker build -t django-docker .
 docker compose up --build
 ```
 
+### 6. Get the GoPhish API key
+
+On the CLI, you will find the credentials to login to the GoPhish API. Use those credentials to login, and get the API from [http://127.0.0.1:3333/](http://127.0.0.1:3333/), then copy the API key from the account settings tab. Then, stop the docker conatiners using ctrl+C. Paste your API key in the `GOPHISH_API_KEY` field, and then rerun the above command.
+
 Access the application at:
 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
@@ -115,6 +119,11 @@ Admin Credentials:
 
 - Username: `faculty`
 - Password: `faculty`
+
+IT Admin credentials:
+
+- Username: `mike_it`
+- Password: `password123`
 
 ### (Optional) Verify API Connection
 

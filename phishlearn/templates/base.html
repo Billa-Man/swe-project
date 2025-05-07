@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,27 +15,42 @@
 
   <style>
     :root {
-      --primary-color: #5047e5;
+      --primary-color: #000000;
       --primary-light: #e0dffe;
       --secondary-color: #6c757d;
       --success-color: #166534;
       --warning-color: #856404;
       --danger-color: #dc3545;
-      --light-color: #f8f9fa;
-      --dark-color: #212529;
+      --light-color: #fff;
+      --dark-color: #000;
       --text-primary: #1e293b;
       --text-secondary: #64748b;
       --border-color: #e2e8f0;
       --sidebar-width: 280px;
       --transition-speed: 0.3s;
+      --card-bg: #fff;
+      --card-border: #e2e8f0;
+    }
+
+    [data-bs-theme="dark"] {
+      --primary-color: #000;
+      --primary-light: #000;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
+      --light-color: #181a20;
+      --dark-color: #f8fafc;
+      --card-bg: #181a20;
+      --card-border: #23272f;
     }
     
     body {
       font-family: 'Inter', sans-serif;
       color: var(--text-primary);
-      background-color: #f8fafc;
+      background-color: var(--light-color);
       line-height: 1.6;
       overflow-x: hidden;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
     }
     
     .navbar {
@@ -45,12 +60,31 @@
     }
     
     #sidebarMenu {
-      background-color: white;
+      background-color: var(--light-color);
       min-height: calc(100vh - 56px);
       border-right: 1px solid var(--border-color);
       box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
       padding-top: 1rem;
       padding-bottom: 1rem;
+      transition: background-color var(--transition-speed), border-color var(--transition-speed);
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0.5rem;
+      margin-right: 1rem;
+      transition: transform var(--transition-speed);
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-toggle i {
+      font-size: 1.2rem;
     }
     
     /* Make sure the sidebar is visible on desktop */
@@ -380,6 +414,9 @@
       
       {% if user.is_authenticated %}
       <div class="nav-right ms-auto d-flex align-items-center">
+        <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+          <i class="fas fa-moon"></i>
+        </button>
         <span class="text-white me-3 d-none d-md-block">Welcome, {{ user.first_name|default:user.username }}</span>
         <a href="{% url 'my_profile' %}" class="btn btn-outline-light btn-sm rounded-pill">
           <i class="fas fa-user-circle me-1"></i> Profile
@@ -421,25 +458,21 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link {% if 'group_list' in request.path %}active{% endif %}" href="{% url 'group_list' %}">
-                      <i class="fas fa-layer-group"></i> Manage Groups
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link {% if 'sending_profiles' in request.path %}active{% endif %}" href="{% url 'sending_profiles' %}">
-                      <i class="fas fa-paper-plane"></i> Sending Profiles
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link {% if 'landing_pages' in request.path %}active{% endif %}" href="{% url 'landing_pages' %}">
-                      <i class="fas fa-file-alt"></i>
-                      <span>Landing Pages</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'gophish_analytics' %}">
+                    <a class="nav-link" href="{% url 'gophish_management' %}">
                       <i class="fas fa-chart-line"></i>
-                      <span>Gophish Analytics</span>
+                      <span>GoPhish Users</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'control_center' %}">
+                      <i class="fas fa-shield-alt"></i>
+                      <span>Control Center</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'gophish_campaigns' %}">
+                      <i class="fas fa-bullhorn"></i>
+                      <span>Campaigns</span>
                     </a>
                   </li>
                 {% elif user.userprofile.user_type == 'site_admin' %}
@@ -548,6 +581,34 @@
         if (window.innerWidth >= 768) {
           sidebarBackdrop.classList.remove('show');
         }
+      });
+    });
+  </script>
+  
+  <!-- Theme Toggle Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeToggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+      const icon = themeToggle.querySelector('i');
+      
+      // Check for saved theme preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        html.setAttribute('data-bs-theme', savedTheme);
+        icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+      }
+      
+      // Toggle theme
+      themeToggle.addEventListener('click', function() {
+        const currentTheme = html.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        html.setAttribute('data-bs-theme', newTheme);
+        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        
+        // Save preference
+        localStorage.setItem('theme', newTheme);
       });
     });
   </script>

@@ -73,7 +73,7 @@ urlpatterns = [
     path('pages/create/', gophish_views.CreateLandingPageFormView.as_view(), name='create_page_form'),
 
     # Campaign URLs
-    path('campaigns/', views.fetchCampaigns, name='campaigns'),
+    path('campaigns/', views.gophish_campaigns, name='gophish_campaigns'),
     path('gophish/control_center/', gophish_views.control_center, name='control_center'),
     path('gophish/management/', gophish_views.gophish_management, name='gophish_management'),
 

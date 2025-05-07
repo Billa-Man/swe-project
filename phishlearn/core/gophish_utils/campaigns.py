@@ -4,6 +4,7 @@ import os
 import urllib3
 
 from loguru import logger
+from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -322,131 +323,91 @@ def get_campaign_with_id(id):
         return None
     
 
-def create_campaign(name, created_date, launch_date, send_by_date, 
-                    completed_date, template, page, status, results, groups, 
-                    timeline, smtp, url):                 
+def create_campaign(name, template, page, smtp, groups, launch_date=None):
     """
     Creates and launches a new campaign.
 
-    This method expects the campaign to be provided in JSON format. 
-    For the various objects in a campaign, such as the template, landing page, or sending profile, you need to provide the name attribute.
+    Args:
+        name (str): Name of the campaign
+        template (int): ID of the template to use
+        page (int): ID of the landing page to use
+        smtp (int): ID of the SMTP profile to use
+        groups (list[int]): List of group IDs to target
+        launch_date (str, optional): ISO8601 formatted datetime for scheduled launch
 
-    You can schedule a campaign to launch at a later time. To do this, simply put the desired time you want the campaign to launch in the launch_date attribute. 
-    Gophish expects the date to be provided in ISO8601 format.
-    Without setting a launch date, Gophish launches the campaign immediately.
-
-    By default, Gophish sends all the emails in a campaign as quickly as possible. 
-    Instead, you may wish to spread emails out over a period of minutes, hours, days, or weeks. 
-    This is possible by setting the send_by_date to an ISO8601 formatted datetime. 
-    It's important to note that this must be after the launch_date.
-
-    Input:
-        Campaign Format
-    
     Returns:
-        {
-        "id": 1,
-        "name": "Example Campaign",
-        "created_date": "2018-10-08T15:56:29.48815Z",
-        "launch_date": "2018-10-08T15:56:00Z",
-        "send_by_date": "0001-01-01T00:00:00Z",
-        "completed_date": "0001-01-01T00:00:00Z",
-        "template": {
-            "id": 1,
-            "name": "Example Template",
-            "subject": "Click here!",
-            "text": "",
-            "html": "\u003chtml\u003e\n\u003chead\u003e\n\t\u003ctitle\u003e\u003c/title\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cp\u003eClick \u003ca href=\"{{.URL}}\"\u003ehere\u003c/a\u003e!\u003c/p\u003e\n{{.Tracker}}\u003c/body\u003e\n\u003c/html\u003e\n",
-            "modified_date": "2018-10-08T15:54:56.258392Z",
-            "attachments": []
-        },
-        "page": {
-            "id": 1,
-            "name": "Example Landing Page",
-            "html": "\u003chtml\u003e\u003chead\u003e\n\t\u003ctitle\u003e\u003c/title\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cp\u003eLanding page HTML\u003c/p\u003e\n\n\n\u003c/body\u003e\u003c/html\u003e",
-            "capture_credentials": false,
-            "capture_passwords": false,
-            "redirect_url": "",
-            "modified_date": "2018-10-08T15:55:16.416396Z"
-        },
-        "status": "In progress",
-        "results": [
-            {
-            "id": "hoqKYFn",
-            "status": "Email Sent",
-            "ip": "",
-            "latitude": 0,
-            "longitude": 0,
-            "send_date": "2018-10-08T15:56:29.535158Z",
-            "reported": false,
-            "modified_date": "2018-10-08T15:56:29.535158Z",
-            "email": "user@example.com",
-            "first_name": "Example",
-            "last_name": "User",
-            "position": ""
-            },
-            {
-            "id": "VYrDwtG",
-            "status": "Clicked Link",
-            "ip": "::1",
-            "latitude": 0,
-            "longitude": 0,
-            "send_date": "2018-10-08T15:56:29.548722Z",
-            "reported": false,
-            "modified_date": "2018-10-08T15:56:46.955281Z",
-            "email": "foo@bar.com",
-            "first_name": "Foo",
-            "last_name": "Bar",
-            "position": ""
-            }
-        ],
-        "timeline": null,
-        "smtp": {
-            "id": 1,
-            "interface_type": "SMTP",
-            "name": "Example Sending Profile",
-            "host": "localhost:1025",
-            "from_address": "Test User \u003ctest@test.com\u003e",
-            "ignore_cert_errors": true,
-            "headers": [],
-            "modified_date": "2018-09-04T01:24:21.691924069Z"
-        },
-        "url": "http://localhost"
-        }
+        dict: Created campaign details, or None on error
     """
-
+    # 1) Build headers
     headers = {
         "Authorization": GOPHISH_API_KEY,
+        "Content-Type": "application/json"
     }
 
-    data = {
-            "name": name,
-            "created_date": created_date,
-            "launch_date": launch_date,
-            "send_by_date": send_by_date,
-            "completed_date": completed_date,
-            "template": template,
-            "page": page,
-            "status": status,
-            "results": results,
-            "groups": groups,
-            "timeline": timeline,
-            "smtp": smtp,
-            "url": url
-        }
+    # 2) Normalize launch_date into full ISO8601 with Z-suffix
+    if launch_date:
+        # Allow inputs like "2025-05-06T10:54" or full ISO strings
+        dt = datetime.fromisoformat(launch_date.replace("Z", "+00:00"))
+    else:
+        dt = datetime.utcnow()
+    launch_iso = dt.replace(microsecond=0).isoformat() + "Z"
+    send_by_iso = (dt + timedelta(days=7)).replace(microsecond=0).isoformat() + "Z"
 
+    # 3) Look up actual names from GoPhish
     try:
-        response = requests.post(
-            f"{GOPHISH_API_URL}/campaigns/",
-            json=data,
-            headers=headers,
-            verify=False
-        )
+        tmpl = requests.get(f"{GOPHISH_API_URL}/templates/{template}",
+                            headers=headers, verify=False)
+        tmpl.raise_for_status()
+        tmpl_name = tmpl.json()["name"]
 
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        logger.error(f"Unable to create campaign: {e}")
+        pg = requests.get(f"{GOPHISH_API_URL}/pages/{page}",
+                          headers=headers, verify=False)
+        pg.raise_for_status()
+        page_name = pg.json()["name"]
+
+        smtp_p = requests.get(f"{GOPHISH_API_URL}/smtp/{smtp}",
+                              headers=headers, verify=False)
+        smtp_p.raise_for_status()
+        smtp_name = smtp_p.json()["name"]
+
+        group_objs = []
+        for gid in groups:
+            g = requests.get(f"{GOPHISH_API_URL}/groups/{gid}",
+                             headers=headers, verify=False)
+            g.raise_for_status()
+            group_objs.append({"name": g.json()["name"]})
+    except requests.HTTPError as e:
+        logger.error("Error fetching GoPhish resource names: %s", e)
+        return None
+
+    # 4) Assemble payload exactly as the API docs expect:
+    #    https://docs.getgophish.com/api-documentation/campaigns#create-campaign :contentReference[oaicite:0]{index=0}
+    payload = {
+        "name": name,
+        "template": {"name": tmpl_name},
+        "url": "http://localhost",
+        "page": {"name": page_name},
+        "smtp": {"name": smtp_name},
+        "launch_date": launch_iso,
+        "send_by_date": send_by_iso,
+        "groups": group_objs
+    }
+
+    # 5) Debug log what we’re about to send
+    logger.info("Creating campaign with payload:\n%s", json.dumps(payload, indent=2))
+    logger.info("POSTing to %s/campaigns/", GOPHISH_API_URL)
+
+    # 6) Send it
+    try:
+        resp = requests.post(f"{GOPHISH_API_URL}/campaigns/",
+                             headers=headers,
+                             json=payload,
+                             verify=False)
+        logger.info("GoPhish response %s: %s", resp.status_code, resp.text)
+        resp.raise_for_status()
+        return resp.json()
+    except requests.HTTPError as e:
+        logger.error("Failed to create campaign (%s): %s", resp.status_code, resp.text)
         return None
     
 def get_campaign_results(id):

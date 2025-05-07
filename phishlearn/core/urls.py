@@ -1,7 +1,18 @@
 from django.urls import path
 from . import views, gophish_views
 from .views import LandingPagesView
-from .api_views import api_campaigns, api_campaign_detail, api_campaign_summary
+from .api_views import (
+    api_campaigns,
+    api_campaign_detail,
+    api_campaign_summary,
+    api_create_campaign,
+    api_delete_campaign,
+    api_complete_campaign,
+    api_templates,
+    api_pages,
+    api_profiles,
+    api_groups
+)
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -27,6 +38,13 @@ urlpatterns = [
     path('api/gophish/campaigns/', api_campaigns, name='api_campaigns'),
     path('api/gophish/campaigns/<int:campaign_id>/', api_campaign_detail, name='api_campaign_detail'),
     path('api/gophish/campaigns/<int:campaign_id>/summary/', api_campaign_summary, name='api_campaign_summary'),
+    path('api/gophish/campaigns/create/', api_create_campaign, name='api_create_campaign'),
+    path('api/gophish/campaigns/<int:campaign_id>/delete/', api_delete_campaign, name='api_delete_campaign'),
+    path('api/gophish/campaigns/<int:campaign_id>/complete/', api_complete_campaign, name='api_complete_campaign'),
+    path('api/gophish/templates/', api_templates, name='api_templates'),
+    path('api/gophish/pages/', api_pages, name='api_pages'),
+    path('api/gophish/profiles/', api_profiles, name='api_profiles'),
+    path('api/gophish/groups/', api_groups, name='api_groups'),
     path("reset-api-key/", views.reset_api_key_view, name="reset_api_key"),  
 
     # Group URLs

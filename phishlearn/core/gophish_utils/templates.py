@@ -156,8 +156,6 @@ def create_template(name, subject, text, html, attachments=[]):
         logger.error(f"Unable to create template: {e}")
         return None
     
-# Fix for templates.py modify_template function
-
 def modify_template(id, name, subject, text, html, attachments):
     """
     Modifies an existing template.

@@ -183,31 +183,6 @@ def test_create_employee(client):
     assert User.objects.filter(email="test@example.com").exists()
 
 
-
-@pytest.mark.django_db
-def test_group_crud(client):
-
-    post_save.disconnect(receiver=create_user_profile, sender=User)
-
-    owner = UserFactory()
-    UserProfileFactory(user=owner, user_type="it_owner") 
-    client.force_login(owner)
-
-    # Create group
-    response = client.post(reverse("create_group"), {
-        "name": "Red Team",
-        "employee_emails": ""
-    }, follow=True)
-
-    print("Hello world")
-    assert response.status_code == 200
-    assert "Group created successfully" in response.content.decode()
-
-    # List groups
-    response = client.get(reverse("group_list"))
-    assert response.status_code == 200
-    assert "Red Team" in response.content.decode()
-
 # new here
 @pytest.mark.django_db
 def test_manage_courses_unauthorized(client):

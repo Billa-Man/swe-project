@@ -993,3 +993,17 @@ def gophish_campaigns(request):
         'page_title': 'GoPhish Campaigns',
     }
     return render(request, 'it_owner/gophish_campaigns.html', context)
+
+@login_required
+def quizzes(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    if user_profile.user_type != 'it_owner':
+        messages.error(request, 'Unauthorized access')
+        return redirect('dashboard')
+    quizzes = Quiz.objects.all()
+    employees = User.objects.filter(userprofile__user_type='employee')
+    context = {
+        'quizzes': quizzes,
+        'employees': employees,
+    }
+    return render(request, 'core/quizzes.html', context)

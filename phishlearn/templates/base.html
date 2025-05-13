@@ -444,6 +444,13 @@
                     <i class="fas fa-graduation-cap"></i> Training Courses
                   </a>
                 </li>
+                {% if user.userprofile.user_type == 'it_owner' %}
+                  <li class="nav-item">
+                    <a class="nav-link {% if '/quizzes/' in request.path %}active{% endif %}" href="{% url 'quizzes' %}">
+                      <i class="fas fa-question-circle"></i> Assign Quizzes
+                    </a>
+                  </li>
+                {% endif %}
                 {% if user.userprofile.user_type == 'it_owner' or user.userprofile.user_type == 'site_admin' %}
                   <li class="nav-item">
                     <a class="nav-link {% if 'login_dashboard' in request.path %}active{% endif %}" href="{% url 'login_dashboard' %}">

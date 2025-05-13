@@ -107,7 +107,7 @@ docker compose up --build
 
 ### 6. Get the GoPhish API key
 
-On the CLI, you will find the credentials to login to the GoPhish API. Use those credentials to login, and get the API from [http://127.0.0.1:3333/](http://127.0.0.1:3333/), then copy the API key from the account settings tab. Then, stop the docker conatiners using ctrl+C. Paste your API key in the `GOPHISH_API_KEY` field, and then rerun the above command.
+On the CLI, you will find the credentials to log in to the GoPhish API. Use those credentials to log in, and get the API from [https://0.0.0.0:3333](https://0.0.0.0:3333), then copy the API key from the account settings tab. Then, stop the Docker containers using Ctrl + C. Paste your API key in the `GOPHISH_API_KEY` field, and then rerun the above command. 
 
 Access the application at:
 

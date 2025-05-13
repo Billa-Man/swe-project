@@ -77,4 +77,6 @@ urlpatterns = [
     path('gophish/control_center/', gophish_views.control_center, name='control_center'),
     path('gophish/management/', gophish_views.gophish_management, name='gophish_management'),
 
+    path('quizzes/', views.quizzes, name='quizzes'),
+
 ]

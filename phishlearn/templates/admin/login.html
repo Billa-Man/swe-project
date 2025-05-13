@@ -1,22 +1,24 @@
 {% extends 'admin/login.html' %}
 
+
+
 {% block branding %}
     <style>
         input[type="submit"],
         input[type="button"],
         .submit-row input {
             width: 100%;
-            background: #5047e5;
+            background: black;
             html[data-theme="light"], :root {
-                --primary: #5047e5;
-                --secondary: #5047e5;
-                --accent: #f5dd5d;
+                --primary: black;
+                --secondary: black;
+                --accent: #black;
                 --primary-fg: #fff;
                 --body-fg: #333;
                 --body-bg: #fff;
                 --body-quiet-color: #666;
                 --body-loud-color: #000;
-                --header-color: #ffc;
+                --header-color: #000;
                 --header-branding-color: var(--accent);
                 --header-bg: var(--secondary);
                 --header-link-color: var(--primary-fg);
@@ -25,7 +27,7 @@
                 --breadcrumbs-bg: var(--primary);
                 --link-fg: rgb(12, 11, 12);
                 --link-hover-color: #036;
-                --link-selected-fg: #5047e5;
+                --link-selected-fg: black;
                 --hairline-color: #e8e8e8;
                 --border-color: #ccc;
                 --error-fg: #ba2121;
@@ -52,8 +54,9 @@
             }
         }
     </style>
+    <!-- #5047e5 -->
 
-    <div id="branding" style="display: flex; align-items: center; background-color: #5047e5; padding: 10px;">
+    <div id="branding" style="display: flex; align-items: center; background-color: #000; padding: 10px;">
         <a href="{% url 'admin:index' %}" style="display: flex; align-items: center;">
             <i class="fas fa-shield-alt" style="font-size: 50px; width: 45px; height: 45px; margin-right: 9px;"></i>
             <span style="font-size: 36px; color: white;">PhishLearn</span>

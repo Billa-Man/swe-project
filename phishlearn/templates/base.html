@@ -42,6 +42,7 @@
       --dark-color: #f8fafc;
       --card-bg: #181a20;
       --card-border: #23272f;
+      --secondary-color:  #334155;
     }
     
     body {
@@ -152,7 +153,9 @@
     }
 
     .dashboard {
-      background-color: #f8fafc;
+      /* background-color: #f8fafc; */
+      background-color: var(--light-color);
+      color: var(--dark-color);
       min-height: calc(100vh - 56px);
       padding: 2.5rem 0;
     }
@@ -332,7 +335,11 @@
     .footer .container {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: center;      
+    }
+
+    .bg-primary {
+      background-color: var(--primary-color) !important;
     }
     
     /* Responsive adjustments */
@@ -398,6 +405,29 @@
     .content {
       padding-top: 1.5rem;
       padding-bottom: 1.5rem;
+    }
+
+    .theme-header {
+      background-color: var(--dark-color);
+      color: var(--light-color); /* customized header */
+      border-width: 5px;
+      border: var(--light-color);
+    }
+
+    .card-header {
+      background-color: var(--dark-color);
+      color: var(--light-color); /* customized header */
+      border-color: var(--light-color); 
+      border-width: 5px;
+    }
+
+    .section-title {
+      color: var(--dark-color);
+    }
+
+    .user-avatar {
+      color: var(--dark-color);
+      background-color: var(--secondary-color);
     }
   </style>
 </head>

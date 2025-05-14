@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
   <div class="page-header mb-4">
-    <h1 class="page-title">Control Center </h1>
+    <h1 class="page-title-reverse">Control Center </h1>
     <p class="page-description">Manage your phishing templates, landing pages, and sending profiles from this dashboard.</p>
   </div>
 
@@ -13,9 +13,9 @@
     <!-- Templates Section - First Column -->
     <div class="col-md-4 mb-4">
       <div class="card shadow-sm h-100">
-        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
           <h2 class="h4 mb-0">Phishing Templates</h2>
-          <a href="{% url 'create_template_form' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'create_template_form' %}" class="btn btn-control-center btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
@@ -56,9 +56,9 @@
     <!-- Landing Pages Section - Second Column -->
     <div class="col-md-4 mb-4">
       <div class="card shadow-sm h-100">
-        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
           <h2 class="h4 mb-0">Landing Pages</h2>
-          <a href="{% url 'create_page_form' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'create_page_form' %}" class="btn btn-control-center btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
@@ -107,9 +107,9 @@
     <!-- Sending Profiles Section - Third Column -->
     <div class="col-md-4 mb-4">
       <div class="card shadow-sm h-100">
-        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
           <h2 class="h4 mb-0">Sending Profiles</h2>
-          <a href="{% url 'create_profile_form' %}" class="btn btn-primary btn-sm">
+          <a href="{% url 'create_profile_form' %}" class="btn btn-control-center btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>

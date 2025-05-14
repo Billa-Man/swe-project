@@ -4,754 +4,402 @@
 
 {% block extra_css %}
 <style>
-    .navbar {
-        background-color: #1e293b !important;
-        padding: 1rem 2rem;
-    }
+  /* Theme variables */
+  :root {
+    --bg-dashboard:   #f8fafc;
+    --bg-card:        #ffffff;
+    --text-primary:   #1e293b;
+    --text-muted:     #64748b;
+    --card-shadow:    rgba(0,0,0,0.1);
+    --bg-light:       #e2e8f0;
+    --border-color:   #e2e8f0;
+    --chart-opened:   #3b82f6;
+    --chart-clicked:  #10b981;
+    --chart-bounced:  #ef4444;
+    --chart-reported: #8b5cf6;
+    --chart-pending:  #e2e8f0;
+  }
+  body.dark-mode {
+    --bg-dashboard:   #1f2937;
+    --bg-card:        #374151;
+    --text-primary:   #f9fafb;
+    --text-muted:     #a1a1aa;
+    --card-shadow:    rgba(0,0,0,0.5);
+    --bg-light:       #4b5563;
+    --border-color:   #4b5563;
+    --chart-opened:   #60a5fa;
+    --chart-clicked:  #6ee7b7;
+    --chart-bounced:  #f87171;
+    --chart-reported: #c084fc;
+    --chart-pending:  #6b7280;
+  }
 
-    .navbar-brand {
-        color: white !important;
-        font-size: 1.25rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .navbar-brand i {
-        font-size: 1.25rem;
-        color: white !important;
-    }
-
-    .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .profile-circle {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-        background-color: #f1f5f9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dashboard {
-        padding: 2rem;
-        background-color: #f8fafc;
-        min-height: calc(100vh - 64px);
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #64748b;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-
-    .form-control:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    .department-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .department-tag {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.375rem 0.75rem;
-        background-color: #e0e7ff;
-        color: #4338ca;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-    }
-
-    .add-more {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.375rem 0.75rem;
-        color: #4338ca;
-        background-color: #f5f3ff;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        text-decoration: none;
-        gap: 0.25rem;
-    }
-
-    .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        background-color: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .btn-primary:hover {
-        background-color: #2563eb;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-value {
-        font-size: 1.875rem;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        color: #64748b;
-        font-size: 0.875rem;
-    }
-
-    .open-rate { color: #3b82f6; }
-    .click-rate { color: #10b981; }
-    .bounce-rate { color: #ef4444; }
-
-    .campaign-date {
-        text-align: center;
-        color: #64748b;
-        font-size: 0.875rem;
-        margin-top: 1rem;
-    }
-
-    .analytics-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .analytics-table th {
-        text-align: left;
-        padding: 0.75rem 1rem;
-        color: #64748b;
-        font-weight: 500;
-        font-size: 0.875rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .analytics-table td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .user-avatar {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-        background-color: #f1f5f9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .user-details {
-        font-size: 0.875rem;
-    }
-
-    .user-email {
-        color: #64748b;
-        font-size: 0.75rem;
-    }
-
-    .progress-bar {
-        width: 100px;
-        height: 0.5rem;
-        background-color: #e2e8f0;
-        border-radius: 0.25rem;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background-color: #10b981;
-        border-radius: 0.25rem;
-    }
+  .navbar {
+    background-color: var(--bg-dashboard) !important;
+    padding: 1rem 2rem;
+  }
+  .navbar-brand {
+    color: var(--text-primary) !important;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  .dashboard {
+    padding: 2rem;
+    background-color: var(--bg-dashboard);
+    min-height: calc(100vh - 64px);
+  }
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+  .stats-container {
+    background: var(--bg-card);
+    border-radius: .5rem;
+    padding: 2rem;
+    box-shadow: 0 1px 3px var(--card-shadow);
+  }
+  .campaign-selector {
+    margin-bottom: 2rem;
+  }
+  .form-select {
+    width: 100%;
+    padding: .75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: .375rem;
+    font-size: .875rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+  .form-select:focus {
+    border-color: var(--chart-opened);
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+    outline: none;
+  }
+  .charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  .chart-wrapper {
+    background: var(--bg-dashboard);
+    border-radius: .5rem;
+    padding: 1.5rem;
+  }
+  .chart-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--bg-dashboard);
+    border-radius: .5rem;
+    transition: transform .2s;
+  }
+  .stat-item:hover { transform: translateY(-2px); }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: .5rem;
+  }
+  .stat-label {
+    color: var(--text-muted);
+    font-size: .875rem;
+    font-weight: 500;
+  }
+  .sent-rate   { color: var(--text-muted); }
+  .open-rate   { color: var(--chart-opened); }
+  .click-rate  { color: var(--chart-clicked); }
+  .bounce-rate { color: var(--chart-bounced); }
+  .report-rate { color: var(--chart-reported); }
+  .skeleton {
+    background: linear-gradient(90deg,var(--bg-light) 25%,#e2e8f0 50%,var(--bg-light) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 </style>
 {% endblock %}
 
 {% block navbar %}
 <nav class="navbar">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-shield-alt me-2" style="color: white !important;"></i>
-            PhishLearn IT Owner
-        </a>
-        <div class="nav-right">
-            <i class="fas fa-bell text-white"></i>
-            <div class="profile-circle">
-                <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}" alt="Profile" class="w-100 h-100 rounded-circle">
-            </div>
-        </div>
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="/">
+      <i class="fas fa-shield-alt me-2"></i>PhishLearn IT Owner
+    </a>
+    <div class="nav-right">
+      <i class="fas fa-bell text-white"></i>
+      <div class="profile-circle">
+        <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}"
+             alt="Profile" class="w-100 h-100 rounded-circle">
+      </div>
+      <button id="themeToggle" class="btn btn-sm btn-light ms-3">🌙/☀️</button>
     </div>
+  </div>
 </nav>
 {% endblock %}
 
 {% block content %}
 <div class="dashboard">
-    <div class="container">
-        <div class="section-title">Email Campaigns</div>
-        
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">Campaign Name</label>
-                    <input type="text" class="form-control" placeholder="Q1 Awareness Campaign" value="Q1 Awareness Campaign">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">Template</label>
-                    <select class="form-control">
-                        <option>Password Reset</option>
-                        <option>Package Delivery</option>
-                        <option>IT Support</option>
-                    </select>
-                </div>
-            </div>
+  <div class="container">
+    <div class="section-title mb-4">Email Campaign Statistics</div>
+    <div class="stats-container">
+      <div class="campaign-selector">
+        <select id="campaignSelect" class="form-select" disabled>
+          <option>Loading campaigns…</option>
+        </select>
+      </div>
+      <div id="statsArea" style="min-height:300px;">
+        <div class="alert alert-info text-center mt-4">
+          <i class="fas fa-info-circle me-2"></i>
+          Select a campaign to view statistics.
         </div>
-
-        <div class="form-group">
-            <label class="form-label">Target Departments</label>
-            <div class="department-tags">
-                <span class="department-tag">Marketing</span>
-                <span class="department-tag">Sales</span>
-                <a href="#" class="add-more">
-                    <i class="fas fa-plus"></i>
-                    Add More
-                </a>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-primary">Schedule Campaign</button>
-        </div>
-
-        <div class="d-flex justify-content-end mb-4">
-          <a href="{% url 'reset_api_key' %}" class="btn btn-danger">
-            Reset API Key
-          </a>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="section-title">User Analytics</div>
-                <table class="analytics-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Department</th>
-                            <th>Progress</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">SW</div>
-                                    <div class="user-details">
-                                        <div>Sarah Wilson</div>
-                                        <div class="user-email">sarah@company.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Marketing</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 85%"></div>
-                                    </div>
-                                    <span>85%</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="col-md-6">
-                <div class="section-title">Email Statistics</div>
-                <div class="campaign-selector mb-3">
-                    <select id="campaignSelect" class="form-select">
-                        <option value="">Select a campaign</option>
-                    </select>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value open-rate">-</div>
-                        <div class="stat-label">Open Rate</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value click-rate">-</div>
-                        <div class="stat-label">Click Rate</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value bounce-rate">-</div>
-                        <div class="stat-label">Bounce Rate</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>   
-    <div class="card mt-5 shadow-sm border-0 rounded-lg">
-        <div class="card-header bg-primary text-white text-center py-3">
-          <h3 class="mb-0"><i class="bi bi-journal-check me-2"></i>Assign a Quiz to Employees</h3>
-        </div>
-        <div class="card-body p-4">
-          <form method="POST" action="{% url 'assign_quiz_to_users' %}">
-            {% csrf_token %}
-            
-            <!-- Quiz Selection with Search -->
-            <div class="mb-4">
-              <label for="quizSelect" class="form-label fw-semibold">
-                <i class="bi bi-book me-2"></i>Select Quiz
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                <input type="text" id="quizSearchInput" class="form-control" placeholder="Search quizzes..." aria-label="Search quizzes">
-              </div>
-              <select id="quizSelect" name="quiz_id" class="form-select mt-2 shadow-sm" required aria-describedby="quizHelp">
-                <option value="" disabled selected>-- Choose a quiz --</option>
-                {% for quiz in quizzes %}
-                  <option value="{{ quiz.id }}" data-course="{{ quiz.course.title }}">{{ quiz.title }} ({{ quiz.course.title }})</option>
-                {% endfor %}
-              </select>
-              <small id="quizHelp" class="form-text text-muted mt-1">Choose the quiz you want to assign to employees.</small>
-            </div>
-            
-            <!-- Two-Column Employee Selection -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">
-                <i class="bi bi-people me-2"></i>Select Employees
-              </label>
-              
-              <div class="input-group mb-2">
-                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                <input type="text" id="employeeSearchInput" class="form-control" placeholder="Search employees..." aria-label="Search employees">
-              </div>
-              
-              <div class="row">
-                <!-- Unselected Employees Column -->
-                <div class="col-md-6 mb-2 mb-md-0">
-                  <div class="card h-100">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                      <h6 class="mb-0">Available Employees</h6>
-                      <span class="badge bg-secondary" id="unselectedCount">0</span>
-                    </div>
-                    <div class="card-body p-0">
-                      <div class="list-group list-group-flush unselected-employees" style="height: 250px; overflow-y: auto;">
-                        {% for employee in employees %}
-                        <div class="list-group-item list-group-item-action employee-item d-flex justify-content-between align-items-center" 
-                             data-id="{{ employee.id }}" data-name="{{ employee.username }}" data-department="{{ employee.department }}">
-                          <div>
-                            <span class="employee-name">{{ employee.username }}</span>
-                            <small class="d-block text-muted">{{ employee.department }}</small>
-                          </div>
-                          <button type="button" class="btn btn-sm btn-outline-primary select-btn">
-                            <i class="bi bi-arrow-right"></i>
-                          </button>
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    <div class="card-footer bg-light py-2">
-                      <button type="button" class="btn btn-sm btn-outline-primary w-100" id="selectAllBtn">
-                        Select All <i class="bi bi-arrow-right"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Selected Employees Column -->
-                <div class="col-md-6">
-                  <div class="card h-100">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                      <h6 class="mb-0">Selected Employees</h6>
-                      <span class="badge bg-success" id="selectedCount">0</span>
-                    </div>
-                    <div class="card-body p-0">
-                      <div class="list-group list-group-flush selected-employees" style="height: 250px; overflow-y: auto;">
-                        <!-- Selected employees will appear here via JavaScript -->
-                      </div>
-                    </div>
-                    <div class="card-footer bg-light py-2">
-                      <button type="button" class="btn btn-sm btn-outline-danger w-100" id="deselectAllBtn">
-                        <i class="bi bi-arrow-left"></i> Remove All
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Hidden input to store selected employee IDs -->
-              <div id="selectedEmployeeInputs"></div>
-              
-              <small id="employeeHelp" class="form-text text-muted mt-2">Select one or more employees to assign this quiz.</small>
-            </div>
-            
-            <!-- Due Date with Calendar Widget -->
-            <div class="mb-4">
-              <label for="dueDate" class="form-label fw-semibold">
-                <i class="bi bi-calendar-event me-2"></i>Due Date
-              </label>
-              <div class="input-group">
-                <input type="date" id="dueDate" name="due_date" class="form-control shadow-sm" aria-describedby="dueDateHelp">
-                <button class="btn btn-outline-secondary" type="button" id="set2Weeks">+2 Weeks</button>
-                <button class="btn btn-outline-secondary" type="button" id="set1Month">+1 Month</button>
-              </div>
-              <small id="dueDateHelp" class="form-text text-muted mt-1">Leave blank to auto-set a due date 14 days from today.</small>
-            </div>
-            
-            <!-- Notification Options -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">
-                <i class="bi bi-bell me-2"></i>Notification Options
-              </label>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="sendEmailNotif" name="send_email" checked>
-                <label class="form-check-label" for="sendEmailNotif">
-                  Send email notification to employees
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="sendReminders" name="send_reminders" checked>
-                <label class="form-check-label" for="sendReminders">
-                  Send reminders before due date
-                </label>
-              </div>
-            </div>
-            
-            <!-- Submit & Cancel Buttons -->
-            <div class="d-flex justify-content-between align-items-center mt-4">
-              <button type="button" class="btn btn-outline-secondary px-4" id="cancelBtn">
-                <i class="bi bi-x-circle me-2"></i>Cancel
-              </button>
-              <button type="submit" class="btn btn-success px-4 py-2 shadow-sm d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-check-circle"></i>
-                <span>Assign Quiz</span>
-              </button>
-            </div>
-          </form>
-        </div>
+      </div>
     </div>
-      
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const unselectedContainer = document.querySelector('.unselected-employees');
-          const selectedContainer = document.querySelector('.selected-employees');
-          const selectedEmployeeInputs = document.getElementById('selectedEmployeeInputs');
-          const selectedCount = document.getElementById('selectedCount');
-          const unselectedCount = document.getElementById('unselectedCount');
-          
-          // Initialize counters
-          updateCounters();
-          
-          // Quiz search functionality
-          document.getElementById('quizSearchInput').addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            const options = document.querySelectorAll('#quizSelect option:not([disabled])');
-            
-            options.forEach(option => {
-              const text = option.textContent.toLowerCase();
-              if (text.includes(searchValue)) {
-                option.style.display = '';
-              } else {
-                option.style.display = 'none';
-              }
-            });
-          });
-          
-          // Employee search functionality
-          document.getElementById('employeeSearchInput').addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            const employees = document.querySelectorAll('.employee-item');
-            
-            employees.forEach(item => {
-              const name = item.getAttribute('data-name').toLowerCase();
-              const department = item.getAttribute('data-department').toLowerCase();
-              
-              if (name.includes(searchValue) || department.includes(searchValue)) {
-                item.style.display = '';
-              } else {
-                item.style.display = 'none';
-              }
-            });
-          });
-          
-          // Handle select/deselect individual employee
-          unselectedContainer.addEventListener('click', function(e) {
-            if (e.target.classList.contains('select-btn') || e.target.parentElement.classList.contains('select-btn')) {
-              const employeeItem = e.target.closest('.employee-item');
-              if (employeeItem) {
-                moveToSelected(employeeItem);
-              }
-            }
-          });
-          
-          selectedContainer.addEventListener('click', function(e) {
-            if (e.target.classList.contains('deselect-btn') || e.target.parentElement.classList.contains('deselect-btn')) {
-              const employeeItem = e.target.closest('.employee-item');
-              if (employeeItem) {
-                moveToUnselected(employeeItem);
-              }
-            }
-          });
-          
-          // Select All button
-          document.getElementById('selectAllBtn').addEventListener('click', function() {
-            const visibleEmployees = [...unselectedContainer.querySelectorAll('.employee-item')]
-              .filter(item => item.style.display !== 'none');
-            
-            visibleEmployees.forEach(employee => {
-              moveToSelected(employee);
-            });
-          });
-          
-          // Deselect All button
-          document.getElementById('deselectAllBtn').addEventListener('click', function() {
-            const selectedEmployees = [...selectedContainer.querySelectorAll('.employee-item')];
-            
-            selectedEmployees.forEach(employee => {
-              moveToUnselected(employee);
-            });
-          });
-          
-          // Move employee to selected column
-          function moveToSelected(employeeItem) {
-            const employeeId = employeeItem.getAttribute('data-id');
-            const employeeName = employeeItem.getAttribute('data-name');
-            const employeeDept = employeeItem.getAttribute('data-department');
-            
-            // Clone the employee item for the selected container
-            const clonedItem = document.createElement('div');
-            clonedItem.className = 'list-group-item list-group-item-action employee-item d-flex justify-content-between align-items-center';
-            clonedItem.setAttribute('data-id', employeeId);
-            clonedItem.setAttribute('data-name', employeeName);
-            clonedItem.setAttribute('data-department', employeeDept);
-            
-            clonedItem.innerHTML = `
-              <div>
-                <span class="employee-name">${employeeName}</span>
-                <small class="d-block text-muted">${employeeDept}</small>
-              </div>
-              <button type="button" class="btn btn-sm btn-outline-danger deselect-btn">
-                <i class="bi bi-arrow-left"></i>
-              </button>
-            `;
-            
-            // Add hidden input for form submission
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'user_ids';
-            hiddenInput.value = employeeId;
-            hiddenInput.id = `employee-input-${employeeId}`;
-            selectedEmployeeInputs.appendChild(hiddenInput);
-            
-            // Remove from unselected and add to selected
-            employeeItem.remove();
-            selectedContainer.appendChild(clonedItem);
-            
-            updateCounters();
-          }
-          
-          // Move employee to unselected column
-          function moveToUnselected(employeeItem) {
-            const employeeId = employeeItem.getAttribute('data-id');
-            const employeeName = employeeItem.getAttribute('data-name');
-            const employeeDept = employeeItem.getAttribute('data-department');
-            
-            // Clone the employee item for the unselected container
-            const clonedItem = document.createElement('div');
-            clonedItem.className = 'list-group-item list-group-item-action employee-item d-flex justify-content-between align-items-center';
-            clonedItem.setAttribute('data-id', employeeId);
-            clonedItem.setAttribute('data-name', employeeName);
-            clonedItem.setAttribute('data-department', employeeDept);
-            
-            clonedItem.innerHTML = `
-              <div>
-                <span class="employee-name">${employeeName}</span>
-                <small class="d-block text-muted">${employeeDept}</small>
-              </div>
-              <button type="button" class="btn btn-sm btn-outline-primary select-btn">
-                <i class="bi bi-arrow-right"></i>
-              </button>
-            `;
-            
-            // Remove hidden input
-            const hiddenInput = document.getElementById(`employee-input-${employeeId}`);
-            if (hiddenInput) {
-              hiddenInput.remove();
-            }
-            
-            // Remove from selected and add to unselected
-            employeeItem.remove();
-            unselectedContainer.appendChild(clonedItem);
-            
-            updateCounters();
-          }
-          
-          // Update employee counters
-          function updateCounters() {
-            const unselectedItems = unselectedContainer.querySelectorAll('.employee-item').length;
-            const selectedItems = selectedContainer.querySelectorAll('.employee-item').length;
-            
-            unselectedCount.textContent = unselectedItems;
-            selectedCount.textContent = selectedItems;
-          }
-          
-          // Quick due date setters
-          document.getElementById('set2Weeks').addEventListener('click', function() {
-            const today = new Date();
-            const twoWeeksLater = new Date(today.setDate(today.getDate() + 14));
-            document.getElementById('dueDate').valueAsDate = twoWeeksLater;
-          });
-          
-          document.getElementById('set1Month').addEventListener('click', function() {
-            const today = new Date();
-            const oneMonthLater = new Date(today.setMonth(today.getMonth() + 1));
-            document.getElementById('dueDate').valueAsDate = oneMonthLater;
-          });
-          
-          // Cancel button
-          document.getElementById('cancelBtn').addEventListener('click', function() {
-            if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-              window.history.back();
-            }
-          });
-          
-          // Form validation
-          document.querySelector('form').addEventListener('submit', function(event) {
-            const quizSelected = document.getElementById('quizSelect').value;
-            const employeesSelected = selectedContainer.querySelectorAll('.employee-item').length;
-            
-            if (!quizSelected) {
-              alert('Please select a quiz to assign.');
-              event.preventDefault();
-              return;
-            }
-            
-            if (employeesSelected === 0) {
-              alert('Please select at least one employee.');
-              event.preventDefault();
-              return;
-            }
-          });
-        });
-      </script>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Function to load campaigns
-    function loadCampaigns() {
-        fetch('/api/gophish/campaigns/')
-            .then(response => response.json())
-            .then(campaigns => {
-                const select = document.getElementById('campaignSelect');
-                select.innerHTML = '<option value="">Select a campaign</option>';
-                
-                campaigns.forEach(campaign => {
-                    const option = document.createElement('option');
-                    option.value = campaign.id;
-                    option.textContent = campaign.name;
-                    select.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading campaigns:', error);
-            });
-    }
+  // helper to read CSS vars
+  function getColor(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+  }
 
-    // Function to update statistics
-    function updateStatistics(campaignId) {
-        if (!campaignId) {
-            document.querySelector('.open-rate').textContent = '-';
-            document.querySelector('.click-rate').textContent = '-';
-            document.querySelector('.bounce-rate').textContent = '-';
-            return;
+  let pieChart, barChart, campaignsList = [], currentStats, currentCampaign;
+
+  function showLoadingState() {
+    const sa = document.getElementById('statsArea');
+    sa.innerHTML = '';
+    sa.classList.add('skeleton');
+    document.getElementById('campaignSelect').disabled = true;
+  }
+  function hideLoadingState() {
+    const sa = document.getElementById('statsArea');
+    sa.classList.remove('skeleton');
+    document.getElementById('campaignSelect').disabled = false;
+  }
+
+  // build or rebuild both charts
+  function buildCharts(stats, campaign) {
+    currentStats = stats;
+    currentCampaign = campaign;
+
+    const o = stats.opened, c = stats.clicked,
+          b = stats.error, r = stats.reported,
+          total = stats.total > 0 ? stats.total : (o+c+b+r),
+          p = Math.max(0, total - (o+c+b+r));
+
+    document.getElementById('statsArea').classList.remove('skeleton');
+    document.getElementById('statsArea').innerHTML = `
+      <div class="charts-container">
+        <div class="chart-wrapper">
+          <div class="chart-title">Email Status Distribution</div>
+          <canvas id="statusPieChart"></canvas>
+        </div>
+        <div class="chart-wrapper">
+          <div class="chart-title">Campaign Performance</div>
+          <canvas id="performanceBarChart"></canvas>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value sent-rate">${total}</div><div class="stat-label">Sent</div></div>
+        <div class="stat-item"><div class="stat-value open-rate">${o}</div><div class="stat-label">Opened</div></div>
+        <div class="stat-item"><div class="stat-value click-rate">${c}</div><div class="stat-label">Clicked</div></div>
+        <div class="stat-item"><div class="stat-value bounce-rate">${b}</div><div class="stat-label">Bounced</div></div>
+        <div class="stat-item"><div class="stat-value report-rate">${r}</div><div class="stat-label">Reported</div></div>
+      </div>`;
+
+    if (pieChart) pieChart.destroy();
+    pieChart = new Chart(
+      document.getElementById('statusPieChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: ['Opened','Clicked','Bounced','Reported','Pending'],
+          datasets:[{
+            data: [o,c,b,r,p],
+            backgroundColor: [
+              getColor('--chart-opened'),
+              getColor('--chart-clicked'),
+              getColor('--chart-bounced'),
+              getColor('--chart-reported'),
+              getColor('--chart-pending')
+            ]
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{ legend:{ labels:{ color:getColor('--text-primary') }, position:'bottom' } }
         }
+      }
+    );
 
-        fetch(`/api/gophish/campaigns/${campaignId}/summary`)
-            .then(response => response.json())
-            .then(data => {
-                const stats = data.stats;
-                const total = stats.total;
-                
-                if (total > 0) {
-                    const openRate = ((stats.opened / total) * 100).toFixed(1);
-                    const clickRate = ((stats.clicked / total) * 100).toFixed(1);
-                    const bounceRate = ((stats.error / total) * 100).toFixed(1);
-                    
-                    document.querySelector('.open-rate').textContent = `${openRate}%`;
-                    document.querySelector('.click-rate').textContent = `${clickRate}%`;
-                    document.querySelector('.bounce-rate').textContent = `${bounceRate}%`;
-                } else {
-                    document.querySelector('.open-rate').textContent = '0%';
-                    document.querySelector('.click-rate').textContent = '0%';
-                    document.querySelector('.bounce-rate').textContent = '0%';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading campaign statistics:', error);
-            });
+    if (barChart) barChart.destroy();
+    barChart = new Chart(
+      document.getElementById('performanceBarChart').getContext('2d'), {
+        type:'bar',
+        data:{
+          labels:['Opened','Clicked','Bounced','Reported'],
+          datasets:[{
+            label:'Emails',
+            data:[o,c,b,r],
+            backgroundColor:[
+              getColor('--chart-opened'),
+              getColor('--chart-clicked'),
+              getColor('--chart-bounced'),
+              getColor('--chart-reported')
+            ]
+          }]
+        },
+        options:{
+          responsive:true,
+          scales:{
+            x:{ ticks:{ color:getColor('--text-primary') } },
+            y:{ beginAtZero:true, ticks:{ color:getColor('--text-primary') } }
+          },
+          plugins:{ legend:{ display:false } }
+        }
+      }
+    );
+  }
+
+  // populate the campaign dropdown
+  async function loadCampaignList() {
+    try {
+      const res = await fetch('/api/gophish/campaigns/');
+      campaignsList = await res.json();
+
+      if (!campaignsList.length) {
+        document.querySelector('.stats-container').innerHTML = `
+          <div class="alert alert-info text-center mt-4">
+            <i class="fas fa-info-circle me-2"></i>
+            No campaigns yet. Create one to see stats here.
+          </div>`;
+        return;
+      }
+
+      const sel = document.getElementById('campaignSelect');
+      sel.disabled = false;
+      sel.innerHTML = `
+        <option value="">-- Select Campaign --</option>
+        <option value="all">All Campaigns</option>
+      `;
+      campaignsList.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id;
+        o.textContent = c.name;
+        sel.appendChild(o);
+      });
+    } catch (e) {
+      console.error(e);
+      document.getElementById('campaignSelect').innerHTML =
+        '<option>Error loading campaigns</option>';
     }
+  }
 
-    // Event listener for campaign selection
-    document.getElementById('campaignSelect').addEventListener('change', function() {
-        updateStatistics(this.value);
-    });
+  // fetch and roll up *all* campaign stats
+  async function loadAggregateStats() {
+    showLoadingState();
+    try {
+      const campaigns = await fetch('/api/gophish/campaigns/').then(r=>r.json());
+      const summaries = await Promise.all(
+        campaigns.map(c =>
+          fetch(`/api/gophish/campaigns/${c.id}/summary/`)
+            .then(r => {
+              if (!r.ok) throw new Error(`Summary failed for ${c.id}`);
+              return r.json();
+            })
+        )
+      );
 
-    // Load campaigns when the page loads
-    document.addEventListener('DOMContentLoaded', loadCampaigns);
+      const total = summaries.reduce((acc, d) => {
+        const s = d.stats || {};
+        acc.opened   += Number(s.opened)   || 0;
+        acc.clicked  += Number(s.clicked)  || 0;
+        acc.error    += Number(s.error)    || 0;
+        acc.reported += Number(s.reported) || 0;
+        acc.total    += Number(s.total)    || 0;
+        return acc;
+      }, { opened:0, clicked:0, error:0, reported:0, total:0 });
+
+      buildCharts(total, null);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('statsArea').innerHTML = `
+        <div class="alert alert-danger text-center mt-4">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading aggregate statistics.
+        </div>`;
+    } finally {
+      hideLoadingState();
+    }
+  }
+
+  // fetch a single campaign's summary
+  async function updateStatistics(id) {
+    showLoadingState();
+    try {
+      const d = await fetch(`/api/gophish/campaigns/${id}/summary/`)
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); });
+
+      const s = d.stats || {};
+      buildCharts({
+        opened:   Number(s.opened)   || 0,
+        clicked:  Number(s.clicked)  || 0,
+        error:    Number(s.error)    || 0,
+        reported: Number(s.reported) || 0,
+        total:    Number(s.total)    || 0
+      }, d.campaign);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('statsArea').innerHTML = `
+        <div class="alert alert-danger text-center mt-4">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading campaign statistics.
+        </div>`;
+    } finally {
+      hideLoadingState();
+    }
+  }
+
+  // theme toggle must re-render charts
+  function updateChartsTheme() {
+    if (currentStats !== undefined) {
+      buildCharts(currentStats, currentCampaign);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCampaignList();
+
+    document.getElementById('campaignSelect')
+      .addEventListener('change', e => {
+        const v = e.target.value;
+        if (v === 'all')       loadAggregateStats();
+        else if (v)            updateStatistics(v);
+      });
+
+    document.getElementById('themeToggle')
+      .addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        updateChartsTheme();
+      });
+  });
 </script>
-{% endblock %} 
+{% endblock %}

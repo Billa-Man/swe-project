@@ -51,7 +51,7 @@ def test_phishing_template_str():
 
 def test_employee_group_str():
     group = EmployeeGroupFactory(name="Team A")
-    assert str(group) == f"Team A - {group.it_owner.email}"
+    assert str(group) == f"Team A"
 
 def test_login_attempt_str():
     attempt = LoginAttempt.objects.create(

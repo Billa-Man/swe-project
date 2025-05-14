@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Assign a Quiz (Wizard){% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Wizard step indicator */
+  .wizard-steps {
+    list-style: none;
+    display: flex;
+    margin: 0 0 2rem;
+    padding: 0;
+  }
+  .wizard-steps .step {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    border-bottom: 3px solid #e2e8f0;
+    cursor: pointer;
+  }
+  .wizard-steps .step.active {
+    font-weight: 600;
+    border-color: #3b82f6;
+  }
+  .wizard-steps .step.complete {
+    color: #10b981;
+    border-color: #10b981;
+  }
+
+  /* Hide all panes except the active one */
+  .step-pane { display: none; }
+  .step-pane.active { display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+  <div class="container">
+    <div class="section-title mb-4">
+      <i class="fas fa-tasks me-2"></i>Assign a Quiz: Step-by-Step
+    </div>
+
+    <div class="card shadow-sm rounded-lg p-4">
+      <form id="assignQuizForm" method="POST" action="{% url 'assign_quiz_to_users' %}">
+        {% csrf_token %}
+
+        <!-- Step indicators -->
+        <ul class="wizard-steps">
+          <li class="step active" data-step="1">1. Quiz</li>
+          <li class="step"         data-step="2">2. Employees</li>
+          <li class="step"         data-step="3">3. Settings</li>
+        </ul>
+
+        <!-- Step 1: Quiz Selection -->
+        <div class="step-pane active" data-step="1">
+          <div class="mb-4">
+            <label for="quizSelect" class="form-label fw-semibold">
+              <i class="fas fa-book me-2"></i>Select Quiz
+            </label>
+            <div class="input-group mb-2">
+              <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+              <input type="text" id="quizSearchInput" class="form-control" placeholder="Search quizzes...">
+            </div>
+            <select id="quizSelect" name="quiz_id" class="form-select shadow-sm" required>
+              <option value="" disabled selected>-- Choose a quiz --</option>
+              {% for quiz in quizzes %}
+                <option value="{{ quiz.id }}">{{ quiz.title }} ({{ quiz.course.title }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 2: Employee Selection -->
+        <div class="step-pane" data-step="2">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-users me-2"></i>Select Employees
+            </label>
+            <div class="input-group mb-2">
+              <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+              <input type="text" id="employeeSearchInput" class="form-control" placeholder="Search employees...">
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                  <div class="card-header bg-light py-2 d-flex justify-content-between">
+                    <span>Available</span>
+                    <span class="badge bg-secondary" id="unselectedCount">0</span>
+                  </div>
+                  <div id="availableList" class="list-group list-group-flush overflow-auto" style="max-height:240px;">
+                    {% for e in employees %}
+                      <div class="list-group-item d-flex justify-content-between align-items-center"
+                           data-id="{{ e.id }}" data-name="{{ e.username }}" data-dept="{{ e.department }}">
+                        <div>
+                          <strong>{{ e.username }}</strong><br>
+                          <small class="text-muted">{{ e.department }}</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary select-btn">
+                          <i class="fas fa-arrow-right"></i>
+                        </button>
+                      </div>
+                    {% endfor %}
+                  </div>
+                  <div class="card-footer bg-light p-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary w-100" id="selectAllBtn">
+                      Select All <i class="fas fa-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                  <div class="card-header bg-light py-2 d-flex justify-content-between">
+                    <span>Selected</span>
+                    <span class="badge bg-success" id="selectedCount">0</span>
+                  </div>
+                  <div id="selectedList" class="list-group list-group-flush overflow-auto" style="max-height:240px;">
+                    <!-- items moved here -->
+                  </div>
+                  <div class="card-footer bg-light p-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger w-100" id="deselectAllBtn">
+                      <i class="fas fa-arrow-left me-1"></i> Remove All
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="selectedEmployeeInputs"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Settings & Review -->
+        <div class="step-pane" data-step="3">
+          <div class="mb-4">
+            <label for="dueDate" class="form-label fw-semibold">
+              <i class="fas fa-calendar-alt me-2"></i>Due Date
+            </label>
+            <div class="input-group shadow-sm mb-3">
+              <input type="date" id="dueDate" name="due_date" class="form-control">
+              <button class="btn btn-outline-secondary" type="button" id="set2Weeks">+2 Weeks</button>
+              <button class="btn btn-outline-secondary" type="button" id="set1Month">+1 Month</button>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-bell me-2"></i>Notifications
+              </label>
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="sendEmailNotif" name="send_email" checked>
+                <label class="form-check-label" for="sendEmailNotif">Email notification</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sendReminders" name="send_reminders" checked>
+                <label class="form-check-label" for="sendReminders">Reminders before due date</label>
+              </div>
+            </div>
+
+            <hr>
+
+            <div id="reviewSummary">
+              <h5 class="fw-semibold mb-3">Review Your Assignment</h5>
+              <ul class="list-unstyled">
+                <li><strong>Quiz:</strong> <span id="summaryQuiz">—</span></li>
+                <li><strong>Employees:</strong> <span id="summaryEmployees">—</span></li>
+                <li><strong>Due Date:</strong> <span id="summaryDueDate">—</span></li>
+                <li><strong>Notifications:</strong> <span id="summaryNotifications">—</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="text-end">
+          <button type="button" id="prevBtn" class="btn btn-outline-secondary me-2" disabled>
+            <i class="fas fa-arrow-left me-1"></i>Back
+          </button>
+          <button type="button" id="nextBtn" class="btn btn-primary">
+            Next <i class="fas fa-arrow-right ms-1"></i>
+          </button>
+          <button type="submit" id="submitBtn" class="btn btn-success d-none">
+            <i class="fas fa-check-circle me-1"></i>Assign Quiz
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let currentStep = 1, totalSteps = 3;
+  const steps = document.querySelectorAll('.wizard-steps .step');
+  const panes = document.querySelectorAll('.step-pane');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // helper to update wizard UI
+  function showStep(n) {
+    // panes
+    panes.forEach(p => p.classList.toggle('active', +p.dataset.step === n));
+    // step indicators
+    steps.forEach(s => {
+      const stepNum = +s.dataset.step;
+      s.classList.toggle('active', stepNum === n);
+      s.classList.toggle('complete', stepNum < n);
+    });
+    // buttons
+    prevBtn.disabled = n === 1;
+    nextBtn.classList.toggle('d-none', n === totalSteps);
+    submitBtn.classList.toggle('d-none', n < totalSteps);
+
+    if (n === totalSteps) populateSummary();
+  }
+
+  // move between lists
+  const availableList = document.getElementById('availableList');
+  const selectedList  = document.getElementById('selectedList');
+  const inputsDiv     = document.getElementById('selectedEmployeeInputs');
+  const selCount      = document.getElementById('selectedCount');
+  const unselCount    = document.getElementById('unselectedCount');
+
+  function updateCounts() {
+    selCount.textContent   = selectedList.children.length;
+    unselCount.textContent = availableList.children.length;
+  }
+
+  function moveItem(item, from, to, toBtnClass, toIcon) {
+    const id   = item.dataset.id;
+    const name = item.dataset.name;
+    const dept = item.dataset.dept;
+    // clone
+    const clone = document.createElement('div');
+    clone.className = item.className;
+    clone.dataset.id   = id;
+    clone.dataset.name = name;
+    clone.dataset.dept = dept;
+    clone.innerHTML = `
+      <div>
+        <strong>${name}</strong><br>
+        <small class="text-muted">${dept}</small>
+      </div>
+      <button type="button" class="btn btn-sm ${toBtnClass}">
+        <i class="${toIcon}"></i>
+      </button>`;
+    to.appendChild(clone);
+    if (to === selectedList) {
+      const input = document.createElement('input');
+      input.type = 'hidden'; input.name = 'user_ids';
+      input.value = id; input.id = `input-${id}`;
+      inputsDiv.appendChild(input);
+    } else {
+      const existing = document.getElementById(`input-${id}`);
+      if (existing) existing.remove();
+    }
+    item.remove();
+    updateCounts();
+  }
+
+  // delegate available → selected
+  availableList.addEventListener('click', e => {
+    const btn = e.target.closest('.select-btn');
+    if (!btn) return;
+    const item = btn.closest('.list-group-item');
+    moveItem(item, availableList, selectedList, 'btn-outline-danger deselect-btn', 'fas fa-arrow-left');
+  });
+  // delegate selected → available
+  selectedList.addEventListener('click', e => {
+    const btn = e.target.closest('.deselect-btn');
+    if (!btn) return;
+    const item = btn.closest('.list-group-item');
+    moveItem(item, selectedList, availableList, 'btn-outline-primary select-btn', 'fas fa-arrow-right');
+  });
+  document.getElementById('selectAllBtn').addEventListener('click', () =>
+    [...availableList.children].forEach(item =>
+      moveItem(item, availableList, selectedList, 'btn-outline-danger deselect-btn', 'fas fa-arrow-left')));
+  document.getElementById('deselectAllBtn').addEventListener('click', () =>
+    [...selectedList.children].forEach(item =>
+      moveItem(item, selectedList, availableList, 'btn-outline-primary select-btn', 'fas fa-arrow-right')));
+
+  // quiz search
+  document.getElementById('quizSearchInput').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#quizSelect option').forEach(opt => {
+      opt.hidden = !opt.textContent.toLowerCase().includes(q);
+    });
+  });
+  // employee search
+  document.getElementById('employeeSearchInput').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    [...availableList.children].forEach(item => {
+      const name = item.dataset.name.toLowerCase();
+      const dpt  = item.dataset.dept.toLowerCase();
+      item.hidden = !(name.includes(q) || dpt.includes(q));
+    });
+  });
+
+  // due date shortcuts
+  const dueDate = document.getElementById('dueDate');
+  document.getElementById('set2Weeks').addEventListener('click', () => {
+    const d = new Date(); d.setDate(d.getDate()+14);
+    dueDate.valueAsDate = d;
+  });
+  document.getElementById('set1Month').addEventListener('click', () => {
+    const d = new Date(); d.setMonth(d.getMonth()+1);
+    dueDate.valueAsDate = d;
+  });
+
+  // summary population
+  function populateSummary() {
+    // quiz
+    const quizOpt = document.querySelector('#quizSelect option:checked');
+    document.getElementById('summaryQuiz').textContent = quizOpt ? quizOpt.textContent : '—';
+    // employees
+    const names = [...selectedList.children].map(i => i.dataset.name);
+    document.getElementById('summaryEmployees').textContent = names.join(', ') || '—';
+    // due date
+    let dateVal = dueDate.value;
+    if (!dateVal) {
+      const d = new Date(); d.setDate(d.getDate()+14);
+      dateVal = d.toISOString().slice(0,10);
+    }
+    document.getElementById('summaryDueDate').textContent =
+      new Date(dateVal).toLocaleDateString();
+    // notifications
+    const notes = [];
+    if (document.getElementById('sendEmailNotif').checked) notes.push('Email');
+    if (document.getElementById('sendReminders').checked) notes.push('Reminders');
+    document.getElementById('summaryNotifications').textContent =
+      notes.length ? notes.join(', ') : 'None';
+  }
+
+  // wizard navigation
+  prevBtn.addEventListener('click', () => {
+    if (currentStep>1) { currentStep--; showStep(currentStep); }
+  });
+  nextBtn.addEventListener('click', () => {
+    // validation
+    if (currentStep===1 && !document.getElementById('quizSelect').value) {
+      alert('Please select a quiz to continue.'); return;
+    }
+    if (currentStep===2 && selectedList.children.length===0) {
+      alert('Please select at least one employee.'); return;
+    }
+    if (currentStep<totalSteps) {
+      currentStep++; showStep(currentStep);
+    }
+  });
+
+  // final form validation
+  document.getElementById('assignQuizForm').addEventListener('submit', e => {
+    if (!document.getElementById('quizSelect').value ||
+        selectedList.children.length===0) {
+      e.preventDefault();
+      alert('You must select a quiz and at least one employee.');
+    }
+  });
+
+  // init
+  updateCounts();
+  showStep(currentStep);
+});
+</script>
+{% endblock %}

@@ -370,26 +370,44 @@ def login_dashboard(request):
 
 @login_required
 def assign_quiz_to_users(request):
-    if request.user.userprofile.user_type not in ['it_owner', 'site_admin']:
+    if not request.user.userprofile.user_type in ['it_owner', 'site_admin']:
         messages.error(request, 'Unauthorized access')
         return redirect('dashboard')
+    
     if request.method == 'POST':
-        quiz = get_object_or_404(Quiz, id=request.POST.get('quiz_id'))
-        due = request.POST.get('due_date')
-        if due:
-            due_date = timezone.make_aware(datetime.strptime(due, '%Y-%m-%d'))
+        quiz_id = request.POST.get('quiz_id')
+        user_ids = request.POST.getlist('user_ids')
+        due_date_str = request.POST.get('due_date')
+        
+        # Parse due date or use default (7 days)
+        if due_date_str:
+            due_date = timezone.datetime.strptime(due_date_str, '%Y-%m-%d')
+            due_date = timezone.make_aware(due_date) 
         else:
             due_date = timezone.now() + timezone.timedelta(days=7)
-        for uid in request.POST.getlist('user_ids'):
-            user = get_object_or_404(User, id=uid)
-            QuizAssignment.objects.create(user=user, quiz=quiz, due_date=due_date)
+            
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+        
+        for user_id in user_ids:
+            user = get_object_or_404(User, id=user_id)
+            
+            # Create assignment
+            QuizAssignment.objects.create(
+                user=user,
+                quiz=quiz,
+                due_date=due_date,
+            )
+            
+            # Create notification
             Notification.objects.create(
                 user=user,
                 message=f"New quiz assigned: {quiz.title}",
                 link=reverse('take_quiz', args=[quiz.id])
             )
-        messages.success(request, f'Quiz successfully assigned')
-        return redirect('dashboard')
+        
+        messages.success(request, f'Quiz successfully assigned to {len(user_ids)} users')
+        
+    return redirect('dashboard')
 
 @login_required
 def mark_all_read(request):

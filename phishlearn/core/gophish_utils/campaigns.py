@@ -171,7 +171,7 @@ def get_campaigns():
             "name": "Example Sending Profile",
             "host": "localhost:1025",
             "from_address": "Test User \u003ctest@test.com\u003e",
-            "ignore_cert_errors": true,
+            s": true,
             "headers": [],
             "modified_date": "2018-09-04T01:24:21.691924069Z"
             },

@@ -170,6 +170,7 @@ def create_sending_profile(name, host, interface_type, from_address,
             "interface_type": interface_type,
             "from_address": from_address,
             "host": host,
+            "ignore_cert_errors":True,
             "username": username,
             "password": password,
         }

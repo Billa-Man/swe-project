@@ -337,7 +337,7 @@
     
     /* Footer styles */
     .footer {
-      background-color: white;
+      background-color: var(--light-color);
       padding: 1.5rem 0;
       border-top: 1px solid var(--border-color);
       margin-top: 3rem;
@@ -398,13 +398,39 @@
     }
 
 
+    .btn-primary-new {
+      background-color: var(--dark-color);
+      border-color: var(--dark-color);
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      color: var(--light-color);
+    }
+
+    .btn-primary-new:hover {
+      background-color: var(--light-color);
+      border-color: var(--dark-color);
+      color: var(--dark-color);
+    }
+
+
+
     .btn-control-center {
       background-color: var(--light-color);
       border-color: var(--dark-color);
       padding: 0.5rem 1.25rem;
       font-weight: 500;
       letter-spacing: 0.3px;
+
     }
+    
+    .btn-control-center:hover {
+      background-color: var(--dark-color);
+      border-color: var(--light-color);
+
+    }
+
+
     
     .btn-control-center:hover {
       background-color: var(--dark-color);
@@ -459,6 +485,7 @@
       color: var(--dark-color); /* customized header */
       border-color: var(--dark-color); 
       border-width: 1px;
+
     }
      
 
@@ -482,6 +509,12 @@
       color: var(--dark-color);
       border-color: var(--dark-color);
     }
+
+
+    .home-icon {
+      color: vcar(--dark-color);
+    }
+
 
   </style>
 </head>

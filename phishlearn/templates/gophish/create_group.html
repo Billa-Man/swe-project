@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% csrf_token %}
+
 {% block title %}Create Target Group{% endblock %}
 
 {% block content %}
@@ -27,27 +27,24 @@
               <div class="form-text">Enter a descriptive name for this target group.</div>
             </div>
             
+            <!-- Targets dynamic list -->
             <div class="mb-3">
-              <label for="targets" class="form-label">Targets</label>
-              <textarea class="form-control" id="targets" name="targets" rows="8" required>[
-  {
-    "first_name": "Example",
-    "last_name": "User",
-    "email": "example@domain.com",
-    "position": "IT Staff"
-  }
-]</textarea>
+              <label class="form-label">Targets</label>
+              <div id="targets-container"></div>
+              <button type="button" class="btn btn-secondary btn-sm mt-2" id="addTargetBtn">
+                <i class="fas fa-plus me-1"></i> Add Target
+              </button>
               <div class="form-text">
-                Enter the target recipients in JSON format. Each target should include first_name, last_name, email, and optionally position.
+                Add one row per recipient. All fields required except Position.
               </div>
             </div>
-            
+
             <div class="d-flex justify-content-between">
               <a href="{% url 'gophish_management' %}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Back
               </a>
               <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save me-1"></i> Create Group
+                <i class="fas fa-save me-1"></i> <span id="submitBtnText">Create Group</span>
               </button>
             </div>
           </form>
@@ -56,206 +53,176 @@
     </div>
   </div>
 </div>
+
+<!-- Template for one target row -->
+<!-- Template for one target row -->
+<template id="target-template">
+  <div class="row flex-nowrap g-2 align-items-end target-row mb-2">
+    <div class="col-3">
+      <label class="form-label visually-hidden">First Name</label>
+      <input type="text" class="form-control first-name" placeholder="First Name" required>
+    </div>
+    <div class="col-3">
+      <label class="form-label visually-hidden">Last Name</label>
+      <input type="text" class="form-control last-name" placeholder="Last Name" required>
+    </div>
+    <div class="col-3">
+      <label class="form-label visually-hidden">Email</label>
+      <input type="email" class="form-control email" placeholder="Email" required>
+    </div>
+    <div class="col-2">
+      <label class="form-label visually-hidden">Position</label>
+      <input type="text" class="form-control position" placeholder="Position">
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-outline-danger btn-sm remove-target" title="Remove">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  </div>
+</template>
 {% endblock %}
+
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Validate JSON in targets field
-    const targetsField = document.getElementById('targets');
-    const form = document.getElementById('groupForm');
-    const alertContainer = document.getElementById('alert-container');
-    
-    if (targetsField) {
-      targetsField.addEventListener('change', function(e) {
-        try {
-          JSON.parse(e.target.value);
-          e.target.classList.remove('is-invalid');
-        } catch (error) {
-          e.target.classList.add('is-invalid');
-          alertContainer.innerHTML = `
-            <div class="alert alert-danger mb-4">
-              <i class="fas fa-exclamation-circle me-2"></i> Invalid JSON format in targets field. Please correct the format.
-            </div>
-          `;
-        }
-      });
-    }
-    
-    // Check if we're in edit mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const editId = urlParams.get('edit');
-    
-    if (editId) {
-      // We're in edit mode - fetch the group data
-      fetch(`/groups/${editId}/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Fill the form with group data
-        document.getElementById('name').value = data.name || '';
-        document.getElementById('targets').value = JSON.stringify(data.targets || [], null, 2);
-        
-        // Change form title
-        const pageTitle = document.querySelector('.page-title');
-        if (pageTitle) pageTitle.textContent = 'Edit Target Group';
-        
-        // Change button text
-        const submitButton = document.querySelector('button[type="submit"]');
-        if (submitButton) {
-          submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Update Group';
-        }
-        
-        // Override form submission for PUT request
-        if (form) {
-          form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const targetsField = document.getElementById('targets');
-            let targets;
-            
-            try {
-              targets = JSON.parse(targetsField.value);
-            } catch (error) {
-              alertContainer.innerHTML = `
-                <div class="alert alert-danger mb-4">
-                  <i class="fas fa-exclamation-circle me-2"></i> Invalid JSON format in targets field. Please correct the format.
-                </div>
-              `;
-              return;
-            }
-            
-            const formData = {
-              name: document.getElementById('name').value,
-              targets: targets
-            };
-            
-            const originalButtonText = submitButton.innerHTML;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
-            submitButton.disabled = true;
-            
-            fetch(`/groups/${editId}/`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-              },
-              body: JSON.stringify(formData)
-            })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              return response.json();
-            })
-            .then(data => {
-              alertContainer.innerHTML = `
-                <div class="alert alert-success mb-4">
-                  <i class="fas fa-check-circle me-2"></i> Group updated successfully!
-                </div>
-              `;
-              setTimeout(function() {
-                window.location.href = "{% url 'gophish_management' %}";
-              }, 1000);
-            })
-            .catch(error => {
-              console.error('Error updating group:', error);
-              alertContainer.innerHTML = `
-                <div class="alert alert-danger mb-4">
-                  <i class="fas fa-exclamation-circle me-2"></i> Error updating group. Please try again.
-                </div>
-              `;
-              submitButton.innerHTML = originalButtonText;
-              submitButton.disabled = false;
-            });
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching group:', error);
-        alertContainer.innerHTML = `
-          <div class="alert alert-danger mb-4">
-            <i class="fas fa-exclamation-circle me-2"></i> Error loading group data. Please try again.
-          </div>
-        `;
-      });
-    } else {
-      // Create mode - handle form submission
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          
-          const submitButton = form.querySelector('button[type="submit"]');
-          const originalButtonText = submitButton.innerHTML;
-          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
-          submitButton.disabled = true;
-          
-          let targets;
-          try {
-            targets = JSON.parse(targetsField.value);
-          } catch (error) {
-            alertContainer.innerHTML = `
-              <div class="alert alert-danger mb-4">
-                <i class="fas fa-exclamation-circle me-2"></i> Invalid JSON format in targets field. Please correct the format.
-              </div>
-            `;
-            submitButton.innerHTML = originalButtonText;
-            submitButton.disabled = false;
-            return;
-          }
-          
-          const formData = {
-            name: document.getElementById('name').value,
-            targets: targets
-          };
-          
-          fetch(form.action, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify(formData)
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              alertContainer.innerHTML = `
-                <div class="alert alert-success mb-4">
-                  <i class="fas fa-check-circle me-2"></i> Group created successfully!
-                </div>
-              `;
-              setTimeout(function() {
-                window.location.href = "{% url 'gophish_management' %}";
-              }, 1000);
-            } else {
-              alertContainer.innerHTML = `
-                <div class="alert alert-danger mb-4">
-                  <i class="fas fa-exclamation-circle me-2"></i> ${data.error || 'Error creating group. Please try again.'}
-                </div>
-              `;
-              submitButton.innerHTML = originalButtonText;
-              submitButton.disabled = false;
-            }
-          })
-          .catch(error => {
-            console.error('Error creating group:', error);
-            alertContainer.innerHTML = `
-              <div class="alert alert-danger mb-4">
-                <i class="fas fa-exclamation-circle me-2"></i> An error occurred while creating the group. Please try again.
-              </div>
-            `;
-            submitButton.innerHTML = originalButtonText;
-            submitButton.disabled = false;
-          });
-        });
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('groupForm');
+  const addBtn = document.getElementById('addTargetBtn');
+  const container = document.getElementById('targets-container');
+  const alertContainer = document.getElementById('alert-container');
+  const submitText = document.getElementById('submitBtnText');
+
+  // helper to add one row, optionally pre-filled
+  function addTargetRow(data = {}) {
+    const tpl = document.getElementById('target-template');
+    const clone = tpl.content.cloneNode(true);
+    const row = clone.querySelector('.target-row');
+
+    row.querySelector('.first-name').value = data.first_name || '';
+    row.querySelector('.last-name').value  = data.last_name  || '';
+    row.querySelector('.email').value      = data.email      || '';
+    row.querySelector('.position').value   = data.position   || '';
+
+    // remove-row button
+    row.querySelector('.remove-target').addEventListener('click', () => {
+      row.remove();
+    });
+
+    container.appendChild(row);
+  }
+
+  // start with one blank row if creating, or none (we'll populate on edit)
+  addTargetRow();
+
+  // add new blank row
+  addBtn.addEventListener('click', () => addTargetRow());
+
+  // Utility: gather all rows into array of objects
+  function collectTargets() {
+    const rows = container.querySelectorAll('.target-row');
+    const arr = [];
+    for (let r of rows) {
+      const first = r.querySelector('.first-name').value.trim();
+      const last  = r.querySelector('.last-name').value.trim();
+      const email = r.querySelector('.email').value.trim();
+      const pos   = r.querySelector('.position').value.trim();
+
+      if (!first || !last || !email) {
+        throw new Error('First name, last name, and email are required for every target.');
       }
+      arr.push({ first_name: first, last_name: last, email: email, position: pos });
     }
+    return arr;
+  }
+
+  // detect edit mode
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get('edit');
+
+  if (editId) {
+    // Fetch existing group, then populate
+    fetch(`/groups/${editId}/`, {
+      headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+    })
+    .then(res => res.json())
+    .then(data => {
+      // clear initial blank row(s)
+      container.innerHTML = '';
+      (data.targets || []).forEach(t => addTargetRow(t));
+
+      // adjust UI for edit
+      document.querySelector('.page-title').textContent = 'Edit Target Group';
+      submitText.textContent = 'Update Group';
+    })
+    .catch(err => {
+      console.error(err);
+      alertContainer.innerHTML = `
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-circle me-2"></i> Unable to load group data.
+        </div>`;
+    });
+  }
+
+  // form submission (works for both create & update)
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    alertContainer.innerHTML = '';
+
+    let targets;
+    try {
+      targets = collectTargets();
+    } catch (err) {
+      alertContainer.innerHTML = `
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-circle me-2"></i>${err.message}
+        </div>`;
+      return;
+    }
+
+    const payload = {
+      name: document.getElementById('name').value.trim(),
+      targets: targets
+    };
+
+    // disable & show spinner
+    submitText.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> ${submitText.textContent}`;
+    form.querySelector('button[type=submit]').disabled = true;
+
+    const url    = editId ? `/groups/${editId}/` : form.action;
+    const method = editId ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(response => {
+      if (response.success || response.id) {
+        alertContainer.innerHTML = `
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            ${ editId ? 'Group updated' : 'Group created'} successfully!
+          </div>`;
+        setTimeout(() => window.location.href = "{% url 'gophish_management' %}", 1000);
+      } else {
+        throw new Error(response.error || 'Server error');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alertContainer.innerHTML = `
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-circle me-2"></i>${err.message}
+        </div>`;
+      form.querySelector('button[type=submit]').disabled = false;
+      submitText.textContent = editId ? 'Update Group' : 'Create Group';
+    });
   });
+});
 </script>
 {% endblock %}

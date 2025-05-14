@@ -5,90 +5,150 @@
 {% block content %}
 <div class="container">
   <div class="page-header mb-4">
-    <h1 class="page-title-reverse">User Management </h1>
+    <h1 class="page-title-reverse">User Management</h1>
     <p class="page-description">Manage your users and groups from this dashboard.</p>
   </div>
 
-  <div class="row">
-    <!-- User Section - First Column -->
-    <div class="col-md-4 mb-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-header card-header-reverse d-flex justify-content-between align-items-center py-3">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" id="userGroupTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button"
+              role="tab" aria-controls="users" aria-selected="true">
+        Users
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button"
+              role="tab" aria-controls="groups" aria-selected="false">
+        Groups
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="userGroupTabsContent">
+    <!-- Users Table -->
+    <div class="tab-pane fade show active py-4" id="users" role="tabpanel" aria-labelledby="users-tab">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h2 class="h4 mb-0">Users</h2>
           <a href="{% url 'create_user_form' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
-        <div class="card-body overflow-auto" style="max-height: 600px;">
+        <div class="card-body p-0">
           {% if users %}
-            <div class="list-group list-group-flush">
-              {% for user in users %}
-                <div class="list-group-item list-group-item-action py-3 px-2">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ user.username }}</h5>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-sm btn-outline-primary view-user" title="View" data-id="{{ user.id }}">
-                        <i class="fas fa-eye"></i>
-                      </button>
-                      <a href="#" class="btn btn-sm btn-outline-secondary edit-user" title="Edit" data-id="{{ user.id }}">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
-                        data-bs-toggle="modal" data-bs-target="#deleteUserModal"
-                        data-id="{{ user.id }}" data-name="{{ user.username }}">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <p class="mb-1 text-muted small">Role: {{ user.role }}</p>
-                </div>
-              {% endfor %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                  <tr>
+                    <td>{{ user.username }}</td>
+                    <td>
+                      {% if user.role.name %}{{ user.role.name }}
+                      {% else %}{{ user.role }}{% endif %}
+                    </td>
+                    <td class="text-end">
+                      <div class="btn-group" role="group">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary view-user"
+                                title="View"
+                                data-id="{{ user.id }}">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary edit-user"
+                                title="Edit"
+                                data-id="{{ user.id }}">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Delete"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteUserModal"
+                                data-id="{{ user.id }}"
+                                data-name="{{ user.username }}">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
             </div>
           {% else %}
-            <div class="alert alert-info mb-0">
-              <i class="fas fa-info-circle me-2"></i> No users found. Create your first user to get started.
+            <div class="alert alert-info mb-0 p-3">
+              <i class="fas fa-info-circle me-2"></i>No users found. Create your first user to get started.
             </div>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Group Section - Second Column -->
-    <div class="col-md-4 mb-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-header card-header-reverse d-flex justify-content-between align-items-center py-3">
+    <!-- Groups Table -->
+    <div class="tab-pane fade py-4" id="groups" role="tabpanel" aria-labelledby="groups-tab">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h2 class="h4 mb-0">Groups</h2>
           <a href="{% url 'create_group_form' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i> New
           </a>
         </div>
-        <div class="card-body overflow-auto" style="max-height: 600px;">
+        <div class="card-body p-0">
           {% if groups %}
-            <div class="list-group list-group-flush">
-              {% for group in groups %}
-                <div class="list-group-item list-group-item-action py-3 px-2">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ group.name }}</h5>
-                    <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-sm btn-outline-primary view-group" title="View" data-id="{{ group.id }}">
-                        <i class="fas fa-eye"></i>
-                      </button>
-                      <a href="#" class="btn btn-sm btn-outline-secondary edit-page" title="Edit" data-id="{{ group.id }}">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
-                        data-bs-toggle="modal" data-bs-target="#deleteGroupModal"
-                        data-id="{{ group.id }}" data-name="{{ group.name }}">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              {% endfor %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Name</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for group in groups %}
+                  <tr>
+                    <td>{{ group.name }}</td>
+                    <td class="text-end">
+                      <div class="btn-group" role="group">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary view-group"
+                                title="View"
+                                data-id="{{ group.id }}">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary edit-page"
+                                title="Edit"
+                                data-id="{{ group.id }}">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Delete"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteGroupModal"
+                                data-id="{{ group.id }}"
+                                data-name="{{ group.name }}">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
             </div>
           {% else %}
-            <div class="alert alert-info mb-0">
-              <i class="fas fa-info-circle me-2"></i> No groups found. Create your first group to get started.
+            <div class="alert alert-info mb-0 p-3">
+              <i class="fas fa-info-circle me-2"></i>No groups found. Create your first group to get started.
             </div>
           {% endif %}
         </div>

@@ -4,448 +4,402 @@
 
 {% block extra_css %}
 <style>
-    .navbar {
-        background-color: #1e293b !important;
-        padding: 1rem 2rem;
-    }
+  /* Theme variables */
+  :root {
+    --bg-dashboard:   #f8fafc;
+    --bg-card:        #ffffff;
+    --text-primary:   #1e293b;
+    --text-muted:     #64748b;
+    --card-shadow:    rgba(0,0,0,0.1);
+    --bg-light:       #e2e8f0;
+    --border-color:   #e2e8f0;
+    --chart-opened:   #3b82f6;
+    --chart-clicked:  #10b981;
+    --chart-bounced:  #ef4444;
+    --chart-reported: #8b5cf6;
+    --chart-pending:  #e2e8f0;
+  }
+  body.dark-mode {
+    --bg-dashboard:   #1f2937;
+    --bg-card:        #374151;
+    --text-primary:   #f9fafb;
+    --text-muted:     #a1a1aa;
+    --card-shadow:    rgba(0,0,0,0.5);
+    --bg-light:       #4b5563;
+    --border-color:   #4b5563;
+    --chart-opened:   #60a5fa;
+    --chart-clicked:  #6ee7b7;
+    --chart-bounced:  #f87171;
+    --chart-reported: #c084fc;
+    --chart-pending:  #6b7280;
+  }
 
-    .navbar-brand {
-        color: white !important;
-        font-size: 1.25rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .navbar-brand i {
-        font-size: 1.25rem;
-        color: white !important;
-    }
-
-    .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .profile-circle {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-        background-color: #f1f5f9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dashboard {
-        padding: 2rem;
-        background-color: #f8fafc;
-        min-height: calc(100vh - 64px);
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 1.5rem;
-    }
-
-    .stats-container {
-        background: white;
-        border-radius: 0.5rem;
-        padding: 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .campaign-selector {
-        margin-bottom: 2rem;
-    }
-
-    .form-select {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-
-    .form-select:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    .charts-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .chart-wrapper {
-        background: #f8fafc;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-    }
-
-    .chart-title {
-        font-size: 1rem;
-        font-weight: 500;
-        color: #1e293b;
-        margin-bottom: 1rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-item {
-        text-align: center;
-        padding: 1.5rem;
-        background: #f8fafc;
-        border-radius: 0.5rem;
-        transition: transform 0.2s;
-    }
-
-    .stat-item:hover {
-        transform: translateY(-2px);
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-        color: #64748b;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .open-rate { color: #3b82f6; }
-    .click-rate { color: #10b981; }
-    .bounce-rate { color: #ef4444; }
-    .report-rate { color: #8b5cf6; }
-
-    .campaign-details {
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .campaign-date {
-        color: #64748b;
-        font-size: 0.875rem;
-        margin-bottom: 1rem;
-    }
-
-    .btn-danger {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        background-color: #ef4444;
-        color: white;
-        border: none;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        text-decoration: none;
-    }
-
-    .btn-danger:hover {
-        background-color: #dc2626;
-        color: white;
-    }
+  .navbar {
+    background-color: var(--bg-dashboard) !important;
+    padding: 1rem 2rem;
+  }
+  .navbar-brand {
+    color: var(--text-primary) !important;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  .dashboard {
+    padding: 2rem;
+    background-color: var(--bg-dashboard);
+    min-height: calc(100vh - 64px);
+  }
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+  .stats-container {
+    background: var(--bg-card);
+    border-radius: .5rem;
+    padding: 2rem;
+    box-shadow: 0 1px 3px var(--card-shadow);
+  }
+  .campaign-selector {
+    margin-bottom: 2rem;
+  }
+  .form-select {
+    width: 100%;
+    padding: .75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: .375rem;
+    font-size: .875rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+  .form-select:focus {
+    border-color: var(--chart-opened);
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+    outline: none;
+  }
+  .charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  .chart-wrapper {
+    background: var(--bg-dashboard);
+    border-radius: .5rem;
+    padding: 1.5rem;
+  }
+  .chart-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--bg-dashboard);
+    border-radius: .5rem;
+    transition: transform .2s;
+  }
+  .stat-item:hover { transform: translateY(-2px); }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: .5rem;
+  }
+  .stat-label {
+    color: var(--text-muted);
+    font-size: .875rem;
+    font-weight: 500;
+  }
+  .sent-rate   { color: var(--text-muted); }
+  .open-rate   { color: var(--chart-opened); }
+  .click-rate  { color: var(--chart-clicked); }
+  .bounce-rate { color: var(--chart-bounced); }
+  .report-rate { color: var(--chart-reported); }
+  .skeleton {
+    background: linear-gradient(90deg,var(--bg-light) 25%,#e2e8f0 50%,var(--bg-light) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 </style>
 {% endblock %}
 
 {% block navbar %}
 <nav class="navbar">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-shield-alt me-2" style="color: white !important;"></i>
-            PhishLearn IT Owner
-        </a>
-        <div class="nav-right">
-            <i class="fas fa-bell text-white"></i>
-            <div class="profile-circle">
-                <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}" alt="Profile" class="w-100 h-100 rounded-circle">
-            </div>
-        </div>
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="/">
+      <i class="fas fa-shield-alt me-2"></i>PhishLearn IT Owner
+    </a>
+    <div class="nav-right">
+      <i class="fas fa-bell text-white"></i>
+      <div class="profile-circle">
+        <img src="{{ user.profile_image.url|default:'/static/images/default-avatar.png' }}"
+             alt="Profile" class="w-100 h-100 rounded-circle">
+      </div>
+      <button id="themeToggle" class="btn btn-sm btn-light ms-3">🌙/☀️</button>
     </div>
+  </div>
 </nav>
 {% endblock %}
 
 {% block content %}
 <div class="dashboard">
-    <div class="container">
-        <div class="section-title mb-4">Email Campaign Statistics</div>
-
-        <div class="stats-container">
-            <div class="campaign-selector">
-                <select id="campaignSelect" class="form-select">
-                    <option value="all">All Campaigns</option>
-                </select>
-            </div>
-
-            <div class="charts-container">
-                <div class="chart-wrapper">
-                    <div class="chart-title">Email Status Distribution</div>
-                    <canvas id="statusPieChart"></canvas>
-                </div>
-                <div class="chart-wrapper">
-                    <div class="chart-title">Campaign Performance</div>
-                    <canvas id="performanceBarChart"></canvas>
-                </div>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value open-rate">-</div>
-                    <div class="stat-label">Opened</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value click-rate">-</div>
-                    <div class="stat-label">Clicked</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value bounce-rate">-</div>
-                    <div class="stat-label">Bounced</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value report-rate">-</div>
-                    <div class="stat-label">Reported</div>
-                </div>
-            </div>
-
-            <div class="campaign-details">
-                <div class="campaign-date" id="campaignDate"></div>
-                <div class="campaign-description" id="campaignDescription"></div>
-            </div>
+  <div class="container">
+    <div class="section-title mb-4">Email Campaign Statistics</div>
+    <div class="stats-container">
+      <div class="campaign-selector">
+        <select id="campaignSelect" class="form-select" disabled>
+          <option>Loading campaigns…</option>
+        </select>
+      </div>
+      <div id="statsArea" style="min-height:300px;">
+        <div class="alert alert-info text-center mt-4">
+          <i class="fas fa-info-circle me-2"></i>
+          Select a campaign to view statistics.
         </div>
-    </div>   
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    let pieChart = null;
-    let barChart = null;
+  // helper to read CSS vars
+  function getColor(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+  }
 
-    // Function to load campaigns
-    function loadCampaigns() {
-        fetch('/api/gophish/campaigns/')
-            .then(response => response.json())
-            .then(campaigns => {
-                const select = document.getElementById('campaignSelect');
-                select.innerHTML = '<option value="all">All Campaigns</option>';
-                
-                campaigns.forEach(campaign => {
-                    const option = document.createElement('option');
-                    option.value = campaign.id;
-                    option.textContent = campaign.name;
-                    select.appendChild(option);
-                });
+  let pieChart, barChart, campaignsList = [], currentStats, currentCampaign;
 
-                // Load aggregate statistics by default
-                loadAggregateStats();
-            })
-            .catch(error => {
-                console.error('Error loading campaigns:', error);
-            });
-    }
+  function showLoadingState() {
+    const sa = document.getElementById('statsArea');
+    sa.innerHTML = '';
+    sa.classList.add('skeleton');
+    document.getElementById('campaignSelect').disabled = true;
+  }
+  function hideLoadingState() {
+    const sa = document.getElementById('statsArea');
+    sa.classList.remove('skeleton');
+    document.getElementById('campaignSelect').disabled = false;
+  }
 
-    // Function to load aggregate statistics
-    function loadAggregateStats() {
-        fetch('/api/gophish/campaigns/')
-            .then(response => response.json())
-            .then(campaigns => {
-                let totalStats = {
-                    opened: 0,
-                    clicked: 0,
-                    error: 0,
-                    reported: 0,
-                    total: 0
-                };
+  // build or rebuild both charts
+  function buildCharts(stats, campaign) {
+    currentStats = stats;
+    currentCampaign = campaign;
 
-                // Create an array of promises for all campaign stats
-                const statPromises = campaigns.map(campaign => 
-                    fetch(`/api/gophish/campaigns/${campaign.id}/summary`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const stats = data.stats;
-                            totalStats.opened += stats.opened;
-                            totalStats.clicked += stats.clicked;
-                            totalStats.error += stats.error;
-                            totalStats.reported += stats.reported;
-                            totalStats.total += stats.total;
-                        })
-                );
+    const o = stats.opened, c = stats.clicked,
+          b = stats.error, r = stats.reported,
+          total = stats.total > 0 ? stats.total : (o+c+b+r),
+          p = Math.max(0, total - (o+c+b+r));
 
-                // Wait for all stats to be loaded
-                Promise.all(statPromises)
-                    .then(() => {
-                        updateChartsAndStats(totalStats);
-                        document.getElementById('campaignDate').textContent = 'Aggregate Statistics';
-                        document.getElementById('campaignDescription').textContent = `Total Emails Sent: ${totalStats.total}`;
-                    })
-                    .catch(error => {
-                        console.error('Error loading aggregate statistics:', error);
-                    });
-            })
-            .catch(error => {
-                console.error('Error loading campaigns:', error);
-            });
-    }
+    document.getElementById('statsArea').classList.remove('skeleton');
+    document.getElementById('statsArea').innerHTML = `
+      <div class="charts-container">
+        <div class="chart-wrapper">
+          <div class="chart-title">Email Status Distribution</div>
+          <canvas id="statusPieChart"></canvas>
+        </div>
+        <div class="chart-wrapper">
+          <div class="chart-title">Campaign Performance</div>
+          <canvas id="performanceBarChart"></canvas>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value sent-rate">${total}</div><div class="stat-label">Sent</div></div>
+        <div class="stat-item"><div class="stat-value open-rate">${o}</div><div class="stat-label">Opened</div></div>
+        <div class="stat-item"><div class="stat-value click-rate">${c}</div><div class="stat-label">Clicked</div></div>
+        <div class="stat-item"><div class="stat-value bounce-rate">${b}</div><div class="stat-label">Bounced</div></div>
+        <div class="stat-item"><div class="stat-value report-rate">${r}</div><div class="stat-label">Reported</div></div>
+      </div>`;
 
-    // Function to update statistics
-    function updateStatistics(campaignId) {
-        if (campaignId === 'all') {
-            loadAggregateStats();
-            return;
+    if (pieChart) pieChart.destroy();
+    pieChart = new Chart(
+      document.getElementById('statusPieChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: ['Opened','Clicked','Bounced','Reported','Pending'],
+          datasets:[{
+            data: [o,c,b,r,p],
+            backgroundColor: [
+              getColor('--chart-opened'),
+              getColor('--chart-clicked'),
+              getColor('--chart-bounced'),
+              getColor('--chart-reported'),
+              getColor('--chart-pending')
+            ]
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{ legend:{ labels:{ color:getColor('--text-primary') }, position:'bottom' } }
         }
+      }
+    );
 
-        if (!campaignId) {
-            clearStats();
-            return;
+    if (barChart) barChart.destroy();
+    barChart = new Chart(
+      document.getElementById('performanceBarChart').getContext('2d'), {
+        type:'bar',
+        data:{
+          labels:['Opened','Clicked','Bounced','Reported'],
+          datasets:[{
+            label:'Emails',
+            data:[o,c,b,r],
+            backgroundColor:[
+              getColor('--chart-opened'),
+              getColor('--chart-clicked'),
+              getColor('--chart-bounced'),
+              getColor('--chart-reported')
+            ]
+          }]
+        },
+        options:{
+          responsive:true,
+          scales:{
+            x:{ ticks:{ color:getColor('--text-primary') } },
+            y:{ beginAtZero:true, ticks:{ color:getColor('--text-primary') } }
+          },
+          plugins:{ legend:{ display:false } }
         }
+      }
+    );
+  }
 
-        fetch(`/api/gophish/campaigns/${campaignId}/summary`)
-            .then(response => response.json())
-            .then(data => {
-                updateChartsAndStats(data.stats);
-                
-                // Update campaign details
-                if (data.campaign) {
-                    const date = new Date(data.campaign.created_date);
-                    document.getElementById('campaignDate').textContent = `Campaign Date: ${date.toLocaleDateString()}`;
-                    document.getElementById('campaignDescription').textContent = data.campaign.description || 'No description available';
-                }
+  // populate the campaign dropdown
+  async function loadCampaignList() {
+    try {
+      const res = await fetch('/api/gophish/campaigns/');
+      campaignsList = await res.json();
+
+      if (!campaignsList.length) {
+        document.querySelector('.stats-container').innerHTML = `
+          <div class="alert alert-info text-center mt-4">
+            <i class="fas fa-info-circle me-2"></i>
+            No campaigns yet. Create one to see stats here.
+          </div>`;
+        return;
+      }
+
+      const sel = document.getElementById('campaignSelect');
+      sel.disabled = false;
+      sel.innerHTML = `
+        <option value="">-- Select Campaign --</option>
+        <option value="all">All Campaigns</option>
+      `;
+      campaignsList.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id;
+        o.textContent = c.name;
+        sel.appendChild(o);
+      });
+    } catch (e) {
+      console.error(e);
+      document.getElementById('campaignSelect').innerHTML =
+        '<option>Error loading campaigns</option>';
+    }
+  }
+
+  // fetch and roll up *all* campaign stats
+  async function loadAggregateStats() {
+    showLoadingState();
+    try {
+      const campaigns = await fetch('/api/gophish/campaigns/').then(r=>r.json());
+      const summaries = await Promise.all(
+        campaigns.map(c =>
+          fetch(`/api/gophish/campaigns/${c.id}/summary/`)
+            .then(r => {
+              if (!r.ok) throw new Error(`Summary failed for ${c.id}`);
+              return r.json();
             })
-            .catch(error => {
-                console.error('Error loading campaign statistics:', error);
-            });
+        )
+      );
+
+      const total = summaries.reduce((acc, d) => {
+        const s = d.stats || {};
+        acc.opened   += Number(s.opened)   || 0;
+        acc.clicked  += Number(s.clicked)  || 0;
+        acc.error    += Number(s.error)    || 0;
+        acc.reported += Number(s.reported) || 0;
+        acc.total    += Number(s.total)    || 0;
+        return acc;
+      }, { opened:0, clicked:0, error:0, reported:0, total:0 });
+
+      buildCharts(total, null);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('statsArea').innerHTML = `
+        <div class="alert alert-danger text-center mt-4">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading aggregate statistics.
+        </div>`;
+    } finally {
+      hideLoadingState();
     }
+  }
 
-    // Function to update charts and stats
-    function updateChartsAndStats(stats) {
-        const total = stats.total;
-        
-        if (total > 0) {
-            // Update stat numbers
-            document.querySelector('.open-rate').textContent = stats.opened;
-            document.querySelector('.click-rate').textContent = stats.clicked;
-            document.querySelector('.bounce-rate').textContent = stats.error;
-            document.querySelector('.report-rate').textContent = stats.reported;
+  // fetch a single campaign's summary
+  async function updateStatistics(id) {
+    showLoadingState();
+    try {
+      const d = await fetch(`/api/gophish/campaigns/${id}/summary/`)
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); });
 
-            // Update pie chart
-            if (pieChart) pieChart.destroy();
-            const pieCtx = document.getElementById('statusPieChart').getContext('2d');
-            pieChart = new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Opened', 'Clicked', 'Bounced', 'Reported', 'Pending'],
-                    datasets: [{
-                        data: [
-                            stats.opened,
-                            stats.clicked,
-                            stats.error,
-                            stats.reported,
-                            total - (stats.opened + stats.clicked + stats.error + stats.reported)
-                        ],
-                        backgroundColor: [
-                            '#3b82f6', // Open rate
-                            '#10b981', // Click rate
-                            '#ef4444', // Bounce rate
-                            '#8b5cf6', // Report rate
-                            '#e2e8f0'  // Pending
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Update bar chart
-            if (barChart) barChart.destroy();
-            const barCtx = document.getElementById('performanceBarChart').getContext('2d');
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Opened', 'Clicked', 'Bounced', 'Reported'],
-                    datasets: [{
-                        label: 'Number of Emails',
-                        data: [
-                            stats.opened,
-                            stats.clicked,
-                            stats.error,
-                            stats.reported
-                        ],
-                        backgroundColor: [
-                            '#3b82f6',
-                            '#10b981',
-                            '#ef4444',
-                            '#8b5cf6'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        } else {
-            clearStats();
-        }
+      const s = d.stats || {};
+      buildCharts({
+        opened:   Number(s.opened)   || 0,
+        clicked:  Number(s.clicked)  || 0,
+        error:    Number(s.error)    || 0,
+        reported: Number(s.reported) || 0,
+        total:    Number(s.total)    || 0
+      }, d.campaign);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('statsArea').innerHTML = `
+        <div class="alert alert-danger text-center mt-4">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Error loading campaign statistics.
+        </div>`;
+    } finally {
+      hideLoadingState();
     }
+  }
 
-    // Function to clear stats
-    function clearStats() {
-        document.querySelector('.open-rate').textContent = '0';
-        document.querySelector('.click-rate').textContent = '0';
-        document.querySelector('.bounce-rate').textContent = '0';
-        document.querySelector('.report-rate').textContent = '0';
-        document.getElementById('campaignDate').textContent = '';
-        document.getElementById('campaignDescription').textContent = '';
-        
-        if (pieChart) pieChart.destroy();
-        if (barChart) barChart.destroy();
+  // theme toggle must re-render charts
+  function updateChartsTheme() {
+    if (currentStats !== undefined) {
+      buildCharts(currentStats, currentCampaign);
     }
+  }
 
-    // Event listener for campaign selection
-    document.getElementById('campaignSelect').addEventListener('change', function() {
-        updateStatistics(this.value);
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCampaignList();
 
-    // Load campaigns when the page loads
-    document.addEventListener('DOMContentLoaded', loadCampaigns);
+    document.getElementById('campaignSelect')
+      .addEventListener('change', e => {
+        const v = e.target.value;
+        if (v === 'all')       loadAggregateStats();
+        else if (v)            updateStatistics(v);
+      });
+
+    document.getElementById('themeToggle')
+      .addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        updateChartsTheme();
+      });
+  });
 </script>
-{% endblock %} 
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% csrf_token %}
 {% block content %}
 <div class="container mt-4">
   <h2>{{ group.name }} Members</h2>
